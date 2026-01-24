@@ -1,0 +1,43 @@
+import ProjectDescription
+
+let project = Project(
+    name: "InterPrep",
+    targets: [
+        .target(
+            name: "InterPrep",
+            destinations: .iOS,
+            product: .app,
+            bundleId: "com.interprep.app",
+            infoPlist: .extendingDefault(
+                with: [
+                    "UILaunchScreen": [:]
+                ]
+            ),
+            sources: ["InterPrep/**"],
+            resources: ["InterPrep/**/*.xcassets"],
+            dependencies: []
+        ),
+        .target(
+            name: "InterPrepTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.interprep.app.tests",
+            infoPlist: .default,
+            sources: ["InterPrepTests/**"],
+            dependencies: [
+                .target(name: "InterPrep")
+            ]
+        ),
+        .target(
+            name: "InterPrepUITests",
+            destinations: .iOS,
+            product: .uiTests,
+            bundleId: "com.interprep.app.uitests",
+            infoPlist: .default,
+            sources: ["InterPrepUITests/**"],
+            dependencies: [
+                .target(name: "InterPrep")
+            ]
+        )
+    ]
+)

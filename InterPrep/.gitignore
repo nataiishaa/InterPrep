@@ -1,0 +1,35 @@
+# Xcode
+*.xcodeproj
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata
+xcuserdata/
+*.xcuserstate
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Tuist
+Derived/
+.build/
+*.swiftpm
+.tuist-cache/
+.tuist-bin/
+graph.png
+
+# CocoaPods
+Pods/
+*.podspec
+
+# SPM
+.swiftpm/
+Package.resolved
+
+# macOS
+.DS_Store
+
+# AppCode
+.idea/

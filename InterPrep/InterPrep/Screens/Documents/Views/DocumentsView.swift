@@ -1,0 +1,184 @@
+//
+//  DocumentsView.swift
+//  InterPrep
+//
+//  Documents main view
+//
+
+import SwiftUI
+import DesignSystem
+
+struct DocumentsView: View {
+    let model: Model
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Мои папки
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Мои папки")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.textOnBackground)
+                        
+                        if model.isLoading && model.folders.isEmpty {
+                            ProgressView()
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            LazyVGrid(
+                                columns: [
+                                    GridItem(.flexible()),
+                                    GridItem(.flexible()),
+                                    GridItem(.flexible())
+                                ],
+                                spacing: 16
+                            ) {
+                                ForEach(model.folders) { folder in
+                                    FolderCardView(folder: folder)
+                                        .onTapGesture {
+                                            model.onFolderTap(folder)
+                                        }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    // Недавнее
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Недавнее")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.textOnBackground)
+                        
+                        if model.recentDocuments.isEmpty {
+                            Text("Нет недавних документов")
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            VStack(spacing: 12) {
+                                ForEach(model.recentDocuments) { document in
+                                    DocumentRowView(document: document)
+                                        .onTapGesture {
+                                            model.onDocumentTap(document)
+                                        }
+                                        .contextMenu {
+                                            Button(role: .destructive) {
+                                                model.onDocumentDelete(document)
+                                            } label: {
+                                                Label("Удалить", systemImage: "trash")
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical)
+            }
+            .background(Color.backgroundPrimary)
+            .navigationTitle("Документы")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button {
+                            model.onUploadFileTap()
+                        } label: {
+                            Label("Загрузить файл", systemImage: "arrow.up.doc")
+                        }
+                        
+                        Button {
+                            model.onCreateNoteTap()
+                        } label: {
+                            Label("Создать заметку", systemImage: "note.text.badge.plus")
+                        }
+                        
+                        Button {
+                            model.onCreateFolderTap()
+                        } label: {
+                            Label("Создать папку", systemImage: "folder.badge.plus")
+                        }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.brandPrimary)
+                    }
+                }
+            }
+            .toolbarBackground(.visible, for: .navigationBar)
+            .sheet(isPresented: .constant(model.showingCreateFolderSheet)) {
+                CreateFolderSheet(
+                    onDismiss: model.onDismissSheet,
+                    onCreate: model.onFolderCreate
+                )
+            }
+            .sheet(isPresented: .constant(model.showingUploadSheet)) {
+                UploadFileSheet(
+                    onDismiss: model.onDismissSheet
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Model
+
+extension DocumentsView {
+    struct Model {
+        let folders: [Folder]
+        let recentDocuments: [Document]
+        let isLoading: Bool
+        let showingCreateFolderSheet: Bool
+        let showingUploadSheet: Bool
+        let onFolderTap: (Folder) -> Void
+        let onDocumentTap: (Document) -> Void
+        let onCreateFolderTap: () -> Void
+        let onUploadFileTap: () -> Void
+        let onCreateNoteTap: () -> Void
+        let onDismissSheet: () -> Void
+        let onFolderCreate: (String) -> Void
+        let onDocumentDelete: (Document) -> Void
+    }
+}
+
+// MARK: - Preview
+
+#Preview {
+    DocumentsView(
+        model: .init(
+            folders: [
+                Folder(name: "Базы данных", documentsCount: 12, color: .blue),
+                Folder(name: "Резюме", documentsCount: 5, color: .green),
+                Folder(name: "Проекты", documentsCount: 8, color: .orange)
+            ],
+            recentDocuments: [
+                Document(
+                    name: "Резюме iOS Developer.pdf",
+                    type: .pdf,
+                    size: 245_760
+                ),
+                Document(
+                    name: "Заметки.txt",
+                    type: .note,
+                    size: 12_288
+                )
+            ],
+            isLoading: false,
+            showingCreateFolderSheet: false,
+            showingUploadSheet: false,
+            onFolderTap: { _ in },
+            onDocumentTap: { _ in },
+            onCreateFolderTap: {},
+            onUploadFileTap: {},
+            onCreateNoteTap: {},
+            onDismissSheet: {},
+            onFolderCreate: { _ in },
+            onDocumentDelete: { _ in }
+        )
+    )
+}
