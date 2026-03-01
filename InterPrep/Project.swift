@@ -348,6 +348,22 @@ let project = Project(
                 .target(name: "DesignSystem"),
                 .package(product: "SnapshotTesting")
             ]
+        ),
+        
+        .target(
+            name: "ChatFeatureTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.interprep.features.chat.tests",
+            sources: [
+                "InterPrepTests/ChatFeatureTests/**"
+            ],
+            dependencies: [
+                .target(name: "ChatFeature"),
+                .target(name: "ArchitectureCore"),
+                .target(name: "DesignSystem"),
+                .package(product: "SnapshotTesting")
+            ]
         )
     ]
 )

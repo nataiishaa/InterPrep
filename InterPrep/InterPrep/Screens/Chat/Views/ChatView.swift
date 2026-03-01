@@ -96,6 +96,110 @@ extension ChatView {
     }
 }
 
+// MARK: - Fixtures
+
+#if DEBUG
+extension ChatView.Model {
+    static var fixtureWelcome: Self {
+        .init(
+            messages: [
+                ChatMessage(
+                    text: "Здравствуйте! Я карьерный консультант, чем могу помочь?",
+                    sender: .consultant,
+                    buttons: [
+                        MessageButton(text: "Помощь в подготовке к собеседованию", action: .selectScenario(.interviewPrep)),
+                        MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation)),
+                        MessageButton(text: "Другое", action: .selectScenario(.other))
+                    ]
+                )
+            ],
+            consultant: Consultant(name: "Карьерный консультант", title: "AI помощник", isOnline: true),
+            inputText: "",
+            isLoading: false,
+            isSending: false,
+            isConnected: true,
+            onInputTextChanged: { _ in },
+            onSendMessage: {},
+            onButtonTapped: { _ in }
+        )
+    }
+    
+    static var fixtureWithMessages: Self {
+        .init(
+            messages: [
+                ChatMessage(text: "Здравствуйте! Я карьерный консультант, чем могу помочь?", sender: .consultant),
+                ChatMessage(text: "Привет! Хочу подготовиться к интервью", sender: .user, status: .read),
+                ChatMessage(text: "Отлично! На какую позицию готовитесь?", sender: .consultant),
+                ChatMessage(text: "iOS разработчик", sender: .user, status: .delivered)
+            ],
+            consultant: Consultant(name: "Карьерный консультант", title: "AI помощник", isOnline: true),
+            inputText: "",
+            isLoading: false,
+            isSending: false,
+            isConnected: true,
+            onInputTextChanged: { _ in },
+            onSendMessage: {},
+            onButtonTapped: { _ in }
+        )
+    }
+    
+    static var fixtureWithButtons: Self {
+        .init(
+            messages: [
+                ChatMessage(
+                    text: "Выберите тип собеседования:",
+                    sender: .consultant,
+                    buttons: [
+                        MessageButton(text: "Техническое интервью", action: .selectScenario(.interviewPrep)),
+                        MessageButton(text: "Поведенческое интервью", action: .selectScenario(.resumeConsultation)),
+                        MessageButton(text: "Общие советы", action: .selectScenario(.other))
+                    ]
+                )
+            ],
+            consultant: Consultant(name: "Карьерный консультант", title: "AI помощник", isOnline: true),
+            inputText: "",
+            isLoading: false,
+            isSending: false,
+            isConnected: true,
+            onInputTextChanged: { _ in },
+            onSendMessage: {},
+            onButtonTapped: { _ in }
+        )
+    }
+    
+    static var fixtureLoading: Self {
+        .init(
+            messages: [],
+            consultant: Consultant(name: "Карьерный консультант", title: "AI помощник", isOnline: true),
+            inputText: "",
+            isLoading: true,
+            isSending: false,
+            isConnected: true,
+            onInputTextChanged: { _ in },
+            onSendMessage: {},
+            onButtonTapped: { _ in }
+        )
+    }
+    
+    static var fixtureSending: Self {
+        .init(
+            messages: [
+                ChatMessage(text: "Здравствуйте!", sender: .consultant),
+                ChatMessage(text: "Привет!", sender: .user, status: .sending)
+            ],
+            consultant: Consultant(name: "Карьерный консультант", title: "AI помощник", isOnline: true),
+            inputText: "",
+            isLoading: false,
+            isSending: true,
+            isConnected: true,
+            onInputTextChanged: { _ in },
+            onSendMessage: {},
+            onButtonTapped: { _ in }
+        )
+    }
+}
+#endif
+
 // MARK: - Preview
 
 #Preview {
