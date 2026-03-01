@@ -39,6 +39,9 @@ public struct ChatContainer: View {
             },
             onSendMessage: {
                 store.send(.sendMessage)
+            },
+            onButtonTapped: { button in
+                store.send(.buttonTapped(button))
             }
         )
     }

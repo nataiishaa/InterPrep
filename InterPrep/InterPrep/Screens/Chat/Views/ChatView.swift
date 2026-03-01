@@ -25,8 +25,11 @@ struct ChatView: View {
                         ScrollView {
                             LazyVStack(spacing: 12) {
                                 ForEach(model.messages) { message in
-                                    MessageBubbleView(message: message)
-                                        .id(message.id)
+                                    MessageBubbleView(
+                                        message: message,
+                                        onButtonTap: model.onButtonTapped
+                                    )
+                                    .id(message.id)
                                 }
                             }
                             .padding()
@@ -50,7 +53,7 @@ struct ChatView: View {
                 )
             }
             .background(Color.backgroundPrimary)
-            .navigationTitle(model.consultant?.name ?? "Чат с консультантом")
+            .navigationTitle(model.consultant?.name ?? "Карьерный консультант")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
@@ -89,6 +92,7 @@ extension ChatView {
         let isConnected: Bool
         let onInputTextChanged: (String) -> Void
         let onSendMessage: () -> Void
+        let onButtonTapped: (MessageButton) -> Void
     }
 }
 
@@ -124,7 +128,8 @@ extension ChatView {
             isSending: false,
             isConnected: true,
             onInputTextChanged: { _ in },
-            onSendMessage: {}
+            onSendMessage: {},
+            onButtonTapped: { _ in }
         )
     )
 }

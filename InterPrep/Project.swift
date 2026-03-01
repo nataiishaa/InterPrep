@@ -6,6 +6,10 @@ let project = Project(
         .remote(
             url: "https://github.com/pointfreeco/swift-snapshot-testing",
             requirement: .upToNextMajor(from: "1.15.0")
+        ),
+        .remote(
+            url: "https://github.com/apple/swift-protobuf.git",
+            requirement: .upToNextMajor(from: "1.28.0")
         )
     ],
     targets: [
@@ -45,6 +49,7 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
+                .target(name: "NetworkService"),
                 .target(name: "DiscoveryModule"),
                 .target(name: "VacancyCardFeature"),
                 .target(name: "AuthFeature"),
@@ -67,6 +72,19 @@ let project = Project(
             sources: [
                 "InterPrep/Architecture/Core/**",
                 "InterPrep/Architecture/Utilities/**"
+            ],
+            dependencies: []
+        ),
+        
+        // MARK: - Network Service
+        
+        .target(
+            name: "NetworkService",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.interprep.network",
+            sources: [
+                "InterPrep/Network/**"
             ],
             dependencies: []
         ),
