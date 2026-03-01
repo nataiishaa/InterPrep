@@ -76,6 +76,7 @@ let project = Project(
             dependencies: []
         ),
         
+        
         // MARK: - Network Service
         
         .target(
@@ -292,7 +293,8 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.features.auth.tests",
             sources: [
-                "InterPrepTests/AuthFeatureTests/**"
+                "InterPrepTests/AuthFeatureTests/**",
+                "InterPrepTests/SnapshotTestingKit/**"
             ],
             dependencies: [
                 .target(name: "AuthFeature"),
@@ -308,7 +310,8 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.features.onboarding.tests",
             sources: [
-                "InterPrepTests/OnboardingFeatureTests/**"
+                "InterPrepTests/OnboardingFeatureTests/**",
+                "InterPrepTests/SnapshotTestingKit/**"
             ],
             dependencies: [
                 .target(name: "OnboardingFeature"),
@@ -324,7 +327,8 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.modules.discovery.tests",
             sources: [
-                "InterPrepTests/DiscoveryFeatureTests/**"
+                "InterPrepTests/DiscoveryFeatureTests/**",
+                "InterPrepTests/SnapshotTestingKit/**"
             ],
             dependencies: [
                 .target(name: "DiscoveryModule"),
@@ -340,7 +344,8 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.features.resumeupload.tests",
             sources: [
-                "InterPrepTests/ResumeUploadFeatureTests/**"
+                "InterPrepTests/ResumeUploadFeatureTests/**",
+                "InterPrepTests/SnapshotTestingKit/**"
             ],
             dependencies: [
                 .target(name: "ResumeUploadFeature"),
@@ -356,7 +361,8 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.features.chat.tests",
             sources: [
-                "InterPrepTests/ChatFeatureTests/**"
+                "InterPrepTests/ChatFeatureTests/**",
+                "InterPrepTests/SnapshotTestingKit/**"
             ],
             dependencies: [
                 .target(name: "ChatFeature"),

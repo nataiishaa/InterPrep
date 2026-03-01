@@ -202,38 +202,22 @@ extension ChatView.Model {
 
 // MARK: - Preview
 
-#Preview {
-    ChatView(
-        model: .init(
-            messages: [
-                ChatMessage(
-                    text: "Здравствуйте! Я ваш карьерный консультант. Чем могу помочь?",
-                    sender: .consultant,
-                    timestamp: Date().addingTimeInterval(-3600)
-                ),
-                ChatMessage(
-                    text: "Привет! Хотел бы обсудить подготовку к интервью",
-                    sender: .user,
-                    timestamp: Date().addingTimeInterval(-3500)
-                ),
-                ChatMessage(
-                    text: "Отлично! Давайте начнем с того, на какую позицию вы готовитесь?",
-                    sender: .consultant,
-                    timestamp: Date().addingTimeInterval(-3400)
-                )
-            ],
-            consultant: Consultant(
-                name: "Анна Петрова",
-                title: "Карьерный консультант",
-                isOnline: true
-            ),
-            inputText: "",
-            isLoading: false,
-            isSending: false,
-            isConnected: true,
-            onInputTextChanged: { _ in },
-            onSendMessage: {},
-            onButtonTapped: { _ in }
-        )
-    )
+#Preview("Welcome") {
+    ChatView(model: .fixtureWelcome)
+}
+
+#Preview("With Messages") {
+    ChatView(model: .fixtureWithMessages)
+}
+
+#Preview("With Buttons") {
+    ChatView(model: .fixtureWithButtons)
+}
+
+#Preview("Loading") {
+    ChatView(model: .fixtureLoading)
+}
+
+#Preview("Sending") {
+    ChatView(model: .fixtureSending)
 }

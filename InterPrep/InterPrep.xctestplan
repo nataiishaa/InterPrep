@@ -1,0 +1,93 @@
+{
+  "configurations" : [
+    {
+      "id" : "Default",
+      "name" : "Default",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SNAPSHOT_RECORDING_MODE",
+            "value" : "missing"
+          }
+        ],
+        "language" : "ru",
+        "region" : "RU"
+      }
+    },
+    {
+      "id" : "RecordFailedSnapshots",
+      "name" : "RecordFailedSnapshots",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SNAPSHOT_RECORDING_MODE",
+            "value" : "failed"
+          }
+        ],
+        "language" : "ru",
+        "region" : "RU"
+      }
+    },
+    {
+      "id" : "RecordAllSnapshots",
+      "name" : "RecordAllSnapshots",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SNAPSHOT_RECORDING_MODE",
+            "value" : "all"
+          }
+        ],
+        "language" : "ru",
+        "region" : "RU"
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "language" : "ru",
+    "region" : "RU",
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:InterPrep.xcodeproj",
+      "identifier" : "InterPrep",
+      "name" : "InterPrep"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:InterPrep.xcodeproj",
+        "identifier" : "AuthFeatureTests",
+        "name" : "AuthFeatureTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:InterPrep.xcodeproj",
+        "identifier" : "OnboardingFeatureTests",
+        "name" : "OnboardingFeatureTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:InterPrep.xcodeproj",
+        "identifier" : "DiscoveryModuleTests",
+        "name" : "DiscoveryModuleTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:InterPrep.xcodeproj",
+        "identifier" : "ChatFeatureTests",
+        "name" : "ChatFeatureTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:InterPrep.xcodeproj",
+        "identifier" : "ResumeUploadFeatureTests",
+        "name" : "ResumeUploadFeatureTests"
+      }
+    }
+  ],
+  "version" : 1
+}
