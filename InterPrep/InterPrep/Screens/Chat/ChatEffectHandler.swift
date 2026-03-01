@@ -57,6 +57,14 @@ public actor ChatEffectHandler: EffectHandler {
             } catch {
                 return .loadingFailed(error.localizedDescription)
             }
+            
+        case .handleButtonAction(let action):
+            do {
+                let response = try await chatService.handleButtonAction(action)
+                return .consultantResponded(response)
+            } catch {
+                return .loadingFailed(error.localizedDescription)
+            }
         }
     }
 }
@@ -69,6 +77,7 @@ public protocol ChatServiceProtocol: Actor {
     func connect() async throws
     func disconnect() async
     func sendMessage(_ message: ChatMessage) async throws
+    func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage
 }
 
 // MARK: - Mock Service
@@ -78,24 +87,19 @@ public final actor ChatServiceMock: ChatServiceProtocol {
     
     public func fetchMessages() async throws -> [ChatMessage] {
         try await Task.sleep(nanoseconds: 500_000_000)
+        
+        // Приветственное сообщение с кнопками выбора сценария
         return [
             ChatMessage(
-                text: "Здравствуйте! Я ваш карьерный консультант. Чем могу помочь?",
+                text: "Здравствуйте! Я карьерный консультант, чем могу помочь?",
                 sender: .consultant,
-                timestamp: Date().addingTimeInterval(-3600),
-                status: .read
-            ),
-            ChatMessage(
-                text: "Привет! Хотел бы обсудить подготовку к интервью",
-                sender: .user,
-                timestamp: Date().addingTimeInterval(-3500),
-                status: .read
-            ),
-            ChatMessage(
-                text: "Отлично! Давайте начнем с того, на какую позицию вы готовитесь?",
-                sender: .consultant,
-                timestamp: Date().addingTimeInterval(-3400),
-                status: .read
+                timestamp: Date(),
+                status: .read,
+                buttons: [
+                    MessageButton(text: "Помощь в подготовке к собеседованию", action: .selectScenario(.interviewPrep)),
+                    MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation)),
+                    MessageButton(text: "Другое", action: .selectScenario(.other))
+                ]
             )
         ]
     }
@@ -119,8 +123,71 @@ public final actor ChatServiceMock: ChatServiceProtocol {
     
     public func sendMessage(_ message: ChatMessage) async throws {
         try await Task.sleep(nanoseconds: 1_000_000_000)
+    }
+    
+    public func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage {
+        try await Task.sleep(nanoseconds: 800_000_000)
         
-        // Simulate consultant response after 2 seconds
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        switch action {
+        case .selectScenario(let scenario):
+            switch scenario {
+            case .interviewPrep:
+                return ChatMessage(
+                    text: "Отлично! Выберите тип собеседования:",
+                    sender: .consultant,
+                    buttons: [
+                        MessageButton(text: "Техническое интервью", action: .selectInterviewType("technical")),
+                        MessageButton(text: "Поведенческое интервью", action: .selectInterviewType("behavioral")),
+                        MessageButton(text: "Общие советы", action: .selectInterviewType("general"))
+                    ]
+                )
+                
+            case .resumeConsultation:
+                return ChatMessage(
+                    text: "Хочешь получить независимую оценку своего резюме или у тебя другие вопросы?",
+                    sender: .consultant,
+                    buttons: [
+                        MessageButton(text: "Да", action: .confirmYes),
+                        MessageButton(text: "Нет", action: .confirmNo)
+                    ]
+                )
+                
+            case .other:
+                return ChatMessage(
+                    text: "Расскажите, чем я могу вам помочь?",
+                    sender: .consultant
+                )
+            }
+            
+        case .confirmYes:
+            return ChatMessage(
+                text: "Отлично! Загрузите ваше резюме, и я проведу детальный анализ.",
+                sender: .consultant
+            )
+            
+        case .confirmNo:
+            return ChatMessage(
+                text: "Хорошо! Задавайте любые вопросы по карьере, и я с удовольствием помогу.",
+                sender: .consultant
+            )
+            
+        case .selectInterviewType(let type):
+            let responseText: String
+            switch type {
+            case "technical":
+                responseText = "Отлично! Давайте начнем подготовку к техническому интервью. На какую позицию вы готовитесь?"
+            case "behavioral":
+                responseText = "Хорошо! Поведенческие интервью - важная часть. Расскажите о компании и позиции."
+            case "general":
+                responseText = "Вот основные советы:\n\n1. Изучите компанию\n2. Подготовьте вопросы\n3. Практикуйте ответы\n4. Будьте собой"
+            default:
+                responseText = "Давайте начнем подготовку!"
+            }
+            
+            return ChatMessage(
+                text: responseText,
+                sender: .consultant
+            )
+        }
     }
 }

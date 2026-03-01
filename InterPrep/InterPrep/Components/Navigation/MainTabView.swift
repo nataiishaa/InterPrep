@@ -15,6 +15,7 @@ import ChatFeature
 
 struct MainTabView: View {
     @State private var selectedTab: TabItem = .search
+    @State private var showChatSheet: Bool = false
     private let appGraph: AppGraph
     
     init(appGraph: AppGraph) {
@@ -32,7 +33,7 @@ struct MainTabView: View {
                 case .search:
                     appGraph.makeDiscoveryContainer()
                 case .chat:
-                    appGraph.makeChatContainer()
+                    appGraph.makeDiscoveryContainer()
                 case .profile:
                     ProfileContainer()
                 }
@@ -42,6 +43,17 @@ struct MainTabView: View {
             TabBarView(selectedTab: $selectedTab)
         }
         .ignoresSafeArea(.keyboard)
+        .onChange(of: selectedTab) { oldValue, newValue in
+            if newValue == .chat {
+                showChatSheet = true
+                selectedTab = oldValue
+            }
+        }
+        .sheet(isPresented: $showChatSheet) {
+            appGraph.makeChatContainer()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
     }
 }
 

@@ -18,6 +18,7 @@ public struct ChatState {
     public var isConnected: Bool = false
     public var error: String?
     public var consultant: Consultant?
+    public var currentScenario: ChatScenario?
     
     public init() {}
 }
@@ -30,20 +31,48 @@ public struct ChatMessage: Identifiable, Equatable, Sendable {
     public let sender: MessageSender
     public let timestamp: Date
     public let status: MessageStatus
+    public let buttons: [MessageButton]
     
     public init(
         id: UUID = UUID(),
         text: String,
         sender: MessageSender,
         timestamp: Date = Date(),
-        status: MessageStatus = .sent
+        status: MessageStatus = .sent,
+        buttons: [MessageButton] = []
     ) {
         self.id = id
         self.text = text
         self.sender = sender
         self.timestamp = timestamp
         self.status = status
+        self.buttons = buttons
     }
+}
+
+// MARK: - Message Button (как в Telegram)
+
+public struct MessageButton: Identifiable, Equatable, Sendable {
+    public let id: UUID
+    public let text: String
+    public let action: ButtonAction
+    
+    public init(
+        id: UUID = UUID(),
+        text: String,
+        action: ButtonAction
+    ) {
+        self.id = id
+        self.text = text
+        self.action = action
+    }
+}
+
+public enum ButtonAction: Equatable, Sendable {
+    case selectScenario(ChatScenario)
+    case confirmYes
+    case confirmNo
+    case selectInterviewType(String)
 }
 
 public enum MessageSender: Equatable, Sendable {
@@ -81,6 +110,27 @@ public struct Consultant: Identifiable, Equatable, Sendable {
     }
 }
 
+// MARK: - Chat Scenario
+
+public enum ChatScenario: String, Identifiable, CaseIterable, Sendable {
+    case interviewPrep = "interview_prep"
+    case resumeConsultation = "resume_consultation"
+    case other = "other"
+    
+    public var id: String { rawValue }
+    
+    public var title: String {
+        switch self {
+        case .interviewPrep:
+            return "Помощь в подготовке к собеседованию"
+        case .resumeConsultation:
+            return "Консультация по резюме"
+        case .other:
+            return "Другое"
+        }
+    }
+}
+
 // MARK: - FeatureState
 
 extension ChatState: FeatureState {
@@ -89,6 +139,7 @@ extension ChatState: FeatureState {
         case inputTextChanged(String)
         case sendMessage
         case messageReceived(ChatMessage)
+        case buttonTapped(MessageButton)
     }
     
     public enum Feedback: Sendable {
@@ -97,6 +148,7 @@ extension ChatState: FeatureState {
         case messageSent(ChatMessage)
         case connectionStatusChanged(Bool)
         case loadingFailed(String)
+        case consultantResponded(ChatMessage)
     }
     
     public enum Effect: Sendable {
@@ -104,6 +156,7 @@ extension ChatState: FeatureState {
         case loadConsultant
         case connect
         case sendMessage(ChatMessage)
+        case handleButtonAction(ButtonAction)
     }
     
     @MainActor
@@ -143,9 +196,16 @@ extension ChatState: FeatureState {
             state.messages.append(message)
             return nil
             
+        case .input(.buttonTapped(let button)):
+            return .handleButtonAction(button.action)
+            
         case .feedback(.messagesLoaded(let messages)):
             state.messages = messages
             state.isLoading = false
+            return nil
+            
+        case .feedback(.consultantResponded(let message)):
+            state.messages.append(message)
             return nil
             
         case .feedback(.consultantLoaded(let consultant)):

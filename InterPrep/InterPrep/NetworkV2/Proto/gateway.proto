@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package gateway;
+
+option swift_prefix = "Gateway";
+
+// Auth Service Messages
+
+message RegisterRequest {
+  string first_name = 1;
+  string last_name = 2;
+  string email = 3;
+  string password = 4;
+  optional string device_id = 5;
+}
+
+message RegisterResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  UserProfile user = 3;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+  optional string device_id = 3;
+}
+
+message LoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  UserProfile user = 3;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+  optional string device_id = 2;
+}
+
+message RefreshResponse {
+  string access_token = 1;
+  UserProfile user = 2;
+}
+
+// User Profile
+
+message UserProfile {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string email = 4;
+  optional string username = 5;
+  optional bool resume_uploaded = 6;
+  optional int32 total_interviews = 7;
+  optional int32 completed_interviews = 8;
+  optional int32 upcoming_interviews = 9;
+  optional bool notifications_enabled = 10;
+}
+
+// Password Reset
+
+message PasswordResetCheckEmailRequest {
+  string email = 1;
+}
+
+message PasswordResetCheckEmailResponse {
+  bool exists = 1;
+}
+
+message PasswordResetSendCodeRequest {
+  string email = 1;
+}
+
+message PasswordResetSendCodeResponse {
+  bool sent = 1;
+}
+
+message PasswordResetVerifyRequest {
+  string email = 1;
+  string code = 2;
+  string password = 3;
+}
+
+message PasswordResetVerifyResponse {
+  bool success = 1;
+}
+
+// User Service
+
+message GetMeRequest {}
+
+message GetMeResponse {
+  UserProfile user = 1;
+}
+
+// Jobs Service
+
+message SearchJobsRequest {
+  int32 page = 1;
+  int32 per_page = 2;
+}
+
+message SearchJobsResponse {
+  repeated Vacancy items = 1;
+  int32 found = 2;
+  int32 page = 3;
+  int32 pages = 4;
+  int32 per_page = 5;
+}
+
+message Vacancy {
+  string id = 1;
+  string name = 2;
+  optional string description = 3;
+  optional Salary salary = 4;
+  optional Employer employer = 5;
+  optional Area area = 6;
+  optional string alternate_url = 7;
+  optional string experience = 8;
+  bool is_favorite = 9;
+  optional bool archived = 10;
+}
+
+message Salary {
+  optional int32 from = 1;
+  optional int32 to = 2;
+  optional string currency = 3;
+}
+
+message Employer {
+  optional string name = 1;
+  optional string logo_url = 2;
+}
+
+message Area {
+  optional string name = 1;
+}
+
+message AddFavoriteRequest {
+  string vacancy_id = 1;
+}
+
+message AddFavoriteResponse {
+  bool success = 1;
+}
+
+message RemoveFavoriteRequest {
+  string vacancy_id = 1;
+}
+
+message RemoveFavoriteResponse {
+  bool success = 1;
+}
+
+message ListFavoritesRequest {}
+
+message ListFavoritesResponse {
+  repeated Vacancy vacancies = 1;
+}
