@@ -8,92 +8,42 @@
 import XCTest
 import SwiftUI
 import SnapshotTesting
+import ArchitectureCore
 @testable import ChatFeature
 
-final class ChatViewSnapshotTests: XCTestCase {
+final class ChatViewSnapshotTests: SnapshotTestCase {
     
-    override func setUp() {
-        super.setUp()
-        // Set to true when recording new snapshots
-        // isRecording = true
-    }
-    
-    // MARK: - Tests
+    // MARK: - Individual State Tests
     
     func testChatView_welcome() {
-        let view = ChatView(model: .fixtureWelcome)
-        let hostingController = UIHostingController(rootView: view)
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhone13Pro),
-            named: "welcome"
-        )
+        ChatView(model: .fixtureWelcome)
+            .test(batch: .regularFullscreen)
     }
     
     func testChatView_withMessages() {
-        let view = ChatView(model: .fixtureWithMessages)
-        let hostingController = UIHostingController(rootView: view)
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhone13Pro),
-            named: "withMessages"
-        )
+        ChatView(model: .fixtureWithMessages)
+            .test(batch: .regularFullscreen)
     }
     
     func testChatView_withButtons() {
-        let view = ChatView(model: .fixtureWithButtons)
-        let hostingController = UIHostingController(rootView: view)
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhone13Pro),
-            named: "withButtons"
-        )
+        ChatView(model: .fixtureWithButtons)
+            .test(batch: .regularFullscreen)
     }
     
     func testChatView_loading() {
-        let view = ChatView(model: .fixtureLoading)
-        let hostingController = UIHostingController(rootView: view)
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhone13Pro),
-            named: "loading"
-        )
+        ChatView(model: .fixtureLoading)
+            .test(batch: .regularFullscreen)
     }
     
     func testChatView_sending() {
-        let view = ChatView(model: .fixtureSending)
-        let hostingController = UIHostingController(rootView: view)
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhone13Pro),
-            named: "sending"
-        )
+        ChatView(model: .fixtureSending)
+            .test(batch: .regularFullscreen)
     }
     
-    func testChatView_iPhone14Pro() {
-        let view = ChatView(model: .fixtureWelcome)
-        let hostingController = UIHostingController(rootView: view)
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhone14Pro),
-            named: "iPhone14Pro"
-        )
-    }
+    // MARK: - Extended Device Coverage
     
-    func testChatView_iPhoneSE() {
-        let view = ChatView(model: .fixtureWelcome)
-        let hostingController = UIHostingController(rootView: view)
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhoneSe),
-            named: "iPhoneSE"
-        )
+    func testChatView_allDevices() {
+        ChatView(model: .fixtureWelcome)
+            .test(batch: .extendedFullscreen)
     }
 }
