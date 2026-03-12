@@ -1,65 +1,55 @@
 import Foundation
 import SwiftProtobuf
 
-// MARK: - Auth API Extensions
-
 extension URLRequestFactory {
-    // MARK: - Register
-    
-    public func register(
-        _ message: Gateway_RegisterRequest
-    ) -> ProtoRequest<Gateway_RegisterResponse> {
+    func register(
+        _ message: Auth_RegisterRequest
+    ) -> ProtoRequest<Auth_RegisterResponse> {
         assemble(
             path: "/gateway.BackendGateway/Register",
             message: message
         )
     }
     
-    // MARK: - Login
-    
-    public func login(
-        _ message: Gateway_LoginRequest
-    ) -> ProtoRequest<Gateway_LoginResponse> {
+    func login(
+        _ message: Auth_LoginRequest
+    ) -> ProtoRequest<Auth_LoginResponse> {
         assemble(
             path: "/gateway.BackendGateway/Login",
             message: message
         )
     }
     
-    // MARK: - Refresh
-    
-    public func refresh(
-        _ message: Gateway_RefreshRequest
-    ) -> ProtoRequest<Gateway_RefreshResponse> {
+    func refresh(
+        _ message: Auth_RefreshRequest
+    ) -> ProtoRequest<Auth_RefreshResponse> {
         assemble(
             path: "/gateway.BackendGateway/Refresh",
             message: message
         )
     }
     
-    // MARK: - Password Reset
-    
-    public func checkPasswordResetEmail(
-        _ message: Gateway_PasswordResetCheckEmailRequest
-    ) -> ProtoRequest<Gateway_PasswordResetCheckEmailResponse> {
+    func checkPasswordResetEmail(
+        _ message: Auth_PasswordResetCheckEmailRequest
+    ) -> ProtoRequest<Auth_PasswordResetCheckEmailResponse> {
         assemble(
             path: "/gateway.BackendGateway/CheckPasswordResetEmail",
             message: message
         )
     }
     
-    public func sendPasswordResetCode(
-        _ message: Gateway_PasswordResetSendCodeRequest
-    ) -> ProtoRequest<Gateway_PasswordResetSendCodeResponse> {
+    func sendPasswordResetCode(
+        _ message: Auth_PasswordResetSendCodeRequest
+    ) -> ProtoRequest<Auth_PasswordResetSendCodeResponse> {
         assemble(
             path: "/gateway.BackendGateway/SendPasswordResetCode",
             message: message
         )
     }
     
-    public func verifyPasswordReset(
-        _ message: Gateway_PasswordResetVerifyRequest
-    ) -> ProtoRequest<Gateway_PasswordResetVerifyResponse> {
+    func verifyPasswordReset(
+        _ message: Auth_PasswordResetVerifyRequest
+    ) -> ProtoRequest<Auth_PasswordResetVerifyResponse> {
         assemble(
             path: "/gateway.BackendGateway/VerifyPasswordReset",
             message: message

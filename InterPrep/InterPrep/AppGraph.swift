@@ -20,12 +20,12 @@ final class AppGraph {
     // MARK: - Shared Services
     
     private lazy var onboardingStorageService: OnboardingStorageService = OnboardingStorageServiceImpl()
-    private lazy var authService: AuthService = AuthServiceMock()
-    private lazy var resumeService: ResumeService = ResumeServiceMock()
-    private lazy var vacancyService: VacancyService = VacancyServiceMock()
+    private lazy var authService: AuthService = AuthServiceImpl()
+    private lazy var resumeService: ResumeService = ResumeServiceImpl()
+    private lazy var vacancyService: VacancyService = VacancyServiceImpl()
     private lazy var fileUploadService: FileUploadService = FileUploadServiceMock()
     private lazy var documentService: DocumentServiceProtocol = DocumentServiceMock()
-    private lazy var chatService: ChatServiceProtocol = ChatServiceMock()
+    private lazy var chatService: ChatServiceProtocol = ChatServiceImpl()
     
     // MARK: - State
     
