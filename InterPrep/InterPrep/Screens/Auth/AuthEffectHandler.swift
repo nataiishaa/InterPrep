@@ -129,12 +129,12 @@ public final class AuthServiceMock: AuthService {
     }
 }
 
-enum AuthError: LocalizedError {
+public enum AuthError: LocalizedError {
     case invalidCredentials
     case invalidData
     case invalidOTP
     
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidCredentials:
             return "Неверный email или пароль"

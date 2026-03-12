@@ -10,6 +10,10 @@ let project = Project(
         .remote(
             url: "https://github.com/apple/swift-protobuf.git",
             requirement: .upToNextMajor(from: "1.28.0")
+        ),
+        .remote(
+            url: "https://github.com/grpc/grpc-swift.git",
+            requirement: .upToNextMajor(from: "1.23.0")
         )
     ],
     targets: [
@@ -34,6 +38,10 @@ let project = Project(
                 "InterPrep/InterPrepApp.swift",
                 "InterPrep/AppGraph.swift",
                 "InterPrep/ContentView.swift",
+                "InterPrep/Services/AuthServiceImpl.swift",
+                "InterPrep/Services/ResumeServiceImpl.swift",
+                "InterPrep/Services/VacancyServiceImpl.swift",
+                "InterPrep/Services/ChatServiceImpl.swift",
                 "InterPrep/Components/Navigation/MainTabView.swift",
                 "InterPrep/Components/Navigation/TabBarView.swift",
                 "InterPrep/Components/Navigation/TabBarButton.swift",
@@ -85,9 +93,12 @@ let project = Project(
             product: .framework,
             bundleId: "com.interprep.network",
             sources: [
-                "InterPrep/Network/**"
+                "InterPrep/NetworkV2/**/*.swift"
             ],
-            dependencies: []
+            dependencies: [
+                .package(product: "SwiftProtobuf"),
+                .package(product: "GRPC")
+            ]
         ),
         
         // MARK: - Design System
