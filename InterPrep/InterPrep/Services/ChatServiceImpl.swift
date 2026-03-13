@@ -8,22 +8,32 @@
 import Foundation
 import ChatFeature
 
-public final actor ChatServiceImpl: ChatServiceProtocol {
+public final actor ChatServiceImpl {
+    private let mock = ChatServiceMock()
     
-    public init() {
+    public init() {}
+    
+    public func fetchMessages() async throws -> [ChatMessage] {
+        try await mock.fetchMessages()
     }
     
-    public func sendMessage(_ message: String) async throws -> String {
-        // TODO: Implement real chat service with NetworkServiceV2
-        // Currently using mock due to internal type restrictions
-        print("⚠️ Chat service not fully implemented yet")
-        try await Task.sleep(nanoseconds: 1_000_000_000)
-        return "Это тестовый ответ. Интеграция с AI будет добавлена позже."
+    public func fetchConsultant() async throws -> Consultant {
+        try await mock.fetchConsultant()
     }
     
-    public func loadChatHistory() async throws -> [ChatMessage] {
-        // TODO: Implement chat history loading if backend supports it
-        print("⚠️ Chat history not implemented yet")
-        return []
+    public func connect() async throws {
+        try await mock.connect()
+    }
+    
+    public func disconnect() async {
+        await mock.disconnect()
+    }
+    
+    public func sendMessage(_ message: ChatMessage) async throws {
+        try await mock.sendMessage(message)
+    }
+    
+    public func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage {
+        try await mock.handleButtonAction(action)
     }
 }

@@ -135,6 +135,10 @@ public struct ProtoRequest<Response: Message>: Sendable {
         request.cachePolicy = cachePolicy
         request.timeoutInterval = timeout
         
+        // Headers some servers/proxies expect (avoid connection reset from strict middleboxes)
+        request.setValue("InterPrep/1.0 (iOS)", forHTTPHeaderField: "User-Agent")
+        request.setValue("application/json, application/x-protobuf, */*", forHTTPHeaderField: "Accept")
+        
         // Add headers
         for header in headers {
             request.setValue(header.value, forHTTPHeaderField: header.name)
@@ -163,6 +167,7 @@ public enum NetworkError: Error, LocalizedError {
     case httpError(Int, Data?)
     case unauthorized
     case noData
+    case transportError(Error)
     case unknown
     
     public var errorDescription: String? {
@@ -179,8 +184,24 @@ public enum NetworkError: Error, LocalizedError {
             return "Unauthorized"
         case .noData:
             return "No data received"
+        case .transportError(let error):
+            return (error as NSError).localizedDescription
         case .unknown:
             return "Unknown error"
         }
+    }
+    
+    /// True if this is a connection/transport failure (e.g. connection lost, timeout, no network).
+    public var isConnectionError: Bool {
+        if case .transportError(let error) = self {
+            let ns = error as NSError
+            return ns.domain == NSURLErrorDomain && (
+                ns.code == NSURLErrorNotConnectedToInternet ||
+                ns.code == NSURLErrorNetworkConnectionLost ||
+                ns.code == NSURLErrorTimedOut ||
+                ns.code == NSURLErrorCannotConnectToHost
+            )
+        }
+        return false
     }
 }

@@ -18,6 +18,8 @@ public struct DocumentsState {
     public var error: String?
     public var showingCreateFolderSheet: Bool = false
     public var showingUploadSheet: Bool = false
+    /// URL загруженного файла для просмотра (QuickLook)
+    public var documentURLToOpen: URL?
     
     public init() {}
 }
@@ -129,12 +131,15 @@ extension DocumentsState: FeatureState {
         case fileUploaded(URL)
         case noteCreated(String, String)
         case documentDeleted(Document)
+        case clearDocumentToOpen
     }
     
     public enum Feedback: Sendable {
         case foldersLoaded([Folder])
         case recentDocumentsLoaded([Document])
         case loadingFailed(String)
+        case documentDownloaded(URL)
+        case documentOpenFailed(String)
     }
     
     public enum Effect: Sendable {
@@ -199,6 +204,10 @@ extension DocumentsState: FeatureState {
             state.recentDocuments.removeAll { $0.id == document.id }
             return .deleteDocument(document.id)
             
+        case .input(.clearDocumentToOpen):
+            state.documentURLToOpen = nil
+            return nil
+            
         case .feedback(.foldersLoaded(let folders)):
             state.folders = folders
             state.isLoading = false
@@ -211,6 +220,14 @@ extension DocumentsState: FeatureState {
         case .feedback(.loadingFailed(let error)):
             state.isLoading = false
             state.error = error
+            return nil
+            
+        case .feedback(.documentDownloaded(let url)):
+            state.documentURLToOpen = url
+            return nil
+            
+        case .feedback(.documentOpenFailed(let message)):
+            state.error = message
             return nil
         }
     }

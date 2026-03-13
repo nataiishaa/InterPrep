@@ -25,6 +25,9 @@ public final class AuthServiceImpl: AuthService {
             print("✅ Login successful: \(response)")
         case .failure(let error):
             print("❌ Login failed: \(error)")
+            if (error as? NetworkError)?.isConnectionError == true {
+                throw AuthError.networkUnavailable
+            }
             throw AuthError.invalidCredentials
         }
     }
@@ -42,6 +45,9 @@ public final class AuthServiceImpl: AuthService {
             print("✅ Registration successful: \(response)")
         case .failure(let error):
             print("❌ Registration failed: \(error)")
+            if (error as? NetworkError)?.isConnectionError == true {
+                throw AuthError.networkUnavailable
+            }
             throw AuthError.invalidData
         }
     }

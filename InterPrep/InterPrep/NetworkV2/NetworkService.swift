@@ -1,5 +1,8 @@
 import Foundation
 import SwiftProtobuf
+import GRPC
+import NIOCore
+import NIOHPACK
 
 public final class NetworkServiceV2: ObservableObject {
     public static let shared = NetworkServiceV2()
@@ -7,9 +10,12 @@ public final class NetworkServiceV2: ObservableObject {
     private let factory: URLRequestFactory
     private let networkService: AsyncNetworkService
     private let tokenStorage: TokenStorage
+    /// gRPC клиент для Register/Login (сервер на :9090 говорит по gRPC/HTTP2).
+    private let grpcAuthClient: BackendGatewayGRPCClient?
     
     private init() {
         self.tokenStorage = TokenStorage()
+        self.grpcAuthClient = try? BackendGatewayGRPCClient(host: "193.124.33.223", port: 9090)
         
         self.factory = URLRequestFactory(
             networkProvider: DefaultNetworkProvider(
@@ -19,14 +25,21 @@ public final class NetworkServiceV2: ObservableObject {
             )
         )
         
+        let sessionConfiguration = URLSessionConfiguration.default
+        sessionConfiguration.timeoutIntervalForRequest = 30
+        sessionConfiguration.timeoutIntervalForResource = 60
+        sessionConfiguration.waitsForConnectivity = true
+        let session = URLSession(configuration: sessionConfiguration)
+        
         let tokenProvider = DefaultTokenProvider(tokenStorage: tokenStorage)
         self.networkService = AsyncNetworkService(
+            session: session,
             tokenProvider: tokenProvider,
             responseObservers: [LoggingObserver()]
         )
     }
     
-    // MARK: - Auth
+    // MARK: - Auth (gRPC)
     
     public func register(firstName: String, lastName: String, email: String, password: String, deviceId: String? = nil) async -> Result<Auth_RegisterResponse, NetworkError> {
         var request = Auth_RegisterRequest()
@@ -38,15 +51,26 @@ public final class NetworkServiceV2: ObservableObject {
             request.deviceID = deviceId
         }
         
-        let result = await networkService.perform(factory.register(request))
+        if let client = grpcAuthClient {
+            do {
+                let response = try await client.register(request: request)
+                await tokenStorage.setTokens(
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken
+                )
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         
+        let result = await networkService.perform(factory.register(request))
         if case .success(let response) = result {
             await tokenStorage.setTokens(
                 accessToken: response.accessToken,
                 refreshToken: response.refreshToken
             )
         }
-        
         return result
     }
     
@@ -58,15 +82,26 @@ public final class NetworkServiceV2: ObservableObject {
             request.deviceID = deviceId
         }
         
-        let result = await networkService.perform(factory.login(request))
+        if let client = grpcAuthClient {
+            do {
+                let response = try await client.login(request: request)
+                await tokenStorage.setTokens(
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken
+                )
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         
+        let result = await networkService.perform(factory.login(request))
         if case .success(let response) = result {
             await tokenStorage.setTokens(
                 accessToken: response.accessToken,
                 refreshToken: response.refreshToken
             )
         }
-        
         return result
     }
     
@@ -117,6 +152,15 @@ public final class NetworkServiceV2: ObservableObject {
     }
     
     public func getUser_ResumeProfile() async -> Result<User_GetResumeProfileResponse, NetworkError> {
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.getResumeProfile(accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         let request = User_GetResumeProfileRequest()
         return await networkService.perform(factory.getResumeProfile(request))
     }
@@ -160,6 +204,15 @@ public final class NetworkServiceV2: ObservableObject {
     // MARK: - Jobs
     
     public func searchJobs(page: Int = 0, perPage: Int = 20) async -> Result<Jobs_SearchJobsResponse, NetworkError> {
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.searchJobs(page: page, perPage: perPage, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         var request = Jobs_SearchJobsRequest()
         request.page = Int32(page)
         request.perPage = Int32(perPage)
@@ -179,6 +232,15 @@ public final class NetworkServiceV2: ObservableObject {
     }
     
     public func listFavorites() async -> Result<Jobs_ListFavoritesResponse, NetworkError> {
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.listFavorites(accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         let request = Jobs_ListFavoritesRequest()
         return await networkService.perform(factory.listFavorites(request))
     }
@@ -342,5 +404,78 @@ public final class NetworkServiceV2: ObservableObject {
     
     public func getRefreshToken() async -> String? {
         await tokenStorage.getRefreshToken()
+    }
+}
+
+// MARK: - gRPC Auth Client (in same file so always in target)
+
+public final class BackendGatewayGRPCClient: Sendable {
+    private let connection: ClientConnection
+    private let group: EventLoopGroup
+    private let client: Gateway_BackendGatewayClient
+
+    public init(host: String = "193.124.33.223", port: Int = 9090) throws {
+        self.group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
+        self.connection = ClientConnection.insecure(group: group)
+            .connect(host: host, port: port)
+        self.client = Gateway_BackendGatewayClient(channel: connection)
+    }
+
+    deinit {
+        try? connection.close().wait()
+    }
+
+    public func register(request: Auth_RegisterRequest) async throws -> Auth_RegisterResponse {
+        let call = client.register(request, callOptions: nil)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func login(request: Auth_LoginRequest) async throws -> Auth_LoginResponse {
+        let call = client.login(request, callOptions: nil)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func getResumeProfile(accessToken: String?) async throws -> User_GetResumeProfileResponse {
+        let request = User_GetResumeProfileRequest()
+        let options = callOptions(with: accessToken)
+        let call = client.getResumeProfile(request, callOptions: options)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func searchJobs(page: Int = 0, perPage: Int = 20, accessToken: String?) async throws -> Jobs_SearchJobsResponse {
+        var request = Jobs_SearchJobsRequest()
+        request.page = Int32(page)
+        request.perPage = Int32(perPage)
+        let options = callOptions(with: accessToken)
+        let call = client.searchJobs(request, callOptions: options)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func listFavorites(accessToken: String?) async throws -> Jobs_ListFavoritesResponse {
+        let request = Jobs_ListFavoritesRequest()
+        let options = callOptions(with: accessToken)
+        let call = client.listFavorites(request, callOptions: options)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    private func callOptions(with token: String?) -> CallOptions {
+        var metadata = HPACKHeaders()
+        if let token = token, !token.isEmpty {
+            metadata.add(name: "authorization", value: "Bearer \(token)")
+        }
+        return CallOptions(customMetadata: metadata)
+    }
+}
+
+private func eventLoopFutureToAsync<T>(_ future: EventLoopFuture<T>) async throws -> T {
+    try await withCheckedThrowingContinuation { continuation in
+        future.whenComplete { result in
+            switch result {
+            case .success(let value):
+                continuation.resume(returning: value)
+            case .failure(let error):
+                continuation.resume(throwing: error)
+            }
+        }
     }
 }

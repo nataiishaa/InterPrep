@@ -133,6 +133,7 @@ public enum AuthError: LocalizedError {
     case invalidCredentials
     case invalidData
     case invalidOTP
+    case networkUnavailable
     
     public var errorDescription: String? {
         switch self {
@@ -142,6 +143,8 @@ public enum AuthError: LocalizedError {
             return "Проверьте правильность введенных данных"
         case .invalidOTP:
             return "Неверный код подтверждения"
+        case .networkUnavailable:
+            return "Нет соединения с интернетом. Проверьте подключение и попробуйте снова."
         }
     }
 }

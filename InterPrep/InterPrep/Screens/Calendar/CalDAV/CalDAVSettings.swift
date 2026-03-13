@@ -36,22 +36,22 @@ public struct CalDAVSettings: Codable {
         .init(
             name: "Google Calendar",
             serverURL: "https://apidata.googleusercontent.com/caldav/v2/",
-            instructions: "Используйте пароль приложения из настроек Google"
+            instructions: "Имя пользователя — ваш email в Google. Пароль: в аккаунте Google откройте Безопасность → Пароли приложений, создайте пароль и введите его здесь (не основной пароль от почты)."
         ),
         .init(
             name: "iCloud",
             serverURL: "https://caldav.icloud.com/",
-            instructions: "Используйте пароль приложения из настроек Apple ID"
+            instructions: "Имя пользователя — ваш Apple ID (email). Пароль: Настройки → Apple ID → Вход и безопасность → Пароли приложений — создайте пароль для «Другое» и введите его здесь."
         ),
         .init(
             name: "Nextcloud",
             serverURL: "https://your-server.com/remote.php/dav/",
-            instructions: "Введите URL вашего Nextcloud сервера"
+            instructions: "Укажите адрес вашего Nextcloud (например https://cloud.example.com/remote.php/dav/). Имя и пароль — от вашего аккаунта Nextcloud."
         ),
         .init(
-            name: "Другой сервер",
+            name: "Другой календарь",
             serverURL: "",
-            instructions: "Введите URL CalDAV сервера вручную"
+            instructions: "Если ваш календарь поддерживает CalDAV, уточните у провайдера URL сервера и введите его, а также логин и пароль."
         )
     ]
 }

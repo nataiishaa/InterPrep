@@ -43,9 +43,6 @@ public actor ProfileEffectHandler: EffectHandler {
             
         case .performDeleteAccount:
             return await performDeleteAccount()
-            
-        case .exportUserData:
-            return await exportUserData()
         }
     }
     
@@ -167,39 +164,4 @@ public actor ProfileEffectHandler: EffectHandler {
         return .accountDeleted
     }
     
-    private func exportUserData() async -> ProfileState.Feedback {
-        do {
-            var exportData: [String: Any] = [:]
-            
-            if let userData = userDefaults.data(forKey: userKey),
-               let user = try? JSONDecoder().decode(ProfileState.User.self, from: userData) {
-                exportData["profile"] = [
-                    "firstName": user.firstName,
-                    "lastName": user.lastName,
-                    "email": user.email,
-                    "phone": user.phone ?? "",
-                    "position": user.position ?? "",
-                    "experience": user.experience ?? ""
-                ]
-            }
-            
-            if let statsData = userDefaults.data(forKey: statisticsKey),
-               let stats = try? JSONDecoder().decode(ProfileState.Statistics.self, from: statsData) {
-                exportData["statistics"] = [
-                    "totalInterviews": stats.totalInterviews,
-                    "completedInterviews": stats.completedInterviews,
-                    "upcomingInterviews": stats.upcomingInterviews
-                ]
-            }
-            
-            let jsonData = try JSONSerialization.data(withJSONObject: exportData, options: .prettyPrinted)
-            
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("InterPrep_Export.json")
-            try jsonData.write(to: tempURL)
-            
-            return .dataExported(tempURL)
-        } catch {
-            return .loadingFailed("Не удалось экспортировать данные")
-        }
-    }
 }

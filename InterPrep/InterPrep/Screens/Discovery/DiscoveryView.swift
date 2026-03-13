@@ -270,22 +270,27 @@ public struct DiscoveryView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         // Header с компанией и избранным
                         HStack(alignment: .top, spacing: 12) {
-                            // Логотип компании (заглушка)
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.brandPrimary.opacity(0.8), .brandSecondary.opacity(0.8)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 48, height: 48)
-                                .overlay(
-                                    Text(String(vacancy.company.prefix(1)))
-                                        .font(.title3)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                )
+                            // Логотип компании (из URL или заглушка по первой букве)
+                            Group {
+                                if let urlString = vacancy.companyLogoURL, let url = URL(string: urlString) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .success(let image):
+                                            image.resizable().aspectRatio(contentMode: .fill)
+                                        case .failure:
+                                            logoPlaceholderView(vacancy: vacancy)
+                                        case .empty:
+                                            ProgressView()
+                                        @unknown default:
+                                            logoPlaceholderView(vacancy: vacancy)
+                                        }
+                                    }
+                                } else {
+                                    logoPlaceholderView(vacancy: vacancy)
+                                }
+                            }
+                            .frame(width: 48, height: 48)
+                            .clipShape(Circle())
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(vacancy.company)
@@ -321,36 +326,36 @@ public struct DiscoveryView: View {
                             .padding(.horizontal, 16)
                             .padding(.bottom, 12)
                         
-                        // Footer с тегами
+                        // Footer с тегами (зарплата и опыт из API)
                         HStack(spacing: 8) {
-                            // Тег зарплаты
-                            HStack(spacing: 4) {
-                                Image(systemName: "rublesign.circle.fill")
-                                    .font(.caption)
-                                Text("от 100 т.руб")
-                                    .font(.caption)
-                                    .fontWeight(.medium)
+                            if let salaryText = vacancy.salaryText {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "rublesign.circle.fill")
+                                        .font(.caption)
+                                    Text(salaryText)
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.brandPrimary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.brandPrimary.opacity(0.1))
+                                .cornerRadius(8)
                             }
-                            .foregroundColor(.brandPrimary)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(Color.brandPrimary.opacity(0.1))
-                            .cornerRadius(8)
-                            
-                            // Тег опыта
-                            HStack(spacing: 4) {
-                                Image(systemName: "briefcase.fill")
-                                    .font(.caption)
-                                Text("1-3 года")
-                                    .font(.caption)
-                                    .fontWeight(.medium)
+                            if let experienceText = vacancy.experienceText {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "briefcase.fill")
+                                        .font(.caption)
+                                    Text(experienceText)
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.fieldBackground)
+                                .cornerRadius(8)
                             }
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(Color.fieldBackground)
-                            .cornerRadius(8)
-                            
                             Spacer()
                         }
                         .padding(.horizontal, 16)
@@ -375,6 +380,24 @@ public struct DiscoveryView: View {
     
     private var shadowColor: Color {
         colorScheme == .dark ? .clear : Color.black.opacity(0.08)
+    }
+    
+    @ViewBuilder
+    private func logoPlaceholderView(vacancy: DiscoveryState.Vacancy) -> some View {
+        Circle()
+            .fill(
+                LinearGradient(
+                    colors: [Color.brandPrimary.opacity(0.8), Color.brandSecondary.opacity(0.8)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .overlay(
+                Text(String(vacancy.company.prefix(1)))
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+            )
     }
     
     // TODO: После генерации Tuist - конвертер из DiscoveryState.Vacancy в Vacancy

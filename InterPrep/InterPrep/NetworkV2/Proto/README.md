@@ -15,8 +15,12 @@ brew install protobuf swift-protobuf
 ```bash
 cd InterPrep/NetworkV2/Proto
 
-# Генерация Swift файлов
-protoc --swift_out=Generated gateway.proto
+# Генерация Swift файлов (публичные типы для использования из фреймворка)
+protoc \
+  --proto_path=. \
+  --swift_out=Generated \
+  --swift_opt=Visibility=Public \
+  gateway.proto
 
 # Результат: Generated/gateway.pb.swift
 ```

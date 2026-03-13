@@ -34,14 +34,37 @@ extension DiscoveryState {
         public let description: String
         public let isFavorite: Bool
         public let url: String? // URL вакансии на hh.ru
+        /// Локация (город/регион)
+        public let location: String
+        /// Зарплата в виде строки, например "100 000 - 150 000 ₽"
+        public let salaryText: String?
+        /// Опыт, например "От 1 года до 3 лет"
+        public let experienceText: String?
+        /// URL логотипа работодателя
+        public let companyLogoURL: String?
         
-        public init(id: String, title: String, company: String, description: String, isFavorite: Bool, url: String? = nil) {
+        public init(
+            id: String,
+            title: String,
+            company: String,
+            description: String,
+            isFavorite: Bool,
+            url: String? = nil,
+            location: String = "",
+            salaryText: String? = nil,
+            experienceText: String? = nil,
+            companyLogoURL: String? = nil
+        ) {
             self.id = id
             self.title = title
             self.company = company
             self.description = description
             self.isFavorite = isFavorite
             self.url = url
+            self.location = location
+            self.salaryText = salaryText
+            self.experienceText = experienceText
+            self.companyLogoURL = companyLogoURL
         }
     }
 }
@@ -121,13 +144,18 @@ extension DiscoveryState: FeatureState {
             
         case let .feedback(.favoriteToggled(id, isFavorite)):
             if let index = state.vacancies.firstIndex(where: { $0.id == id }) {
+                let v = state.vacancies[index]
                 state.vacancies[index] = Vacancy(
-                    id: state.vacancies[index].id,
-                    title: state.vacancies[index].title,
-                    company: state.vacancies[index].company,
-                    description: state.vacancies[index].description,
+                    id: v.id,
+                    title: v.title,
+                    company: v.company,
+                    description: v.description,
                     isFavorite: isFavorite,
-                    url: state.vacancies[index].url
+                    url: v.url,
+                    location: v.location,
+                    salaryText: v.salaryText,
+                    experienceText: v.experienceText,
+                    companyLogoURL: v.companyLogoURL
                 )
             }
         }

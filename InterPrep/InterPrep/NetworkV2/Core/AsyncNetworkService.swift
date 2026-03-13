@@ -94,7 +94,21 @@ public actor AsyncNetworkService {
             )
             
         } catch {
-            return .failure(.unknown)
+            let nsError = error as NSError
+            let isConnectionError = nsError.domain == NSURLErrorDomain && (
+                nsError.code == NSURLErrorNotConnectedToInternet ||
+                nsError.code == NSURLErrorNetworkConnectionLost ||
+                nsError.code == NSURLErrorTimedOut ||
+                nsError.code == NSURLErrorCannotConnectToHost
+            )
+            if isConnectionError && protoRequest.shouldRetry {
+                try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 sec before retry
+                return await performInternal(
+                    request: protoRequest.withReducedRetries(),
+                    tokenWasSet: tokenWasSet
+                )
+            }
+            return .failure(.transportError(error))
         }
     }
     

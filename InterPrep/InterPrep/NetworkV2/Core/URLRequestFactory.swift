@@ -10,7 +10,8 @@ public protocol ContentTypeProvider: Sendable {
 public struct DefaultContentTypeProvider: ContentTypeProvider, Sendable {
     public let contentType: ContentType
     
-    public init(contentType: ContentType = .protobuf) {
+    /// По умолчанию шлём JSON, чтобы совпасть с тем, как ты дергаешь API руками.
+    public init(contentType: ContentType = .json) {
         self.contentType = contentType
     }
 }

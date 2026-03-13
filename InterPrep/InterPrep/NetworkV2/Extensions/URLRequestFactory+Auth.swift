@@ -7,7 +7,8 @@ extension URLRequestFactory {
     ) -> ProtoRequest<Auth_RegisterResponse> {
         assemble(
             path: "/gateway.BackendGateway/Register",
-            message: message
+            message: message,
+            retryPolicy: RetryPolicy(maxRetries: 2)
         )
     }
     
@@ -16,7 +17,8 @@ extension URLRequestFactory {
     ) -> ProtoRequest<Auth_LoginResponse> {
         assemble(
             path: "/gateway.BackendGateway/Login",
-            message: message
+            message: message,
+            retryPolicy: RetryPolicy(maxRetries: 2)
         )
     }
     

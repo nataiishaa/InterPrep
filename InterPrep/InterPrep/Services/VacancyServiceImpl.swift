@@ -21,14 +21,18 @@ public final actor VacancyServiceImpl: VacancyService {
         
         switch result {
         case .success(let response):
-            return response.vacancies.map { vacancy in
+            return response.items.map { vacancy in
                 DiscoveryState.Vacancy(
                     id: vacancy.id,
-                    title: vacancy.title,
-                    company: vacancy.company,
+                    title: vacancy.name,
+                    company: vacancy.hasEmployer ? vacancy.employer.name : "Неизвестный работодатель",
                     description: vacancy.description_p,
                     isFavorite: vacancy.isFavorite,
-                    url: vacancy.url
+                    url: vacancy.alternateURL.isEmpty ? nil : vacancy.alternateURL,
+                    location: vacancy.hasArea ? vacancy.area.name : "Не указано",
+                    salaryText: Self.salaryString(from: vacancy),
+                    experienceText: vacancy.experience.isEmpty ? nil : vacancy.experience,
+                    companyLogoURL: vacancy.hasEmployer && vacancy.employer.hasLogoURL && !vacancy.employer.logoURL.isEmpty ? vacancy.employer.logoURL : nil
                 )
             }
         case .failure(let error):
@@ -37,13 +41,25 @@ public final actor VacancyServiceImpl: VacancyService {
         }
     }
     
+    private static func salaryString(from vacancy: Jobs_Vacancy) -> String? {
+        guard vacancy.hasSalary else { return nil }
+        let s = vacancy.salary
+        let currency = s.currency.isEmpty ? "₽" : s.currency
+        if s.hasFrom && s.hasTo {
+            return "\(s.from) - \(s.to) \(currency)"
+        }
+        if s.hasFrom { return "от \(s.from) \(currency)" }
+        if s.hasTo { return "до \(s.to) \(currency)" }
+        return nil
+    }
+    
     public func toggleFavorite(id: String) async throws -> Bool {
         // Сначала получаем текущий список избранного
         let favoritesResult = await networkService.listFavorites()
         
         switch favoritesResult {
         case .success(let response):
-            let isFavorite = response.vacancyIds.contains(id)
+            let isFavorite = response.vacancies.contains { $0.id == id }
             
             // Если в избранном - удаляем, иначе - добавляем
             if isFavorite {

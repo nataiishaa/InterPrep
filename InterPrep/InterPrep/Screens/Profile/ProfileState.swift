@@ -144,10 +144,6 @@ extension ProfileState: FeatureState {
         case cancelEditingProfile
         case firstNameChanged(String)
         case lastNameChanged(String)
-        case emailChanged(String)
-        case phoneChanged(String)
-        case positionChanged(String)
-        case experienceChanged(String)
         case saveProfile
         
         // Settings
@@ -163,7 +159,6 @@ extension ProfileState: FeatureState {
         case changeResume
         case logout
         case deleteAccount
-        case exportData
         case openCalDAVSettings
     }
     
@@ -175,7 +170,6 @@ extension ProfileState: FeatureState {
         case loadingFailed(String)
         case logoutCompleted
         case accountDeleted
-        case dataExported(URL)
     }
     
     public enum Effect: Sendable {
@@ -186,7 +180,6 @@ extension ProfileState: FeatureState {
         case navigateToResumeUpload
         case performLogout
         case performDeleteAccount
-        case exportUserData
     }
     
     @MainActor
@@ -205,10 +198,6 @@ extension ProfileState: FeatureState {
             if let user = state.user {
                 state.editedFirstName = user.firstName
                 state.editedLastName = user.lastName
-                state.editedEmail = user.email
-                state.editedPhone = user.phone ?? ""
-                state.editedPosition = user.position ?? ""
-                state.editedExperience = user.experience ?? ""
             }
             
         case .input(.cancelEditingProfile):
@@ -223,24 +212,10 @@ extension ProfileState: FeatureState {
             state.editedLastName = name
             state.errorMessage = nil
             
-        case let .input(.emailChanged(email)):
-            state.editedEmail = email
-            state.errorMessage = nil
-            
-        case let .input(.phoneChanged(phone)):
-            state.editedPhone = phone
-            
-        case let .input(.positionChanged(position)):
-            state.editedPosition = position
-            
-        case let .input(.experienceChanged(experience)):
-            state.editedExperience = experience
-            
         case .input(.saveProfile):
             guard !state.editedFirstName.isEmpty,
-                  !state.editedLastName.isEmpty,
-                  !state.editedEmail.isEmpty else {
-                state.errorMessage = "Заполните обязательные поля"
+                  !state.editedLastName.isEmpty else {
+                state.errorMessage = "Заполните имя и фамилию"
                 return nil
             }
             
@@ -250,11 +225,11 @@ extension ProfileState: FeatureState {
                 id: user.id,
                 firstName: state.editedFirstName,
                 lastName: state.editedLastName,
-                email: state.editedEmail,
-                phone: state.editedPhone.isEmpty ? nil : state.editedPhone,
+                email: user.email,
+                phone: user.phone,
                 avatarURL: user.avatarURL,
-                position: state.editedPosition.isEmpty ? nil : state.editedPosition,
-                experience: state.editedExperience.isEmpty ? nil : state.editedExperience,
+                position: user.position,
+                experience: user.experience,
                 registeredDate: user.registeredDate
             )
             
@@ -300,9 +275,6 @@ extension ProfileState: FeatureState {
         case .input(.deleteAccount):
             return .performDeleteAccount
             
-        case .input(.exportData):
-            return .exportUserData
-            
         case .input(.openCalDAVSettings):
             // Handled in UI
             break
@@ -335,10 +307,6 @@ extension ProfileState: FeatureState {
             
         case .feedback(.accountDeleted):
             state.user = nil
-            
-        case let .feedback(.dataExported(url)):
-            // Data exported to URL
-            break
         }
         
         return nil
