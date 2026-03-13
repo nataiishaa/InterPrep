@@ -21,8 +21,16 @@ public final actor ResumeServiceImpl: ResumeService {
         
         switch result {
         case .success(let response):
-            // Если есть профиль с данными, значит резюме есть
-            return !response.profile.name.isEmpty || !response.profile.email.isEmpty
+            let profile = response.profile
+            
+            // Считаем, что резюме есть, если заполнены какие-либо ключевые поля
+            let hasTargetRoles = !profile.targetRoles.isEmpty
+            let hasAreas = !profile.areas.isEmpty
+            let hasSkills = !profile.skillsTop.isEmpty
+            let hasExperience = profile.hasExperienceLevel
+            let hasSalary = profile.hasSalaryMin
+            
+            return hasTargetRoles || hasAreas || hasSkills || hasExperience || hasSalary
         case .failure(let error):
             print("❌ Failed to check resume: \(error)")
             return false

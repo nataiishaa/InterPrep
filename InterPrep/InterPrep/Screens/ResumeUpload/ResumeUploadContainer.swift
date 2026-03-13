@@ -70,7 +70,7 @@ public struct ResumeUploadContainer: View {
         store: Store(
             state: ResumeUploadState(),
             effectHandler: ResumeUploadEffectHandler(
-                fileService: FileUploadServiceMock()
+                fileService: FileUploadServiceImpl()
             )
         ),
         onComplete: {},

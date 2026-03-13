@@ -7,6 +7,7 @@
 
 import Foundation
 import ArchitectureCore
+import NetworkService
 
 // MARK: - Effect Handler
 
@@ -76,9 +77,17 @@ public actor DocumentsEffectHandler: EffectHandler {
                 return .loadingFailed(error.localizedDescription)
             }
             
-        case .openDocument:
-            // Navigation handled by coordinator
-            return nil
+        case let .openDocument(document):
+            do {
+                let (data, filename) = try await documentService.downloadDocument(id: document.id)
+                let tempDir = FileManager.default.temporaryDirectory
+                let safeName = filename.isEmpty ? "document" : (filename as NSString).lastPathComponent
+                let tempURL = tempDir.appendingPathComponent("preview_\(UUID().uuidString)_\(safeName)")
+                try data.write(to: tempURL)
+                return .documentDownloaded(tempURL)
+            } catch {
+                return .documentOpenFailed(error.localizedDescription)
+            }
         }
     }
 }
@@ -92,59 +101,157 @@ public protocol DocumentServiceProtocol: Actor {
     func uploadFile(url: URL) async throws
     func createNote(title: String, content: String) async throws
     func deleteDocument(id: UUID) async throws
+    /// Скачивает файл по id документа. Возвращает (данные, имя файла).
+    func downloadDocument(id: UUID) async throws -> (Data, String)
 }
 
-// MARK: - Mock Service
+// MARK: - Real Service
 
-public final actor DocumentServiceMock: DocumentServiceProtocol {
-    public init() {}
+public final actor DocumentServiceImpl: DocumentServiceProtocol {
+    private let networkService: NetworkServiceV2
+    private var nodeIdByDocumentId: [UUID: UInt32] = [:]
+    private var documentIdToMaterialId: [UUID: String] = [:]
+    
+    public init(networkService: NetworkServiceV2 = .shared) {
+        self.networkService = networkService
+    }
     
     public func fetchFolders() async throws -> [Folder] {
-        try await Task.sleep(nanoseconds: 500_000_000)
-        return [
-            Folder(name: "Базы данных", documentsCount: 12, color: .blue),
-            Folder(name: "Резюме", documentsCount: 5, color: .green),
-            Folder(name: "Сопроводительные письма", documentsCount: 8, color: .orange)
-        ]
+        let result = await networkService.listFolder(parentId: nil)
+        
+        switch result {
+        case .success(let response):
+            return response.nodes
+                .filter { $0.type == "folder" }
+                .map { node in
+                    Folder(
+                        name: node.name,
+                        documentsCount: 0,
+                        createdAt: Date(timeIntervalSince1970: TimeInterval(node.createdAt)),
+                        color: .blue
+                    )
+                }
+        case .failure(let error):
+            throw error
+        }
     }
     
     public func fetchRecentDocuments() async throws -> [Document] {
-        try await Task.sleep(nanoseconds: 500_000_000)
-        return [
-            Document(
-                name: "Резюме iOS Developer.pdf",
-                type: .pdf,
-                size: 245_760,
-                createdAt: Date().addingTimeInterval(-86400)
-            ),
-            Document(
-                name: "Заметки по интервью.txt",
-                type: .note,
-                size: 12_288,
-                createdAt: Date().addingTimeInterval(-172800)
-            ),
-            Document(
-                name: "Портфолио проектов.pdf",
-                type: .pdf,
-                size: 1_048_576,
-                createdAt: Date().addingTimeInterval(-259200)
-            )
-        ]
+        let result = await networkService.listFolder(parentId: nil)
+        
+        switch result {
+        case .success(let response):
+            nodeIdByDocumentId.removeAll()
+            documentIdToMaterialId.removeAll()
+            
+            return response.nodes
+                .filter { $0.type == "file" }
+                .map { node in
+                    let documentId = UUID()
+                    nodeIdByDocumentId[documentId] = node.id
+                    if node.hasMaterialID {
+                        documentIdToMaterialId[documentId] = node.materialID
+                    }
+                    
+                    let size = node.hasFile ? node.file.size : 0
+                    let createdAt = Date(timeIntervalSince1970: TimeInterval(node.createdAt))
+                    let updatedAt = Date(timeIntervalSince1970: TimeInterval(node.updatedAt))
+                    
+                    return Document(
+                        id: documentId,
+                        name: node.name,
+                        type: .pdf,
+                        size: size,
+                        createdAt: createdAt,
+                        modifiedAt: updatedAt,
+                        folderId: nil,
+                        url: nil
+                    )
+                }
+        case .failure(let error):
+            throw error
+        }
     }
     
     public func createFolder(name: String) async throws {
-        try await Task.sleep(nanoseconds: 500_000_000)
+        let result = await networkService.createFolder(name: name, parentId: nil)
+        
+        switch result {
+        case .success:
+            return
+        case .failure(let error):
+            throw error
+        }
     }
     
     public func uploadFile(url: URL) async throws {
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        let resources = try url.resourceValues(forKeys: [.nameKey])
+        let fileName = resources.name ?? url.lastPathComponent
+        let data = try Data(contentsOf: url)
+        
+        let result = await networkService.uploadFile(
+            fileContent: data,
+            filename: fileName,
+            parentId: nil,
+            name: fileName
+        )
+        
+        switch result {
+        case .success:
+            return
+        case .failure(let error):
+            throw error
+        }
     }
     
     public func createNote(title: String, content: String) async throws {
-        try await Task.sleep(nanoseconds: 500_000_000)
+        let data = Data(content.utf8)
+        let filename = "\(title).txt"
+        
+        let result = await networkService.uploadFile(
+            fileContent: data,
+            filename: filename,
+            parentId: nil,
+            name: title
+        )
+        
+        switch result {
+        case .success:
+            return
+        case .failure(let error):
+            throw error
+        }
     }
     
     public func deleteDocument(id: UUID) async throws {
-        try await Task.sleep(nanoseconds: 300_000_000)
+        guard let nodeId = nodeIdByDocumentId[id] else {
+            return
+        }
+        
+        let result = await networkService.deleteNode(nodeId: nodeId)
+        
+        switch result {
+        case .success:
+            nodeIdByDocumentId.removeValue(forKey: id)
+            documentIdToMaterialId.removeValue(forKey: id)
+        case .failure(let error):
+            throw error
+        }
+    }
+    
+    public func downloadDocument(id: UUID) async throws -> (Data, String) {
+        guard let materialId = documentIdToMaterialId[id], !materialId.isEmpty else {
+            throw NSError(domain: "DocumentService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Документ не найден"])
+        }
+        let result = await networkService.downloadFile(materialId: materialId)
+        switch result {
+        case .success(let response):
+            let data = response.content.isEmpty && response.hasContentBase64
+                ? (Data(base64Encoded: response.contentBase64) ?? Data())
+                : response.content
+            return (data, response.filename.isEmpty ? "document" : response.filename)
+        case .failure(let error):
+            throw error
+        }
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import QuickLook
 import DesignSystem
 
 struct DocumentsView: View {
@@ -122,6 +123,61 @@ struct DocumentsView: View {
                     onDismiss: model.onDismissSheet
                 )
             }
+            .sheet(isPresented: Binding(
+                get: { model.documentURLToOpen != nil },
+                set: { if !$0 { model.onClearDocumentToOpen() } }
+            )) {
+                if let url = model.documentURLToOpen {
+                    DocumentPreviewSheet(url: url, onDismiss: model.onClearDocumentToOpen)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Document Preview (QuickLook)
+
+struct DocumentPreviewSheet: View {
+    let url: URL
+    let onDismiss: () -> Void
+    
+    var body: some View {
+        NavigationStack {
+            QuickLookPreview(url: url)
+                .navigationTitle(url.lastPathComponent)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Готово") {
+                            onDismiss()
+                        }
+                    }
+                }
+        }
+    }
+}
+
+struct QuickLookPreview: UIViewControllerRepresentable {
+    let url: URL
+    
+    func makeUIViewController(context: Context) -> QLPreviewController {
+        let controller = QLPreviewController()
+        controller.dataSource = context.coordinator
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: QLPreviewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(url: url)
+    }
+    
+    class Coordinator: NSObject, QLPreviewControllerDataSource {
+        let url: URL
+        init(url: URL) { self.url = url }
+        func numberOfPreviewItems(in controller: QLPreviewController) -> Int { 1 }
+        func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+            url as QLPreviewItem
         }
     }
 }
@@ -135,6 +191,7 @@ extension DocumentsView {
         let isLoading: Bool
         let showingCreateFolderSheet: Bool
         let showingUploadSheet: Bool
+        let documentURLToOpen: URL?
         let onFolderTap: (Folder) -> Void
         let onDocumentTap: (Document) -> Void
         let onCreateFolderTap: () -> Void
@@ -143,6 +200,7 @@ extension DocumentsView {
         let onDismissSheet: () -> Void
         let onFolderCreate: (String) -> Void
         let onDocumentDelete: (Document) -> Void
+        let onClearDocumentToOpen: () -> Void
     }
 }
 
@@ -171,6 +229,7 @@ extension DocumentsView {
             isLoading: false,
             showingCreateFolderSheet: false,
             showingUploadSheet: false,
+            documentURLToOpen: nil,
             onFolderTap: { _ in },
             onDocumentTap: { _ in },
             onCreateFolderTap: {},
@@ -178,7 +237,8 @@ extension DocumentsView {
             onCreateNoteTap: {},
             onDismissSheet: {},
             onFolderCreate: { _ in },
-            onDocumentDelete: { _ in }
+            onDocumentDelete: { _ in },
+            onClearDocumentToOpen: {}
         )
     )
 }

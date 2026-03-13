@@ -33,6 +33,7 @@ public struct DocumentsContainer: View {
             isLoading: store.state.isLoading,
             showingCreateFolderSheet: store.state.showingCreateFolderSheet,
             showingUploadSheet: store.state.showingUploadSheet,
+            documentURLToOpen: store.state.documentURLToOpen,
             onFolderTap: { folder in
                 store.send(.folderTapped(folder))
             },
@@ -56,6 +57,9 @@ public struct DocumentsContainer: View {
             },
             onDocumentDelete: { document in
                 store.send(.documentDeleted(document))
+            },
+            onClearDocumentToOpen: {
+                store.send(.clearDocumentToOpen)
             }
         )
     }
@@ -67,7 +71,7 @@ public struct DocumentsContainer: View {
     DocumentsContainer(store: Store(
         state: DocumentsState(),
         effectHandler: DocumentsEffectHandler(
-            documentService: DocumentServiceMock()
+            documentService: DocumentServiceImpl()
         )
     ))
 }

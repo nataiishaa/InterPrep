@@ -8,7 +8,11 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -21,190 +25,190 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-struct Materials_UploadFileRequest: @unchecked Sendable {
+public struct Materials_UploadFileRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var fileContent: Data = Data()
+  public var fileContent: Data = Data()
 
-  var filename: String = String()
+  public var filename: String = String()
 
-  var parentID: UInt32 {
-    get {return _parentID ?? 0}
+  public var parentID: UInt32 {
+    get {_parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  var hasParentID: Bool {return self._parentID != nil}
+  public var hasParentID: Bool {self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
-  mutating func clearParentID() {self._parentID = nil}
+  public mutating func clearParentID() {self._parentID = nil}
 
-  var name: String {
-    get {return _name ?? String()}
+  public var name: String {
+    get {_name ?? String()}
     set {_name = newValue}
   }
   /// Returns true if `name` has been explicitly set.
-  var hasName: Bool {return self._name != nil}
+  public var hasName: Bool {self._name != nil}
   /// Clears the value of `name`. Subsequent reads from it will return its default value.
-  mutating func clearName() {self._name = nil}
+  public mutating func clearName() {self._name = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _parentID: UInt32? = nil
   fileprivate var _name: String? = nil
 }
 
-struct Materials_UploadFileResponse: Sendable {
+public struct Materials_UploadFileResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var materialID: String = String()
+  public var materialID: String = String()
 
-  var name: String = String()
+  public var name: String = String()
 
-  var size: Int64 = 0
+  public var size: Int64 = 0
 
-  var mimeType: String = String()
+  public var mimeType: String = String()
 
-  var downloadURL: String {
-    get {return _downloadURL ?? String()}
+  public var downloadURL: String {
+    get {_downloadURL ?? String()}
     set {_downloadURL = newValue}
   }
   /// Returns true if `downloadURL` has been explicitly set.
-  var hasDownloadURL: Bool {return self._downloadURL != nil}
+  public var hasDownloadURL: Bool {self._downloadURL != nil}
   /// Clears the value of `downloadURL`. Subsequent reads from it will return its default value.
-  mutating func clearDownloadURL() {self._downloadURL = nil}
+  public mutating func clearDownloadURL() {self._downloadURL = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _downloadURL: String? = nil
 }
 
-struct Materials_DownloadFileRequest: Sendable {
+public struct Materials_DownloadFileRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var materialID: String = String()
+  public var materialID: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_DownloadFileResponse: @unchecked Sendable {
+public struct Materials_DownloadFileResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var content: Data = Data()
+  public var content: Data = Data()
 
-  var filename: String = String()
+  public var filename: String = String()
 
-  var mimeType: String = String()
+  public var mimeType: String = String()
 
-  var size: Int64 = 0
+  public var size: Int64 = 0
 
   /// Контент файла в формате base64 для удобства передачи через gRPC
-  var contentBase64: String {
-    get {return _contentBase64 ?? String()}
+  public var contentBase64: String {
+    get {_contentBase64 ?? String()}
     set {_contentBase64 = newValue}
   }
   /// Returns true if `contentBase64` has been explicitly set.
-  var hasContentBase64: Bool {return self._contentBase64 != nil}
+  public var hasContentBase64: Bool {self._contentBase64 != nil}
   /// Clears the value of `contentBase64`. Subsequent reads from it will return its default value.
-  mutating func clearContentBase64() {self._contentBase64 = nil}
+  public mutating func clearContentBase64() {self._contentBase64 = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _contentBase64: String? = nil
 }
 
-struct Materials_ListFolderRequest: Sendable {
+public struct Materials_ListFolderRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var parentID: UInt32 {
-    get {return _parentID ?? 0}
+  public var parentID: UInt32 {
+    get {_parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  var hasParentID: Bool {return self._parentID != nil}
+  public var hasParentID: Bool {self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
-  mutating func clearParentID() {self._parentID = nil}
+  public mutating func clearParentID() {self._parentID = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _parentID: UInt32? = nil
 }
 
-struct Materials_Node: Sendable {
+public struct Materials_Node: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var id: UInt32 = 0
+  public var id: UInt32 = 0
 
-  var userID: UInt32 = 0
+  public var userID: UInt32 = 0
 
-  var parentID: UInt32 {
-    get {return _parentID ?? 0}
+  public var parentID: UInt32 {
+    get {_parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  var hasParentID: Bool {return self._parentID != nil}
+  public var hasParentID: Bool {self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
-  mutating func clearParentID() {self._parentID = nil}
+  public mutating func clearParentID() {self._parentID = nil}
 
-  var type: String = String()
+  public var type: String = String()
 
-  var name: String = String()
+  public var name: String = String()
 
-  var file: Materials_FileInfo {
-    get {return _file ?? Materials_FileInfo()}
+  public var file: Materials_FileInfo {
+    get {_file ?? Materials_FileInfo()}
     set {_file = newValue}
   }
   /// Returns true if `file` has been explicitly set.
-  var hasFile: Bool {return self._file != nil}
+  public var hasFile: Bool {self._file != nil}
   /// Clears the value of `file`. Subsequent reads from it will return its default value.
-  mutating func clearFile() {self._file = nil}
+  public mutating func clearFile() {self._file = nil}
 
-  var link: Materials_LinkInfo {
-    get {return _link ?? Materials_LinkInfo()}
+  public var link: Materials_LinkInfo {
+    get {_link ?? Materials_LinkInfo()}
     set {_link = newValue}
   }
   /// Returns true if `link` has been explicitly set.
-  var hasLink: Bool {return self._link != nil}
+  public var hasLink: Bool {self._link != nil}
   /// Clears the value of `link`. Subsequent reads from it will return its default value.
-  mutating func clearLink() {self._link = nil}
+  public mutating func clearLink() {self._link = nil}
 
-  var createdAt: Int64 = 0
+  public var createdAt: Int64 = 0
 
-  var updatedAt: Int64 = 0
+  public var updatedAt: Int64 = 0
 
   /// UUID for download/API
-  var materialID: String {
-    get {return _materialID ?? String()}
+  public var materialID: String {
+    get {_materialID ?? String()}
     set {_materialID = newValue}
   }
   /// Returns true if `materialID` has been explicitly set.
-  var hasMaterialID: Bool {return self._materialID != nil}
+  public var hasMaterialID: Bool {self._materialID != nil}
   /// Clears the value of `materialID`. Subsequent reads from it will return its default value.
-  mutating func clearMaterialID() {self._materialID = nil}
+  public mutating func clearMaterialID() {self._materialID = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _parentID: UInt32? = nil
   fileprivate var _file: Materials_FileInfo? = nil
@@ -212,249 +216,249 @@ struct Materials_Node: Sendable {
   fileprivate var _materialID: String? = nil
 }
 
-struct Materials_FileInfo: Sendable {
+public struct Materials_FileInfo: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var objectKey: String = String()
+  public var objectKey: String = String()
 
-  var mimeType: String = String()
+  public var mimeType: String = String()
 
-  var size: Int64 = 0
+  public var size: Int64 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_LinkInfo: Sendable {
+public struct Materials_LinkInfo: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var url: String = String()
+  public var url: String = String()
 
-  var title: String {
-    get {return _title ?? String()}
+  public var title: String {
+    get {_title ?? String()}
     set {_title = newValue}
   }
   /// Returns true if `title` has been explicitly set.
-  var hasTitle: Bool {return self._title != nil}
+  public var hasTitle: Bool {self._title != nil}
   /// Clears the value of `title`. Subsequent reads from it will return its default value.
-  mutating func clearTitle() {self._title = nil}
+  public mutating func clearTitle() {self._title = nil}
 
-  var description_p: String {
-    get {return _description_p ?? String()}
+  public var description_p: String {
+    get {_description_p ?? String()}
     set {_description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  var hasDescription_p: Bool {return self._description_p != nil}
+  public var hasDescription_p: Bool {self._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
-  mutating func clearDescription_p() {self._description_p = nil}
+  public mutating func clearDescription_p() {self._description_p = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _title: String? = nil
   fileprivate var _description_p: String? = nil
 }
 
-struct Materials_ListFolderResponse: Sendable {
+public struct Materials_ListFolderResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var nodes: [Materials_Node] = []
+  public var nodes: [Materials_Node] = []
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_CreateFolderRequest: Sendable {
+public struct Materials_CreateFolderRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var name: String = String()
+  public var name: String = String()
 
-  var parentID: UInt32 {
-    get {return _parentID ?? 0}
+  public var parentID: UInt32 {
+    get {_parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  var hasParentID: Bool {return self._parentID != nil}
+  public var hasParentID: Bool {self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
-  mutating func clearParentID() {self._parentID = nil}
+  public mutating func clearParentID() {self._parentID = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _parentID: UInt32? = nil
 }
 
-struct Materials_CreateFolderResponse: Sendable {
+public struct Materials_CreateFolderResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var node: Materials_Node {
-    get {return _node ?? Materials_Node()}
+  public var node: Materials_Node {
+    get {_node ?? Materials_Node()}
     set {_node = newValue}
   }
   /// Returns true if `node` has been explicitly set.
-  var hasNode: Bool {return self._node != nil}
+  public var hasNode: Bool {self._node != nil}
   /// Clears the value of `node`. Subsequent reads from it will return its default value.
-  mutating func clearNode() {self._node = nil}
+  public mutating func clearNode() {self._node = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _node: Materials_Node? = nil
 }
 
-struct Materials_CreateLinkRequest: Sendable {
+public struct Materials_CreateLinkRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var name: String = String()
+  public var name: String = String()
 
-  var url: String = String()
+  public var url: String = String()
 
-  var title: String {
-    get {return _title ?? String()}
+  public var title: String {
+    get {_title ?? String()}
     set {_title = newValue}
   }
   /// Returns true if `title` has been explicitly set.
-  var hasTitle: Bool {return self._title != nil}
+  public var hasTitle: Bool {self._title != nil}
   /// Clears the value of `title`. Subsequent reads from it will return its default value.
-  mutating func clearTitle() {self._title = nil}
+  public mutating func clearTitle() {self._title = nil}
 
-  var description_p: String {
-    get {return _description_p ?? String()}
+  public var description_p: String {
+    get {_description_p ?? String()}
     set {_description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  var hasDescription_p: Bool {return self._description_p != nil}
+  public var hasDescription_p: Bool {self._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
-  mutating func clearDescription_p() {self._description_p = nil}
+  public mutating func clearDescription_p() {self._description_p = nil}
 
-  var parentID: UInt32 {
-    get {return _parentID ?? 0}
+  public var parentID: UInt32 {
+    get {_parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  var hasParentID: Bool {return self._parentID != nil}
+  public var hasParentID: Bool {self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
-  mutating func clearParentID() {self._parentID = nil}
+  public mutating func clearParentID() {self._parentID = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _title: String? = nil
   fileprivate var _description_p: String? = nil
   fileprivate var _parentID: UInt32? = nil
 }
 
-struct Materials_CreateLinkResponse: Sendable {
+public struct Materials_CreateLinkResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var node: Materials_Node {
-    get {return _node ?? Materials_Node()}
+  public var node: Materials_Node {
+    get {_node ?? Materials_Node()}
     set {_node = newValue}
   }
   /// Returns true if `node` has been explicitly set.
-  var hasNode: Bool {return self._node != nil}
+  public var hasNode: Bool {self._node != nil}
   /// Clears the value of `node`. Subsequent reads from it will return its default value.
-  mutating func clearNode() {self._node = nil}
+  public mutating func clearNode() {self._node = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _node: Materials_Node? = nil
 }
 
-struct Materials_RenameNodeRequest: Sendable {
+public struct Materials_RenameNodeRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var nodeID: UInt32 = 0
+  public var nodeID: UInt32 = 0
 
-  var newName: String = String()
+  public var newName: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_RenameNodeResponse: Sendable {
+public struct Materials_RenameNodeResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var success: Bool = false
+  public var success: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_DeleteNodeRequest: Sendable {
+public struct Materials_DeleteNodeRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var nodeID: UInt32 = 0
+  public var nodeID: UInt32 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_DeleteNodeResponse: Sendable {
+public struct Materials_DeleteNodeResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var success: Bool = false
+  public var success: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_DeleteUserDataRequest: Sendable {
+public struct Materials_DeleteUserDataRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var userID: UInt32 = 0
+  public var userID: UInt32 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Materials_DeleteUserDataResponse: Sendable {
+public struct Materials_DeleteUserDataResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var ok: Bool = false
+  public var ok: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -462,15 +466,10 @@ struct Materials_DeleteUserDataResponse: Sendable {
 fileprivate let _protobuf_package = "materials"
 
 extension Materials_UploadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UploadFileRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "file_content"),
-    2: .same(proto: "filename"),
-    3: .standard(proto: "parent_id"),
-    4: .same(proto: "name"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UploadFileRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}file_content\0\u{1}filename\0\u{3}parent_id\0\u{1}name\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -485,7 +484,7 @@ extension Materials_UploadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -505,7 +504,7 @@ extension Materials_UploadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_UploadFileRequest, rhs: Materials_UploadFileRequest) -> Bool {
+  public static func ==(lhs: Materials_UploadFileRequest, rhs: Materials_UploadFileRequest) -> Bool {
     if lhs.fileContent != rhs.fileContent {return false}
     if lhs.filename != rhs.filename {return false}
     if lhs._parentID != rhs._parentID {return false}
@@ -516,16 +515,10 @@ extension Materials_UploadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Materials_UploadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UploadFileResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "material_id"),
-    2: .same(proto: "name"),
-    3: .same(proto: "size"),
-    4: .standard(proto: "mime_type"),
-    5: .standard(proto: "download_url"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UploadFileResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}material_id\0\u{1}name\0\u{1}size\0\u{3}mime_type\0\u{3}download_url\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -541,7 +534,7 @@ extension Materials_UploadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -564,7 +557,7 @@ extension Materials_UploadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_UploadFileResponse, rhs: Materials_UploadFileResponse) -> Bool {
+  public static func ==(lhs: Materials_UploadFileResponse, rhs: Materials_UploadFileResponse) -> Bool {
     if lhs.materialID != rhs.materialID {return false}
     if lhs.name != rhs.name {return false}
     if lhs.size != rhs.size {return false}
@@ -576,12 +569,10 @@ extension Materials_UploadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Materials_DownloadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DownloadFileRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "material_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DownloadFileRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}material_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -593,14 +584,14 @@ extension Materials_DownloadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._M
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.materialID.isEmpty {
       try visitor.visitSingularStringField(value: self.materialID, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_DownloadFileRequest, rhs: Materials_DownloadFileRequest) -> Bool {
+  public static func ==(lhs: Materials_DownloadFileRequest, rhs: Materials_DownloadFileRequest) -> Bool {
     if lhs.materialID != rhs.materialID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -608,16 +599,10 @@ extension Materials_DownloadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._M
 }
 
 extension Materials_DownloadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DownloadFileResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "content"),
-    2: .same(proto: "filename"),
-    3: .standard(proto: "mime_type"),
-    4: .same(proto: "size"),
-    5: .standard(proto: "content_base64"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DownloadFileResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}content\0\u{1}filename\0\u{3}mime_type\0\u{1}size\0\u{3}content_base64\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -633,7 +618,7 @@ extension Materials_DownloadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -656,7 +641,7 @@ extension Materials_DownloadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_DownloadFileResponse, rhs: Materials_DownloadFileResponse) -> Bool {
+  public static func ==(lhs: Materials_DownloadFileResponse, rhs: Materials_DownloadFileResponse) -> Bool {
     if lhs.content != rhs.content {return false}
     if lhs.filename != rhs.filename {return false}
     if lhs.mimeType != rhs.mimeType {return false}
@@ -668,12 +653,10 @@ extension Materials_DownloadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._
 }
 
 extension Materials_ListFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ListFolderRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "parent_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ListFolderRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}parent_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -685,7 +668,7 @@ extension Materials_ListFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -696,7 +679,7 @@ extension Materials_ListFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_ListFolderRequest, rhs: Materials_ListFolderRequest) -> Bool {
+  public static func ==(lhs: Materials_ListFolderRequest, rhs: Materials_ListFolderRequest) -> Bool {
     if lhs._parentID != rhs._parentID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -704,21 +687,10 @@ extension Materials_ListFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Materials_Node: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Node"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-    2: .standard(proto: "user_id"),
-    3: .standard(proto: "parent_id"),
-    4: .same(proto: "type"),
-    5: .same(proto: "name"),
-    6: .same(proto: "file"),
-    7: .same(proto: "link"),
-    8: .standard(proto: "created_at"),
-    9: .standard(proto: "updated_at"),
-    10: .standard(proto: "material_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".Node"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}user_id\0\u{3}parent_id\0\u{1}type\0\u{1}name\0\u{1}file\0\u{1}link\0\u{3}created_at\0\u{3}updated_at\0\u{3}material_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -739,7 +711,7 @@ extension Materials_Node: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -777,7 +749,7 @@ extension Materials_Node: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_Node, rhs: Materials_Node) -> Bool {
+  public static func ==(lhs: Materials_Node, rhs: Materials_Node) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.userID != rhs.userID {return false}
     if lhs._parentID != rhs._parentID {return false}
@@ -794,14 +766,10 @@ extension Materials_Node: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
 }
 
 extension Materials_FileInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".FileInfo"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "object_key"),
-    2: .standard(proto: "mime_type"),
-    3: .same(proto: "size"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".FileInfo"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}object_key\0\u{3}mime_type\0\u{1}size\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -815,7 +783,7 @@ extension Materials_FileInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.objectKey.isEmpty {
       try visitor.visitSingularStringField(value: self.objectKey, fieldNumber: 1)
     }
@@ -828,7 +796,7 @@ extension Materials_FileInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_FileInfo, rhs: Materials_FileInfo) -> Bool {
+  public static func ==(lhs: Materials_FileInfo, rhs: Materials_FileInfo) -> Bool {
     if lhs.objectKey != rhs.objectKey {return false}
     if lhs.mimeType != rhs.mimeType {return false}
     if lhs.size != rhs.size {return false}
@@ -838,14 +806,10 @@ extension Materials_FileInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 }
 
 extension Materials_LinkInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".LinkInfo"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "url"),
-    2: .same(proto: "title"),
-    3: .same(proto: "description"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".LinkInfo"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}url\0\u{1}title\0\u{1}description\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -859,7 +823,7 @@ extension Materials_LinkInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -876,7 +840,7 @@ extension Materials_LinkInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_LinkInfo, rhs: Materials_LinkInfo) -> Bool {
+  public static func ==(lhs: Materials_LinkInfo, rhs: Materials_LinkInfo) -> Bool {
     if lhs.url != rhs.url {return false}
     if lhs._title != rhs._title {return false}
     if lhs._description_p != rhs._description_p {return false}
@@ -886,12 +850,10 @@ extension Materials_LinkInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 }
 
 extension Materials_ListFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ListFolderResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "nodes"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ListFolderResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}nodes\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -903,14 +865,14 @@ extension Materials_ListFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.nodes.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.nodes, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_ListFolderResponse, rhs: Materials_ListFolderResponse) -> Bool {
+  public static func ==(lhs: Materials_ListFolderResponse, rhs: Materials_ListFolderResponse) -> Bool {
     if lhs.nodes != rhs.nodes {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -918,13 +880,10 @@ extension Materials_ListFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Materials_CreateFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".CreateFolderRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "name"),
-    2: .standard(proto: "parent_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".CreateFolderRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}parent_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -937,7 +896,7 @@ extension Materials_CreateFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._M
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -951,7 +910,7 @@ extension Materials_CreateFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._M
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_CreateFolderRequest, rhs: Materials_CreateFolderRequest) -> Bool {
+  public static func ==(lhs: Materials_CreateFolderRequest, rhs: Materials_CreateFolderRequest) -> Bool {
     if lhs.name != rhs.name {return false}
     if lhs._parentID != rhs._parentID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -960,12 +919,10 @@ extension Materials_CreateFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._M
 }
 
 extension Materials_CreateFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".CreateFolderResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "node"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".CreateFolderResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}node\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -977,7 +934,7 @@ extension Materials_CreateFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -988,7 +945,7 @@ extension Materials_CreateFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_CreateFolderResponse, rhs: Materials_CreateFolderResponse) -> Bool {
+  public static func ==(lhs: Materials_CreateFolderResponse, rhs: Materials_CreateFolderResponse) -> Bool {
     if lhs._node != rhs._node {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -996,16 +953,10 @@ extension Materials_CreateFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._
 }
 
 extension Materials_CreateLinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".CreateLinkRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "name"),
-    2: .same(proto: "url"),
-    3: .same(proto: "title"),
-    4: .same(proto: "description"),
-    5: .standard(proto: "parent_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".CreateLinkRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}url\0\u{1}title\0\u{1}description\0\u{3}parent_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1021,7 +972,7 @@ extension Materials_CreateLinkRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1044,7 +995,7 @@ extension Materials_CreateLinkRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_CreateLinkRequest, rhs: Materials_CreateLinkRequest) -> Bool {
+  public static func ==(lhs: Materials_CreateLinkRequest, rhs: Materials_CreateLinkRequest) -> Bool {
     if lhs.name != rhs.name {return false}
     if lhs.url != rhs.url {return false}
     if lhs._title != rhs._title {return false}
@@ -1056,12 +1007,10 @@ extension Materials_CreateLinkRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Materials_CreateLinkResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".CreateLinkResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "node"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".CreateLinkResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}node\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1073,7 +1022,7 @@ extension Materials_CreateLinkResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1084,7 +1033,7 @@ extension Materials_CreateLinkResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_CreateLinkResponse, rhs: Materials_CreateLinkResponse) -> Bool {
+  public static func ==(lhs: Materials_CreateLinkResponse, rhs: Materials_CreateLinkResponse) -> Bool {
     if lhs._node != rhs._node {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1092,13 +1041,10 @@ extension Materials_CreateLinkResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Materials_RenameNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".RenameNodeRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "node_id"),
-    2: .standard(proto: "new_name"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".RenameNodeRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}node_id\0\u{3}new_name\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1111,7 +1057,7 @@ extension Materials_RenameNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.nodeID != 0 {
       try visitor.visitSingularUInt32Field(value: self.nodeID, fieldNumber: 1)
     }
@@ -1121,7 +1067,7 @@ extension Materials_RenameNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_RenameNodeRequest, rhs: Materials_RenameNodeRequest) -> Bool {
+  public static func ==(lhs: Materials_RenameNodeRequest, rhs: Materials_RenameNodeRequest) -> Bool {
     if lhs.nodeID != rhs.nodeID {return false}
     if lhs.newName != rhs.newName {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1130,12 +1076,10 @@ extension Materials_RenameNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Materials_RenameNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".RenameNodeResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "success"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".RenameNodeResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1147,14 +1091,14 @@ extension Materials_RenameNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.success != false {
       try visitor.visitSingularBoolField(value: self.success, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_RenameNodeResponse, rhs: Materials_RenameNodeResponse) -> Bool {
+  public static func ==(lhs: Materials_RenameNodeResponse, rhs: Materials_RenameNodeResponse) -> Bool {
     if lhs.success != rhs.success {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1162,12 +1106,10 @@ extension Materials_RenameNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Materials_DeleteNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteNodeRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "node_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteNodeRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}node_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1179,14 +1121,14 @@ extension Materials_DeleteNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.nodeID != 0 {
       try visitor.visitSingularUInt32Field(value: self.nodeID, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_DeleteNodeRequest, rhs: Materials_DeleteNodeRequest) -> Bool {
+  public static func ==(lhs: Materials_DeleteNodeRequest, rhs: Materials_DeleteNodeRequest) -> Bool {
     if lhs.nodeID != rhs.nodeID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1194,12 +1136,10 @@ extension Materials_DeleteNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Materials_DeleteNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteNodeResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "success"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteNodeResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1211,14 +1151,14 @@ extension Materials_DeleteNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.success != false {
       try visitor.visitSingularBoolField(value: self.success, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_DeleteNodeResponse, rhs: Materials_DeleteNodeResponse) -> Bool {
+  public static func ==(lhs: Materials_DeleteNodeResponse, rhs: Materials_DeleteNodeResponse) -> Bool {
     if lhs.success != rhs.success {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1226,12 +1166,10 @@ extension Materials_DeleteNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Materials_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "user_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1243,14 +1181,14 @@ extension Materials_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf.
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.userID != 0 {
       try visitor.visitSingularUInt32Field(value: self.userID, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_DeleteUserDataRequest, rhs: Materials_DeleteUserDataRequest) -> Bool {
+  public static func ==(lhs: Materials_DeleteUserDataRequest, rhs: Materials_DeleteUserDataRequest) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1258,12 +1196,10 @@ extension Materials_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf.
 }
 
 extension Materials_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ok"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1275,14 +1211,14 @@ extension Materials_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.ok != false {
       try visitor.visitSingularBoolField(value: self.ok, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Materials_DeleteUserDataResponse, rhs: Materials_DeleteUserDataResponse) -> Bool {
+  public static func ==(lhs: Materials_DeleteUserDataResponse, rhs: Materials_DeleteUserDataResponse) -> Bool {
     if lhs.ok != rhs.ok {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

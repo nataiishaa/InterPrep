@@ -8,6 +8,7 @@
 import Foundation
 import UniformTypeIdentifiers
 import ArchitectureCore
+import NetworkService
 
 public actor ResumeUploadEffectHandler: EffectHandler {
     public typealias S = ResumeUploadState
@@ -31,29 +32,14 @@ public actor ResumeUploadEffectHandler: EffectHandler {
             
         case let .uploadFile(file):
             uploadTask?.cancel()
-            uploadTask = Task {
-                do {
-                    // Имитируем загрузку с прогрессом
-                    for progress in stride(from: 0.0, through: 1.0, by: 0.1) {
-                        try Task.checkCancellation()
-                        try await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-                        await sendFeedback(.uploadProgress(progress))
-                    }
-                    
-                    try await fileService.uploadFile(file)
-                    await sendFeedback(.uploadCompleted)
-                    
-                    // Ждем 1 секунду перед переходом
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
-                    // TODO: Navigate to main
-                    
-                } catch is CancellationError {
-                    await sendFeedback(.uploadFailed("Загрузка отменена"))
-                } catch {
-                    await sendFeedback(.uploadFailed(error.localizedDescription))
-                }
+            do {
+                try await fileService.uploadFile(file)
+                return .uploadCompleted
+            } catch is CancellationError {
+                return .uploadFailed("Загрузка отменена")
+            } catch {
+                return .uploadFailed(error.localizedDescription)
             }
-            return nil
             
         case .cancelUpload:
             uploadTask?.cancel()
@@ -67,10 +53,6 @@ public actor ResumeUploadEffectHandler: EffectHandler {
         }
     }
     
-    private func sendFeedback(_ feedback: S.Feedback) async {
-        // В реальном приложении здесь будет отправка через Store
-        // Пока просто заглушка
-    }
 }
 
 // MARK: - File Upload Service
@@ -80,15 +62,16 @@ public protocol FileUploadService: Actor {
     func uploadFile(_ file: ResumeUploadState.SelectedFile) async throws
 }
 
-// MARK: - Mock Service
+// MARK: - Real Service
 
-public final actor FileUploadServiceMock: FileUploadService {
-    public init() {}
+public final actor FileUploadServiceImpl: FileUploadService {
+    private let networkService: NetworkServiceV2
+    
+    public init(networkService: NetworkServiceV2 = .shared) {
+        self.networkService = networkService
+    }
     
     public func validateFile(_ url: URL) async throws -> ResumeUploadState.SelectedFile {
-        // Имитируем задержку валидации
-        try await Task.sleep(nanoseconds: 500_000_000) // 0.5s
-        
         // Получаем информацию о файле
         let resources = try url.resourceValues(forKeys: [.fileSizeKey, .nameKey])
         let fileName = resources.name ?? "resume.pdf"
@@ -126,13 +109,21 @@ public final actor FileUploadServiceMock: FileUploadService {
     }
     
     public func uploadFile(_ file: ResumeUploadState.SelectedFile) async throws {
-        // Имитируем загрузку на сервер
-        try await Task.sleep(nanoseconds: 3_000_000_000) // 3s
+        let fileData = try Data(contentsOf: file.url)
         
-        // В реальном приложении здесь будет:
-        // - Чтение файла
-        // - Отправка на сервер
-        // - Обработка ответа
+        let result = await networkService.uploadFile(
+            fileContent: fileData,
+            filename: file.name,
+            parentId: nil,
+            name: file.name
+        )
+        
+        switch result {
+        case .success:
+            return
+        case .failure:
+            throw FileUploadError.uploadFailed
+        }
     }
 }
 

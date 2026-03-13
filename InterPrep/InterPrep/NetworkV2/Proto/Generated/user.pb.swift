@@ -20,18 +20,18 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-enum User_ResumeProfileStatus: SwiftProtobuf.Enum, Swift.CaseIterable {
-  typealias RawValue = Int
+public enum User_ResumeProfileStatus: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
   case unspecified // = 0
   case draft // = 1
   case confirmed // = 2
   case UNRECOGNIZED(Int)
 
-  init() {
+  public init() {
     self = .unspecified
   }
 
-  init?(rawValue: Int) {
+  public init?(rawValue: Int) {
     switch rawValue {
     case 0: self = .unspecified
     case 1: self = .draft
@@ -40,7 +40,7 @@ enum User_ResumeProfileStatus: SwiftProtobuf.Enum, Swift.CaseIterable {
     }
   }
 
-  var rawValue: Int {
+  public var rawValue: Int {
     switch self {
     case .unspecified: return 0
     case .draft: return 1
@@ -50,7 +50,7 @@ enum User_ResumeProfileStatus: SwiftProtobuf.Enum, Swift.CaseIterable {
   }
 
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static let allCases: [User_ResumeProfileStatus] = [
+  public static let allCases: [User_ResumeProfileStatus] = [
     .unspecified,
     .draft,
     .confirmed,
@@ -58,128 +58,128 @@ enum User_ResumeProfileStatus: SwiftProtobuf.Enum, Swift.CaseIterable {
 
 }
 
-struct User_GetMeRequest: Sendable {
+public struct User_GetMeRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_GetMeResponse: Sendable {
+public struct User_GetMeResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var user: User_UserProfile {
-    get {return _user ?? User_UserProfile()}
+  public var user: User_UserProfile {
+    get {_user ?? User_UserProfile()}
     set {_user = newValue}
   }
   /// Returns true if `user` has been explicitly set.
-  var hasUser: Bool {return self._user != nil}
+  public var hasUser: Bool {self._user != nil}
   /// Clears the value of `user`. Subsequent reads from it will return its default value.
-  mutating func clearUser() {self._user = nil}
+  public mutating func clearUser() {self._user = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _user: User_UserProfile? = nil
 }
 
-struct User_UserProfile: Sendable {
+public struct User_UserProfile: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var id: UInt32 = 0
+  public var id: UInt32 = 0
 
-  var firstName: String = String()
+  public var firstName: String = String()
 
-  var lastName: String = String()
+  public var lastName: String = String()
 
-  var email: String = String()
+  public var email: String = String()
 
-  var username: String = String()
+  public var username: String = String()
 
-  var resumeUploaded: Bool = false
+  public var resumeUploaded: Bool = false
 
-  var totalInterviews: Int32 = 0
+  public var totalInterviews: Int32 = 0
 
-  var completedInterviews: Int32 = 0
+  public var completedInterviews: Int32 = 0
 
-  var upcomingInterviews: Int32 = 0
+  public var upcomingInterviews: Int32 = 0
 
-  var notificationsEnabled: Bool = false
+  public var notificationsEnabled: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_ResumeProfile: Sendable {
+public struct User_ResumeProfile: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var targetRoles: [String] = []
+  public var targetRoles: [String] = []
 
-  var experienceLevel: String {
-    get {return _experienceLevel ?? String()}
+  public var experienceLevel: String {
+    get {_experienceLevel ?? String()}
     set {_experienceLevel = newValue}
   }
   /// Returns true if `experienceLevel` has been explicitly set.
-  var hasExperienceLevel: Bool {return self._experienceLevel != nil}
+  public var hasExperienceLevel: Bool {self._experienceLevel != nil}
   /// Clears the value of `experienceLevel`. Subsequent reads from it will return its default value.
-  mutating func clearExperienceLevel() {self._experienceLevel = nil}
+  public mutating func clearExperienceLevel() {self._experienceLevel = nil}
 
-  var areas: [User_Area] = []
+  public var areas: [User_Area] = []
 
-  var salaryMin: Double {
-    get {return _salaryMin ?? 0}
+  public var salaryMin: Double {
+    get {_salaryMin ?? 0}
     set {_salaryMin = newValue}
   }
   /// Returns true if `salaryMin` has been explicitly set.
-  var hasSalaryMin: Bool {return self._salaryMin != nil}
+  public var hasSalaryMin: Bool {self._salaryMin != nil}
   /// Clears the value of `salaryMin`. Subsequent reads from it will return its default value.
-  mutating func clearSalaryMin() {self._salaryMin = nil}
+  public mutating func clearSalaryMin() {self._salaryMin = nil}
 
-  var currency: String {
-    get {return _currency ?? String()}
+  public var currency: String {
+    get {_currency ?? String()}
     set {_currency = newValue}
   }
   /// Returns true if `currency` has been explicitly set.
-  var hasCurrency: Bool {return self._currency != nil}
+  public var hasCurrency: Bool {self._currency != nil}
   /// Clears the value of `currency`. Subsequent reads from it will return its default value.
-  mutating func clearCurrency() {self._currency = nil}
+  public mutating func clearCurrency() {self._currency = nil}
 
-  var workFormat: [String] = []
+  public var workFormat: [String] = []
 
-  var skillsTop: [String] = []
+  public var skillsTop: [String] = []
 
-  var educationLevel: String {
-    get {return _educationLevel ?? String()}
+  public var educationLevel: String {
+    get {_educationLevel ?? String()}
     set {_educationLevel = newValue}
   }
   /// Returns true if `educationLevel` has been explicitly set.
-  var hasEducationLevel: Bool {return self._educationLevel != nil}
+  public var hasEducationLevel: Bool {self._educationLevel != nil}
   /// Clears the value of `educationLevel`. Subsequent reads from it will return its default value.
-  mutating func clearEducationLevel() {self._educationLevel = nil}
+  public mutating func clearEducationLevel() {self._educationLevel = nil}
 
-  var notes: String {
-    get {return _notes ?? String()}
+  public var notes: String {
+    get {_notes ?? String()}
     set {_notes = newValue}
   }
   /// Returns true if `notes` has been explicitly set.
-  var hasNotes: Bool {return self._notes != nil}
+  public var hasNotes: Bool {self._notes != nil}
   /// Clears the value of `notes`. Subsequent reads from it will return its default value.
-  mutating func clearNotes() {self._notes = nil}
+  public mutating func clearNotes() {self._notes = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _experienceLevel: String? = nil
   fileprivate var _salaryMin: Double? = nil
@@ -188,67 +188,67 @@ struct User_ResumeProfile: Sendable {
   fileprivate var _notes: String? = nil
 }
 
-struct User_ResumeProfilePatch: Sendable {
+public struct User_ResumeProfilePatch: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var targetRoles: [String] = []
+  public var targetRoles: [String] = []
 
-  var experienceLevel: String {
-    get {return _experienceLevel ?? String()}
+  public var experienceLevel: String {
+    get {_experienceLevel ?? String()}
     set {_experienceLevel = newValue}
   }
   /// Returns true if `experienceLevel` has been explicitly set.
-  var hasExperienceLevel: Bool {return self._experienceLevel != nil}
+  public var hasExperienceLevel: Bool {self._experienceLevel != nil}
   /// Clears the value of `experienceLevel`. Subsequent reads from it will return its default value.
-  mutating func clearExperienceLevel() {self._experienceLevel = nil}
+  public mutating func clearExperienceLevel() {self._experienceLevel = nil}
 
-  var areas: [User_Area] = []
+  public var areas: [User_Area] = []
 
-  var salaryMin: Double {
-    get {return _salaryMin ?? 0}
+  public var salaryMin: Double {
+    get {_salaryMin ?? 0}
     set {_salaryMin = newValue}
   }
   /// Returns true if `salaryMin` has been explicitly set.
-  var hasSalaryMin: Bool {return self._salaryMin != nil}
+  public var hasSalaryMin: Bool {self._salaryMin != nil}
   /// Clears the value of `salaryMin`. Subsequent reads from it will return its default value.
-  mutating func clearSalaryMin() {self._salaryMin = nil}
+  public mutating func clearSalaryMin() {self._salaryMin = nil}
 
-  var currency: String {
-    get {return _currency ?? String()}
+  public var currency: String {
+    get {_currency ?? String()}
     set {_currency = newValue}
   }
   /// Returns true if `currency` has been explicitly set.
-  var hasCurrency: Bool {return self._currency != nil}
+  public var hasCurrency: Bool {self._currency != nil}
   /// Clears the value of `currency`. Subsequent reads from it will return its default value.
-  mutating func clearCurrency() {self._currency = nil}
+  public mutating func clearCurrency() {self._currency = nil}
 
-  var workFormat: [String] = []
+  public var workFormat: [String] = []
 
-  var skillsTop: [String] = []
+  public var skillsTop: [String] = []
 
-  var educationLevel: String {
-    get {return _educationLevel ?? String()}
+  public var educationLevel: String {
+    get {_educationLevel ?? String()}
     set {_educationLevel = newValue}
   }
   /// Returns true if `educationLevel` has been explicitly set.
-  var hasEducationLevel: Bool {return self._educationLevel != nil}
+  public var hasEducationLevel: Bool {self._educationLevel != nil}
   /// Clears the value of `educationLevel`. Subsequent reads from it will return its default value.
-  mutating func clearEducationLevel() {self._educationLevel = nil}
+  public mutating func clearEducationLevel() {self._educationLevel = nil}
 
-  var notes: String {
-    get {return _notes ?? String()}
+  public var notes: String {
+    get {_notes ?? String()}
     set {_notes = newValue}
   }
   /// Returns true if `notes` has been explicitly set.
-  var hasNotes: Bool {return self._notes != nil}
+  public var hasNotes: Bool {self._notes != nil}
   /// Clears the value of `notes`. Subsequent reads from it will return its default value.
-  mutating func clearNotes() {self._notes = nil}
+  public mutating func clearNotes() {self._notes = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _experienceLevel: String? = nil
   fileprivate var _salaryMin: Double? = nil
@@ -257,393 +257,393 @@ struct User_ResumeProfilePatch: Sendable {
   fileprivate var _notes: String? = nil
 }
 
-struct User_Area: Sendable {
+public struct User_Area: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var id: String = String()
+  public var id: String = String()
 
-  var name: String = String()
+  public var name: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_GetResumeProfileRequest: Sendable {
+public struct User_GetResumeProfileRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_GetResumeProfileResponse: Sendable {
+public struct User_GetResumeProfileResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var profile: User_ResumeProfile {
-    get {return _profile ?? User_ResumeProfile()}
+  public var profile: User_ResumeProfile {
+    get {_profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  var hasProfile: Bool {return self._profile != nil}
+  public var hasProfile: Bool {self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
-  mutating func clearProfile() {self._profile = nil}
+  public mutating func clearProfile() {self._profile = nil}
 
-  var status: User_ResumeProfileStatus = .unspecified
+  public var status: User_ResumeProfileStatus = .unspecified
 
-  var version: Int64 = 0
+  public var version: Int64 = 0
 
-  var sourceMaterialID: String {
-    get {return _sourceMaterialID ?? String()}
+  public var sourceMaterialID: String {
+    get {_sourceMaterialID ?? String()}
     set {_sourceMaterialID = newValue}
   }
   /// Returns true if `sourceMaterialID` has been explicitly set.
-  var hasSourceMaterialID: Bool {return self._sourceMaterialID != nil}
+  public var hasSourceMaterialID: Bool {self._sourceMaterialID != nil}
   /// Clears the value of `sourceMaterialID`. Subsequent reads from it will return its default value.
-  mutating func clearSourceMaterialID() {self._sourceMaterialID = nil}
+  public mutating func clearSourceMaterialID() {self._sourceMaterialID = nil}
 
-  var confirmedFields: Dictionary<String,Bool> = [:]
+  public var confirmedFields: Dictionary<String,Bool> = [:]
 
-  var confidence: Dictionary<String,Double> = [:]
+  public var confidence: Dictionary<String,Double> = [:]
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _profile: User_ResumeProfile? = nil
   fileprivate var _sourceMaterialID: String? = nil
 }
 
-struct User_GetResumeProfileInternalRequest: Sendable {
+public struct User_GetResumeProfileInternalRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var userID: UInt32 = 0
+  public var userID: UInt32 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_GetResumeProfileInternalResponse: Sendable {
+public struct User_GetResumeProfileInternalResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var profile: User_ResumeProfile {
-    get {return _profile ?? User_ResumeProfile()}
+  public var profile: User_ResumeProfile {
+    get {_profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  var hasProfile: Bool {return self._profile != nil}
+  public var hasProfile: Bool {self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
-  mutating func clearProfile() {self._profile = nil}
+  public mutating func clearProfile() {self._profile = nil}
 
-  var status: User_ResumeProfileStatus = .unspecified
+  public var status: User_ResumeProfileStatus = .unspecified
 
-  var version: Int64 = 0
+  public var version: Int64 = 0
 
-  var sourceMaterialID: String {
-    get {return _sourceMaterialID ?? String()}
+  public var sourceMaterialID: String {
+    get {_sourceMaterialID ?? String()}
     set {_sourceMaterialID = newValue}
   }
   /// Returns true if `sourceMaterialID` has been explicitly set.
-  var hasSourceMaterialID: Bool {return self._sourceMaterialID != nil}
+  public var hasSourceMaterialID: Bool {self._sourceMaterialID != nil}
   /// Clears the value of `sourceMaterialID`. Subsequent reads from it will return its default value.
-  mutating func clearSourceMaterialID() {self._sourceMaterialID = nil}
+  public mutating func clearSourceMaterialID() {self._sourceMaterialID = nil}
 
-  var confirmedFields: Dictionary<String,Bool> = [:]
+  public var confirmedFields: Dictionary<String,Bool> = [:]
 
-  var confidence: Dictionary<String,Double> = [:]
+  public var confidence: Dictionary<String,Double> = [:]
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _profile: User_ResumeProfile? = nil
   fileprivate var _sourceMaterialID: String? = nil
 }
 
-struct User_UpsertResumeProfileInternalRequest: Sendable {
+public struct User_UpsertResumeProfileInternalRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var userID: UInt32 = 0
+  public var userID: UInt32 = 0
 
-  var sourceMaterialID: String = String()
+  public var sourceMaterialID: String = String()
 
-  var profile: User_ResumeProfile {
-    get {return _profile ?? User_ResumeProfile()}
+  public var profile: User_ResumeProfile {
+    get {_profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  var hasProfile: Bool {return self._profile != nil}
+  public var hasProfile: Bool {self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
-  mutating func clearProfile() {self._profile = nil}
+  public mutating func clearProfile() {self._profile = nil}
 
-  var status: User_ResumeProfileStatus = .unspecified
+  public var status: User_ResumeProfileStatus = .unspecified
 
-  var confirmedFields: Dictionary<String,Bool> = [:]
+  public var confirmedFields: Dictionary<String,Bool> = [:]
 
-  var confidence: Dictionary<String,Double> = [:]
+  public var confidence: Dictionary<String,Double> = [:]
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _profile: User_ResumeProfile? = nil
 }
 
-struct User_UpsertResumeProfileInternalResponse: Sendable {
+public struct User_UpsertResumeProfileInternalResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var version: Int64 = 0
+  public var version: Int64 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_PatchResumeProfileInternalRequest: Sendable {
+public struct User_PatchResumeProfileInternalRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var userID: UInt32 = 0
+  public var userID: UInt32 = 0
 
-  var patch: User_ResumeProfilePatch {
-    get {return _patch ?? User_ResumeProfilePatch()}
+  public var patch: User_ResumeProfilePatch {
+    get {_patch ?? User_ResumeProfilePatch()}
     set {_patch = newValue}
   }
   /// Returns true if `patch` has been explicitly set.
-  var hasPatch: Bool {return self._patch != nil}
+  public var hasPatch: Bool {self._patch != nil}
   /// Clears the value of `patch`. Subsequent reads from it will return its default value.
-  mutating func clearPatch() {self._patch = nil}
+  public mutating func clearPatch() {self._patch = nil}
 
-  var setConfirmedFields: Dictionary<String,Bool> = [:]
+  public var setConfirmedFields: Dictionary<String,Bool> = [:]
 
-  var setConfidence: Dictionary<String,Double> = [:]
+  public var setConfidence: Dictionary<String,Double> = [:]
 
-  var status: User_ResumeProfileStatus {
-    get {return _status ?? .unspecified}
+  public var status: User_ResumeProfileStatus {
+    get {_status ?? .unspecified}
     set {_status = newValue}
   }
   /// Returns true if `status` has been explicitly set.
-  var hasStatus: Bool {return self._status != nil}
+  public var hasStatus: Bool {self._status != nil}
   /// Clears the value of `status`. Subsequent reads from it will return its default value.
-  mutating func clearStatus() {self._status = nil}
+  public mutating func clearStatus() {self._status = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _patch: User_ResumeProfilePatch? = nil
   fileprivate var _status: User_ResumeProfileStatus? = nil
 }
 
-struct User_PatchResumeProfileInternalResponse: Sendable {
+public struct User_PatchResumeProfileInternalResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var version: Int64 = 0
+  public var version: Int64 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_UpdateResumeProfileRequest: Sendable {
+public struct User_UpdateResumeProfileRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var userID: UInt32 = 0
+  public var userID: UInt32 = 0
 
-  var profile: User_ResumeProfile {
-    get {return _profile ?? User_ResumeProfile()}
+  public var profile: User_ResumeProfile {
+    get {_profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  var hasProfile: Bool {return self._profile != nil}
+  public var hasProfile: Bool {self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
-  mutating func clearProfile() {self._profile = nil}
+  public mutating func clearProfile() {self._profile = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _profile: User_ResumeProfile? = nil
 }
 
-struct User_UpdateResumeProfileResponse: Sendable {
+public struct User_UpdateResumeProfileResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var success: Bool = false
+  public var success: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_RequestPasswordResetRequest: Sendable {
+public struct User_RequestPasswordResetRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var email: String = String()
+  public var email: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_RequestPasswordResetResponse: Sendable {
+public struct User_RequestPasswordResetResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var ok: Bool = false
+  public var ok: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_VerifyPasswordResetCodeRequest: Sendable {
+public struct User_VerifyPasswordResetCodeRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var email: String = String()
+  public var email: String = String()
 
-  var code: String = String()
+  public var code: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_VerifyPasswordResetCodeResponse: Sendable {
+public struct User_VerifyPasswordResetCodeResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var valid: Bool = false
+  public var valid: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_ResetPasswordRequest: Sendable {
+public struct User_ResetPasswordRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var email: String = String()
+  public var email: String = String()
 
-  var code: String = String()
+  public var code: String = String()
 
-  var newPassword: String = String()
+  public var newPassword: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_ResetPasswordResponse: Sendable {
+public struct User_ResetPasswordResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var ok: Bool = false
+  public var ok: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_DeleteAccountRequest: Sendable {
+public struct User_DeleteAccountRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var password: String = String()
+  public var password: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_DeleteAccountResponse: Sendable {
+public struct User_DeleteAccountResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var deleted: Bool = false
+  public var deleted: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct User_UpdateUserProfileRequest: Sendable {
+public struct User_UpdateUserProfileRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var firstName: String {
-    get {return _firstName ?? String()}
+  public var firstName: String {
+    get {_firstName ?? String()}
     set {_firstName = newValue}
   }
   /// Returns true if `firstName` has been explicitly set.
-  var hasFirstName: Bool {return self._firstName != nil}
+  public var hasFirstName: Bool {self._firstName != nil}
   /// Clears the value of `firstName`. Subsequent reads from it will return its default value.
-  mutating func clearFirstName() {self._firstName = nil}
+  public mutating func clearFirstName() {self._firstName = nil}
 
-  var lastName: String {
-    get {return _lastName ?? String()}
+  public var lastName: String {
+    get {_lastName ?? String()}
     set {_lastName = newValue}
   }
   /// Returns true if `lastName` has been explicitly set.
-  var hasLastName: Bool {return self._lastName != nil}
+  public var hasLastName: Bool {self._lastName != nil}
   /// Clears the value of `lastName`. Subsequent reads from it will return its default value.
-  mutating func clearLastName() {self._lastName = nil}
+  public mutating func clearLastName() {self._lastName = nil}
 
-  var email: String {
-    get {return _email ?? String()}
+  public var email: String {
+    get {_email ?? String()}
     set {_email = newValue}
   }
   /// Returns true if `email` has been explicitly set.
-  var hasEmail: Bool {return self._email != nil}
+  public var hasEmail: Bool {self._email != nil}
   /// Clears the value of `email`. Subsequent reads from it will return its default value.
-  mutating func clearEmail() {self._email = nil}
+  public mutating func clearEmail() {self._email = nil}
 
-  var notificationsEnabled: Bool {
-    get {return _notificationsEnabled ?? false}
+  public var notificationsEnabled: Bool {
+    get {_notificationsEnabled ?? false}
     set {_notificationsEnabled = newValue}
   }
   /// Returns true if `notificationsEnabled` has been explicitly set.
-  var hasNotificationsEnabled: Bool {return self._notificationsEnabled != nil}
+  public var hasNotificationsEnabled: Bool {self._notificationsEnabled != nil}
   /// Clears the value of `notificationsEnabled`. Subsequent reads from it will return its default value.
-  mutating func clearNotificationsEnabled() {self._notificationsEnabled = nil}
+  public mutating func clearNotificationsEnabled() {self._notificationsEnabled = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _firstName: String? = nil
   fileprivate var _lastName: String? = nil
@@ -651,16 +651,16 @@ struct User_UpdateUserProfileRequest: Sendable {
   fileprivate var _notificationsEnabled: Bool? = nil
 }
 
-struct User_UpdateUserProfileResponse: Sendable {
+public struct User_UpdateUserProfileResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var success: Bool = false
+  public var success: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -668,39 +668,33 @@ struct User_UpdateUserProfileResponse: Sendable {
 fileprivate let _protobuf_package = "user"
 
 extension User_ResumeProfileStatus: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "RESUME_PROFILE_STATUS_UNSPECIFIED"),
-    1: .same(proto: "DRAFT"),
-    2: .same(proto: "CONFIRMED"),
-  ]
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0RESUME_PROFILE_STATUS_UNSPECIFIED\0\u{1}DRAFT\0\u{1}CONFIRMED\0")
 }
 
 extension User_GetMeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetMeRequest"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+  public static let protoMessageName: String = _protobuf_package + ".GetMeRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     // Load everything into unknown fields
     while try decoder.nextFieldNumber() != nil {}
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_GetMeRequest, rhs: User_GetMeRequest) -> Bool {
+  public static func ==(lhs: User_GetMeRequest, rhs: User_GetMeRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
 extension User_GetMeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetMeResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "user"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".GetMeResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}user\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -712,7 +706,7 @@ extension User_GetMeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -723,7 +717,7 @@ extension User_GetMeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_GetMeResponse, rhs: User_GetMeResponse) -> Bool {
+  public static func ==(lhs: User_GetMeResponse, rhs: User_GetMeResponse) -> Bool {
     if lhs._user != rhs._user {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -731,21 +725,10 @@ extension User_GetMeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 }
 
 extension User_UserProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UserProfile"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-    2: .standard(proto: "first_name"),
-    3: .standard(proto: "last_name"),
-    4: .same(proto: "email"),
-    5: .same(proto: "username"),
-    6: .standard(proto: "resume_uploaded"),
-    7: .standard(proto: "total_interviews"),
-    8: .standard(proto: "completed_interviews"),
-    9: .standard(proto: "upcoming_interviews"),
-    10: .standard(proto: "notifications_enabled"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UserProfile"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}first_name\0\u{3}last_name\0\u{1}email\0\u{1}username\0\u{3}resume_uploaded\0\u{3}total_interviews\0\u{3}completed_interviews\0\u{3}upcoming_interviews\0\u{3}notifications_enabled\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -766,7 +749,7 @@ extension User_UserProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.id != 0 {
       try visitor.visitSingularUInt32Field(value: self.id, fieldNumber: 1)
     }
@@ -800,7 +783,7 @@ extension User_UserProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_UserProfile, rhs: User_UserProfile) -> Bool {
+  public static func ==(lhs: User_UserProfile, rhs: User_UserProfile) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.firstName != rhs.firstName {return false}
     if lhs.lastName != rhs.lastName {return false}
@@ -817,20 +800,10 @@ extension User_UserProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
 }
 
 extension User_ResumeProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ResumeProfile"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "target_roles"),
-    2: .standard(proto: "experience_level"),
-    3: .same(proto: "areas"),
-    4: .standard(proto: "salary_min"),
-    5: .same(proto: "currency"),
-    6: .standard(proto: "work_format"),
-    7: .standard(proto: "skills_top"),
-    8: .standard(proto: "education_level"),
-    9: .same(proto: "notes"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ResumeProfile"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}target_roles\0\u{3}experience_level\0\u{1}areas\0\u{3}salary_min\0\u{1}currency\0\u{3}work_format\0\u{3}skills_top\0\u{3}education_level\0\u{1}notes\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -850,7 +823,7 @@ extension User_ResumeProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -885,7 +858,7 @@ extension User_ResumeProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_ResumeProfile, rhs: User_ResumeProfile) -> Bool {
+  public static func ==(lhs: User_ResumeProfile, rhs: User_ResumeProfile) -> Bool {
     if lhs.targetRoles != rhs.targetRoles {return false}
     if lhs._experienceLevel != rhs._experienceLevel {return false}
     if lhs.areas != rhs.areas {return false}
@@ -901,20 +874,10 @@ extension User_ResumeProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 }
 
 extension User_ResumeProfilePatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ResumeProfilePatch"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "target_roles"),
-    2: .standard(proto: "experience_level"),
-    3: .same(proto: "areas"),
-    4: .standard(proto: "salary_min"),
-    5: .same(proto: "currency"),
-    6: .standard(proto: "work_format"),
-    7: .standard(proto: "skills_top"),
-    8: .standard(proto: "education_level"),
-    9: .same(proto: "notes"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ResumeProfilePatch"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}target_roles\0\u{3}experience_level\0\u{1}areas\0\u{3}salary_min\0\u{1}currency\0\u{3}work_format\0\u{3}skills_top\0\u{3}education_level\0\u{1}notes\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -934,7 +897,7 @@ extension User_ResumeProfilePatch: SwiftProtobuf.Message, SwiftProtobuf._Message
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -969,7 +932,7 @@ extension User_ResumeProfilePatch: SwiftProtobuf.Message, SwiftProtobuf._Message
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_ResumeProfilePatch, rhs: User_ResumeProfilePatch) -> Bool {
+  public static func ==(lhs: User_ResumeProfilePatch, rhs: User_ResumeProfilePatch) -> Bool {
     if lhs.targetRoles != rhs.targetRoles {return false}
     if lhs._experienceLevel != rhs._experienceLevel {return false}
     if lhs.areas != rhs.areas {return false}
@@ -985,13 +948,10 @@ extension User_ResumeProfilePatch: SwiftProtobuf.Message, SwiftProtobuf._Message
 }
 
 extension User_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Area"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-    2: .same(proto: "name"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".Area"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1004,7 +964,7 @@ extension User_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
     }
@@ -1014,7 +974,7 @@ extension User_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_Area, rhs: User_Area) -> Bool {
+  public static func ==(lhs: User_Area, rhs: User_Area) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.name != rhs.name {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1023,36 +983,29 @@ extension User_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
 }
 
 extension User_GetResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetResumeProfileRequest"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+  public static let protoMessageName: String = _protobuf_package + ".GetResumeProfileRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     // Load everything into unknown fields
     while try decoder.nextFieldNumber() != nil {}
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_GetResumeProfileRequest, rhs: User_GetResumeProfileRequest) -> Bool {
+  public static func ==(lhs: User_GetResumeProfileRequest, rhs: User_GetResumeProfileRequest) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
 extension User_GetResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetResumeProfileResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "profile"),
-    2: .same(proto: "status"),
-    3: .same(proto: "version"),
-    4: .standard(proto: "source_material_id"),
-    5: .standard(proto: "confirmed_fields"),
-    6: .same(proto: "confidence"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".GetResumeProfileResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profile\0\u{1}status\0\u{1}version\0\u{3}source_material_id\0\u{3}confirmed_fields\0\u{1}confidence\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1069,7 +1022,7 @@ extension User_GetResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._M
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1095,7 +1048,7 @@ extension User_GetResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._M
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_GetResumeProfileResponse, rhs: User_GetResumeProfileResponse) -> Bool {
+  public static func ==(lhs: User_GetResumeProfileResponse, rhs: User_GetResumeProfileResponse) -> Bool {
     if lhs._profile != rhs._profile {return false}
     if lhs.status != rhs.status {return false}
     if lhs.version != rhs.version {return false}
@@ -1108,12 +1061,10 @@ extension User_GetResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._M
 }
 
 extension User_GetResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetResumeProfileInternalRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "user_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".GetResumeProfileInternalRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1125,14 +1076,14 @@ extension User_GetResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProt
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.userID != 0 {
       try visitor.visitSingularUInt32Field(value: self.userID, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_GetResumeProfileInternalRequest, rhs: User_GetResumeProfileInternalRequest) -> Bool {
+  public static func ==(lhs: User_GetResumeProfileInternalRequest, rhs: User_GetResumeProfileInternalRequest) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1140,17 +1091,10 @@ extension User_GetResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProt
 }
 
 extension User_GetResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetResumeProfileInternalResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "profile"),
-    2: .same(proto: "status"),
-    3: .same(proto: "version"),
-    4: .standard(proto: "source_material_id"),
-    5: .standard(proto: "confirmed_fields"),
-    6: .same(proto: "confidence"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".GetResumeProfileInternalResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profile\0\u{1}status\0\u{1}version\0\u{3}source_material_id\0\u{3}confirmed_fields\0\u{1}confidence\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1167,7 +1111,7 @@ extension User_GetResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftPro
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1193,7 +1137,7 @@ extension User_GetResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftPro
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_GetResumeProfileInternalResponse, rhs: User_GetResumeProfileInternalResponse) -> Bool {
+  public static func ==(lhs: User_GetResumeProfileInternalResponse, rhs: User_GetResumeProfileInternalResponse) -> Bool {
     if lhs._profile != rhs._profile {return false}
     if lhs.status != rhs.status {return false}
     if lhs.version != rhs.version {return false}
@@ -1206,17 +1150,10 @@ extension User_GetResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftPro
 }
 
 extension User_UpsertResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpsertResumeProfileInternalRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "user_id"),
-    2: .standard(proto: "source_material_id"),
-    3: .same(proto: "profile"),
-    4: .same(proto: "status"),
-    5: .standard(proto: "confirmed_fields"),
-    6: .same(proto: "confidence"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpsertResumeProfileInternalRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{3}source_material_id\0\u{1}profile\0\u{1}status\0\u{3}confirmed_fields\0\u{1}confidence\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1233,7 +1170,7 @@ extension User_UpsertResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftP
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1259,7 +1196,7 @@ extension User_UpsertResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftP
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_UpsertResumeProfileInternalRequest, rhs: User_UpsertResumeProfileInternalRequest) -> Bool {
+  public static func ==(lhs: User_UpsertResumeProfileInternalRequest, rhs: User_UpsertResumeProfileInternalRequest) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs.sourceMaterialID != rhs.sourceMaterialID {return false}
     if lhs._profile != rhs._profile {return false}
@@ -1272,12 +1209,10 @@ extension User_UpsertResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftP
 }
 
 extension User_UpsertResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpsertResumeProfileInternalResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "version"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpsertResumeProfileInternalResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1289,14 +1224,14 @@ extension User_UpsertResumeProfileInternalResponse: SwiftProtobuf.Message, Swift
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.version != 0 {
       try visitor.visitSingularInt64Field(value: self.version, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_UpsertResumeProfileInternalResponse, rhs: User_UpsertResumeProfileInternalResponse) -> Bool {
+  public static func ==(lhs: User_UpsertResumeProfileInternalResponse, rhs: User_UpsertResumeProfileInternalResponse) -> Bool {
     if lhs.version != rhs.version {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1304,16 +1239,10 @@ extension User_UpsertResumeProfileInternalResponse: SwiftProtobuf.Message, Swift
 }
 
 extension User_PatchResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".PatchResumeProfileInternalRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "user_id"),
-    2: .same(proto: "patch"),
-    3: .standard(proto: "set_confirmed_fields"),
-    4: .standard(proto: "set_confidence"),
-    5: .same(proto: "status"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".PatchResumeProfileInternalRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}patch\0\u{3}set_confirmed_fields\0\u{3}set_confidence\0\u{1}status\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1329,7 +1258,7 @@ extension User_PatchResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftPr
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1352,7 +1281,7 @@ extension User_PatchResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftPr
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_PatchResumeProfileInternalRequest, rhs: User_PatchResumeProfileInternalRequest) -> Bool {
+  public static func ==(lhs: User_PatchResumeProfileInternalRequest, rhs: User_PatchResumeProfileInternalRequest) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs._patch != rhs._patch {return false}
     if lhs.setConfirmedFields != rhs.setConfirmedFields {return false}
@@ -1364,12 +1293,10 @@ extension User_PatchResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftPr
 }
 
 extension User_PatchResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".PatchResumeProfileInternalResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "version"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".PatchResumeProfileInternalResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1381,14 +1308,14 @@ extension User_PatchResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftP
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.version != 0 {
       try visitor.visitSingularInt64Field(value: self.version, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_PatchResumeProfileInternalResponse, rhs: User_PatchResumeProfileInternalResponse) -> Bool {
+  public static func ==(lhs: User_PatchResumeProfileInternalResponse, rhs: User_PatchResumeProfileInternalResponse) -> Bool {
     if lhs.version != rhs.version {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1396,13 +1323,10 @@ extension User_PatchResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftP
 }
 
 extension User_UpdateResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpdateResumeProfileRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "user_id"),
-    2: .same(proto: "profile"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpdateResumeProfileRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}profile\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1415,7 +1339,7 @@ extension User_UpdateResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf.
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1429,7 +1353,7 @@ extension User_UpdateResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf.
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_UpdateResumeProfileRequest, rhs: User_UpdateResumeProfileRequest) -> Bool {
+  public static func ==(lhs: User_UpdateResumeProfileRequest, rhs: User_UpdateResumeProfileRequest) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs._profile != rhs._profile {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1438,12 +1362,10 @@ extension User_UpdateResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf.
 }
 
 extension User_UpdateResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpdateResumeProfileResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "success"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpdateResumeProfileResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1455,14 +1377,14 @@ extension User_UpdateResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.success != false {
       try visitor.visitSingularBoolField(value: self.success, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_UpdateResumeProfileResponse, rhs: User_UpdateResumeProfileResponse) -> Bool {
+  public static func ==(lhs: User_UpdateResumeProfileResponse, rhs: User_UpdateResumeProfileResponse) -> Bool {
     if lhs.success != rhs.success {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1470,12 +1392,10 @@ extension User_UpdateResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf
 }
 
 extension User_RequestPasswordResetRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".RequestPasswordResetRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "email"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".RequestPasswordResetRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}email\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1487,14 +1407,14 @@ extension User_RequestPasswordResetRequest: SwiftProtobuf.Message, SwiftProtobuf
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.email.isEmpty {
       try visitor.visitSingularStringField(value: self.email, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_RequestPasswordResetRequest, rhs: User_RequestPasswordResetRequest) -> Bool {
+  public static func ==(lhs: User_RequestPasswordResetRequest, rhs: User_RequestPasswordResetRequest) -> Bool {
     if lhs.email != rhs.email {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1502,12 +1422,10 @@ extension User_RequestPasswordResetRequest: SwiftProtobuf.Message, SwiftProtobuf
 }
 
 extension User_RequestPasswordResetResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".RequestPasswordResetResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ok"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".RequestPasswordResetResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1519,14 +1437,14 @@ extension User_RequestPasswordResetResponse: SwiftProtobuf.Message, SwiftProtobu
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.ok != false {
       try visitor.visitSingularBoolField(value: self.ok, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_RequestPasswordResetResponse, rhs: User_RequestPasswordResetResponse) -> Bool {
+  public static func ==(lhs: User_RequestPasswordResetResponse, rhs: User_RequestPasswordResetResponse) -> Bool {
     if lhs.ok != rhs.ok {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1534,13 +1452,10 @@ extension User_RequestPasswordResetResponse: SwiftProtobuf.Message, SwiftProtobu
 }
 
 extension User_VerifyPasswordResetCodeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".VerifyPasswordResetCodeRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "email"),
-    2: .same(proto: "code"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".VerifyPasswordResetCodeRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}email\0\u{1}code\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1553,7 +1468,7 @@ extension User_VerifyPasswordResetCodeRequest: SwiftProtobuf.Message, SwiftProto
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.email.isEmpty {
       try visitor.visitSingularStringField(value: self.email, fieldNumber: 1)
     }
@@ -1563,7 +1478,7 @@ extension User_VerifyPasswordResetCodeRequest: SwiftProtobuf.Message, SwiftProto
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_VerifyPasswordResetCodeRequest, rhs: User_VerifyPasswordResetCodeRequest) -> Bool {
+  public static func ==(lhs: User_VerifyPasswordResetCodeRequest, rhs: User_VerifyPasswordResetCodeRequest) -> Bool {
     if lhs.email != rhs.email {return false}
     if lhs.code != rhs.code {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1572,12 +1487,10 @@ extension User_VerifyPasswordResetCodeRequest: SwiftProtobuf.Message, SwiftProto
 }
 
 extension User_VerifyPasswordResetCodeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".VerifyPasswordResetCodeResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "valid"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".VerifyPasswordResetCodeResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}valid\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1589,14 +1502,14 @@ extension User_VerifyPasswordResetCodeResponse: SwiftProtobuf.Message, SwiftProt
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.valid != false {
       try visitor.visitSingularBoolField(value: self.valid, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_VerifyPasswordResetCodeResponse, rhs: User_VerifyPasswordResetCodeResponse) -> Bool {
+  public static func ==(lhs: User_VerifyPasswordResetCodeResponse, rhs: User_VerifyPasswordResetCodeResponse) -> Bool {
     if lhs.valid != rhs.valid {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1604,14 +1517,10 @@ extension User_VerifyPasswordResetCodeResponse: SwiftProtobuf.Message, SwiftProt
 }
 
 extension User_ResetPasswordRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ResetPasswordRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "email"),
-    2: .same(proto: "code"),
-    3: .standard(proto: "new_password"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ResetPasswordRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}email\0\u{1}code\0\u{3}new_password\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1625,7 +1534,7 @@ extension User_ResetPasswordRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.email.isEmpty {
       try visitor.visitSingularStringField(value: self.email, fieldNumber: 1)
     }
@@ -1638,7 +1547,7 @@ extension User_ResetPasswordRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_ResetPasswordRequest, rhs: User_ResetPasswordRequest) -> Bool {
+  public static func ==(lhs: User_ResetPasswordRequest, rhs: User_ResetPasswordRequest) -> Bool {
     if lhs.email != rhs.email {return false}
     if lhs.code != rhs.code {return false}
     if lhs.newPassword != rhs.newPassword {return false}
@@ -1648,12 +1557,10 @@ extension User_ResetPasswordRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
 }
 
 extension User_ResetPasswordResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ResetPasswordResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ok"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ResetPasswordResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1665,14 +1572,14 @@ extension User_ResetPasswordResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.ok != false {
       try visitor.visitSingularBoolField(value: self.ok, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_ResetPasswordResponse, rhs: User_ResetPasswordResponse) -> Bool {
+  public static func ==(lhs: User_ResetPasswordResponse, rhs: User_ResetPasswordResponse) -> Bool {
     if lhs.ok != rhs.ok {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1680,12 +1587,10 @@ extension User_ResetPasswordResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
 }
 
 extension User_DeleteAccountRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteAccountRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "password"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteAccountRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}password\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1697,14 +1602,14 @@ extension User_DeleteAccountRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.password.isEmpty {
       try visitor.visitSingularStringField(value: self.password, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_DeleteAccountRequest, rhs: User_DeleteAccountRequest) -> Bool {
+  public static func ==(lhs: User_DeleteAccountRequest, rhs: User_DeleteAccountRequest) -> Bool {
     if lhs.password != rhs.password {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1712,12 +1617,10 @@ extension User_DeleteAccountRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
 }
 
 extension User_DeleteAccountResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteAccountResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "deleted"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteAccountResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}deleted\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1729,14 +1632,14 @@ extension User_DeleteAccountResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.deleted != false {
       try visitor.visitSingularBoolField(value: self.deleted, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_DeleteAccountResponse, rhs: User_DeleteAccountResponse) -> Bool {
+  public static func ==(lhs: User_DeleteAccountResponse, rhs: User_DeleteAccountResponse) -> Bool {
     if lhs.deleted != rhs.deleted {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1744,15 +1647,10 @@ extension User_DeleteAccountResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
 }
 
 extension User_UpdateUserProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpdateUserProfileRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "first_name"),
-    2: .standard(proto: "last_name"),
-    3: .same(proto: "email"),
-    4: .standard(proto: "notifications_enabled"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpdateUserProfileRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}first_name\0\u{3}last_name\0\u{1}email\0\u{3}notifications_enabled\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1767,7 +1665,7 @@ extension User_UpdateUserProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._M
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1787,7 +1685,7 @@ extension User_UpdateUserProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._M
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_UpdateUserProfileRequest, rhs: User_UpdateUserProfileRequest) -> Bool {
+  public static func ==(lhs: User_UpdateUserProfileRequest, rhs: User_UpdateUserProfileRequest) -> Bool {
     if lhs._firstName != rhs._firstName {return false}
     if lhs._lastName != rhs._lastName {return false}
     if lhs._email != rhs._email {return false}
@@ -1798,12 +1696,10 @@ extension User_UpdateUserProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._M
 }
 
 extension User_UpdateUserProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpdateUserProfileResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "success"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpdateUserProfileResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1815,14 +1711,14 @@ extension User_UpdateUserProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.success != false {
       try visitor.visitSingularBoolField(value: self.success, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: User_UpdateUserProfileResponse, rhs: User_UpdateUserProfileResponse) -> Bool {
+  public static func ==(lhs: User_UpdateUserProfileResponse, rhs: User_UpdateUserProfileResponse) -> Bool {
     if lhs.success != rhs.success {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

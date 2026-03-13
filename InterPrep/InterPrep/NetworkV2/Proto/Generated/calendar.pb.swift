@@ -20,8 +20,8 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-enum Calendar_EventType: SwiftProtobuf.Enum, Swift.CaseIterable {
-  typealias RawValue = Int
+public enum Calendar_EventType: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
   case unspecified // = 0
 
   /// Собеседование
@@ -40,11 +40,11 @@ enum Calendar_EventType: SwiftProtobuf.Enum, Swift.CaseIterable {
   case other // = 7
   case UNRECOGNIZED(Int)
 
-  init() {
+  public init() {
     self = .unspecified
   }
 
-  init?(rawValue: Int) {
+  public init?(rawValue: Int) {
     switch rawValue {
     case 0: self = .unspecified
     case 1: self = .interview
@@ -58,7 +58,7 @@ enum Calendar_EventType: SwiftProtobuf.Enum, Swift.CaseIterable {
     }
   }
 
-  var rawValue: Int {
+  public var rawValue: Int {
     switch self {
     case .unspecified: return 0
     case .interview: return 1
@@ -73,7 +73,7 @@ enum Calendar_EventType: SwiftProtobuf.Enum, Swift.CaseIterable {
   }
 
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static let allCases: [Calendar_EventType] = [
+  public static let allCases: [Calendar_EventType] = [
     .unspecified,
     .interview,
     .call,
@@ -86,17 +86,17 @@ enum Calendar_EventType: SwiftProtobuf.Enum, Swift.CaseIterable {
 
 }
 
-enum Calendar_SortOrder: SwiftProtobuf.Enum, Swift.CaseIterable {
-  typealias RawValue = Int
+public enum Calendar_SortOrder: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
   case sortStartAsc // = 0
   case sortStartDesc // = 1
   case UNRECOGNIZED(Int)
 
-  init() {
+  public init() {
     self = .sortStartAsc
   }
 
-  init?(rawValue: Int) {
+  public init?(rawValue: Int) {
     switch rawValue {
     case 0: self = .sortStartAsc
     case 1: self = .sortStartDesc
@@ -104,7 +104,7 @@ enum Calendar_SortOrder: SwiftProtobuf.Enum, Swift.CaseIterable {
     }
   }
 
-  var rawValue: Int {
+  public var rawValue: Int {
     switch self {
     case .sortStartAsc: return 0
     case .sortStartDesc: return 1
@@ -113,220 +113,220 @@ enum Calendar_SortOrder: SwiftProtobuf.Enum, Swift.CaseIterable {
   }
 
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static let allCases: [Calendar_SortOrder] = [
+  public static let allCases: [Calendar_SortOrder] = [
     .sortStartAsc,
     .sortStartDesc,
   ]
 
 }
 
-struct Calendar_Event: @unchecked Sendable {
+public struct Calendar_Event: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var id: String {
-    get {return _storage._id}
+  public var id: String {
+    get {_storage._id}
     set {_uniqueStorage()._id = newValue}
   }
 
-  var title: String {
-    get {return _storage._title}
+  public var title: String {
+    get {_storage._title}
     set {_uniqueStorage()._title = newValue}
   }
 
-  var description_p: String {
-    get {return _storage._description_p ?? String()}
+  public var description_p: String {
+    get {_storage._description_p ?? String()}
     set {_uniqueStorage()._description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  var hasDescription_p: Bool {return _storage._description_p != nil}
+  public var hasDescription_p: Bool {_storage._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
-  mutating func clearDescription_p() {_uniqueStorage()._description_p = nil}
+  public mutating func clearDescription_p() {_uniqueStorage()._description_p = nil}
 
-  var eventType: Calendar_EventType {
-    get {return _storage._eventType}
+  public var eventType: Calendar_EventType {
+    get {_storage._eventType}
     set {_uniqueStorage()._eventType = newValue}
   }
 
-  var startTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _storage._startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var startTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._startTime = newValue}
   }
   /// Returns true if `startTime` has been explicitly set.
-  var hasStartTime: Bool {return _storage._startTime != nil}
+  public var hasStartTime: Bool {_storage._startTime != nil}
   /// Clears the value of `startTime`. Subsequent reads from it will return its default value.
-  mutating func clearStartTime() {_uniqueStorage()._startTime = nil}
+  public mutating func clearStartTime() {_uniqueStorage()._startTime = nil}
 
-  var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _storage._endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._endTime = newValue}
   }
   /// Returns true if `endTime` has been explicitly set.
-  var hasEndTime: Bool {return _storage._endTime != nil}
+  public var hasEndTime: Bool {_storage._endTime != nil}
   /// Clears the value of `endTime`. Subsequent reads from it will return its default value.
-  mutating func clearEndTime() {_uniqueStorage()._endTime = nil}
+  public mutating func clearEndTime() {_uniqueStorage()._endTime = nil}
 
-  var timezone: String {
-    get {return _storage._timezone ?? String()}
+  public var timezone: String {
+    get {_storage._timezone ?? String()}
     set {_uniqueStorage()._timezone = newValue}
   }
   /// Returns true if `timezone` has been explicitly set.
-  var hasTimezone: Bool {return _storage._timezone != nil}
+  public var hasTimezone: Bool {_storage._timezone != nil}
   /// Clears the value of `timezone`. Subsequent reads from it will return its default value.
-  mutating func clearTimezone() {_uniqueStorage()._timezone = nil}
+  public mutating func clearTimezone() {_uniqueStorage()._timezone = nil}
 
-  var location: String {
-    get {return _storage._location ?? String()}
+  public var location: String {
+    get {_storage._location ?? String()}
     set {_uniqueStorage()._location = newValue}
   }
   /// Returns true if `location` has been explicitly set.
-  var hasLocation: Bool {return _storage._location != nil}
+  public var hasLocation: Bool {_storage._location != nil}
   /// Clears the value of `location`. Subsequent reads from it will return its default value.
-  mutating func clearLocation() {_uniqueStorage()._location = nil}
+  public mutating func clearLocation() {_uniqueStorage()._location = nil}
 
-  var relatedVacancyID: String {
-    get {return _storage._relatedVacancyID ?? String()}
+  public var relatedVacancyID: String {
+    get {_storage._relatedVacancyID ?? String()}
     set {_uniqueStorage()._relatedVacancyID = newValue}
   }
   /// Returns true if `relatedVacancyID` has been explicitly set.
-  var hasRelatedVacancyID: Bool {return _storage._relatedVacancyID != nil}
+  public var hasRelatedVacancyID: Bool {_storage._relatedVacancyID != nil}
   /// Clears the value of `relatedVacancyID`. Subsequent reads from it will return its default value.
-  mutating func clearRelatedVacancyID() {_uniqueStorage()._relatedVacancyID = nil}
+  public mutating func clearRelatedVacancyID() {_uniqueStorage()._relatedVacancyID = nil}
 
-  var reminderEnabled: Bool {
-    get {return _storage._reminderEnabled}
+  public var reminderEnabled: Bool {
+    get {_storage._reminderEnabled}
     set {_uniqueStorage()._reminderEnabled = newValue}
   }
 
-  var reminderMinutes: Int32 {
-    get {return _storage._reminderMinutes}
+  public var reminderMinutes: Int32 {
+    get {_storage._reminderMinutes}
     set {_uniqueStorage()._reminderMinutes = newValue}
   }
 
-  var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _storage._createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._createdAt = newValue}
   }
   /// Returns true if `createdAt` has been explicitly set.
-  var hasCreatedAt: Bool {return _storage._createdAt != nil}
+  public var hasCreatedAt: Bool {_storage._createdAt != nil}
   /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
-  mutating func clearCreatedAt() {_uniqueStorage()._createdAt = nil}
+  public mutating func clearCreatedAt() {_uniqueStorage()._createdAt = nil}
 
-  var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _storage._updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._updatedAt = newValue}
   }
   /// Returns true if `updatedAt` has been explicitly set.
-  var hasUpdatedAt: Bool {return _storage._updatedAt != nil}
+  public var hasUpdatedAt: Bool {_storage._updatedAt != nil}
   /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
-  mutating func clearUpdatedAt() {_uniqueStorage()._updatedAt = nil}
+  public mutating func clearUpdatedAt() {_uniqueStorage()._updatedAt = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
-struct Calendar_EventPatch: Sendable {
+public struct Calendar_EventPatch: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var title: String {
-    get {return _title ?? String()}
+  public var title: String {
+    get {_title ?? String()}
     set {_title = newValue}
   }
   /// Returns true if `title` has been explicitly set.
-  var hasTitle: Bool {return self._title != nil}
+  public var hasTitle: Bool {self._title != nil}
   /// Clears the value of `title`. Subsequent reads from it will return its default value.
-  mutating func clearTitle() {self._title = nil}
+  public mutating func clearTitle() {self._title = nil}
 
-  var description_p: String {
-    get {return _description_p ?? String()}
+  public var description_p: String {
+    get {_description_p ?? String()}
     set {_description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  var hasDescription_p: Bool {return self._description_p != nil}
+  public var hasDescription_p: Bool {self._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
-  mutating func clearDescription_p() {self._description_p = nil}
+  public mutating func clearDescription_p() {self._description_p = nil}
 
-  var eventType: Calendar_EventType {
-    get {return _eventType ?? .unspecified}
+  public var eventType: Calendar_EventType {
+    get {_eventType ?? .unspecified}
     set {_eventType = newValue}
   }
   /// Returns true if `eventType` has been explicitly set.
-  var hasEventType: Bool {return self._eventType != nil}
+  public var hasEventType: Bool {self._eventType != nil}
   /// Clears the value of `eventType`. Subsequent reads from it will return its default value.
-  mutating func clearEventType() {self._eventType = nil}
+  public mutating func clearEventType() {self._eventType = nil}
 
-  var startTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var startTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_startTime = newValue}
   }
   /// Returns true if `startTime` has been explicitly set.
-  var hasStartTime: Bool {return self._startTime != nil}
+  public var hasStartTime: Bool {self._startTime != nil}
   /// Clears the value of `startTime`. Subsequent reads from it will return its default value.
-  mutating func clearStartTime() {self._startTime = nil}
+  public mutating func clearStartTime() {self._startTime = nil}
 
-  var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_endTime = newValue}
   }
   /// Returns true if `endTime` has been explicitly set.
-  var hasEndTime: Bool {return self._endTime != nil}
+  public var hasEndTime: Bool {self._endTime != nil}
   /// Clears the value of `endTime`. Subsequent reads from it will return its default value.
-  mutating func clearEndTime() {self._endTime = nil}
+  public mutating func clearEndTime() {self._endTime = nil}
 
-  var timezone: String {
-    get {return _timezone ?? String()}
+  public var timezone: String {
+    get {_timezone ?? String()}
     set {_timezone = newValue}
   }
   /// Returns true if `timezone` has been explicitly set.
-  var hasTimezone: Bool {return self._timezone != nil}
+  public var hasTimezone: Bool {self._timezone != nil}
   /// Clears the value of `timezone`. Subsequent reads from it will return its default value.
-  mutating func clearTimezone() {self._timezone = nil}
+  public mutating func clearTimezone() {self._timezone = nil}
 
-  var location: String {
-    get {return _location ?? String()}
+  public var location: String {
+    get {_location ?? String()}
     set {_location = newValue}
   }
   /// Returns true if `location` has been explicitly set.
-  var hasLocation: Bool {return self._location != nil}
+  public var hasLocation: Bool {self._location != nil}
   /// Clears the value of `location`. Subsequent reads from it will return its default value.
-  mutating func clearLocation() {self._location = nil}
+  public mutating func clearLocation() {self._location = nil}
 
-  var relatedVacancyID: String {
-    get {return _relatedVacancyID ?? String()}
+  public var relatedVacancyID: String {
+    get {_relatedVacancyID ?? String()}
     set {_relatedVacancyID = newValue}
   }
   /// Returns true if `relatedVacancyID` has been explicitly set.
-  var hasRelatedVacancyID: Bool {return self._relatedVacancyID != nil}
+  public var hasRelatedVacancyID: Bool {self._relatedVacancyID != nil}
   /// Clears the value of `relatedVacancyID`. Subsequent reads from it will return its default value.
-  mutating func clearRelatedVacancyID() {self._relatedVacancyID = nil}
+  public mutating func clearRelatedVacancyID() {self._relatedVacancyID = nil}
 
-  var reminderEnabled: Bool {
-    get {return _reminderEnabled ?? false}
+  public var reminderEnabled: Bool {
+    get {_reminderEnabled ?? false}
     set {_reminderEnabled = newValue}
   }
   /// Returns true if `reminderEnabled` has been explicitly set.
-  var hasReminderEnabled: Bool {return self._reminderEnabled != nil}
+  public var hasReminderEnabled: Bool {self._reminderEnabled != nil}
   /// Clears the value of `reminderEnabled`. Subsequent reads from it will return its default value.
-  mutating func clearReminderEnabled() {self._reminderEnabled = nil}
+  public mutating func clearReminderEnabled() {self._reminderEnabled = nil}
 
-  var reminderMinutes: Int32 {
-    get {return _reminderMinutes ?? 0}
+  public var reminderMinutes: Int32 {
+    get {_reminderMinutes ?? 0}
     set {_reminderMinutes = newValue}
   }
   /// Returns true if `reminderMinutes` has been explicitly set.
-  var hasReminderMinutes: Bool {return self._reminderMinutes != nil}
+  public var hasReminderMinutes: Bool {self._reminderMinutes != nil}
   /// Clears the value of `reminderMinutes`. Subsequent reads from it will return its default value.
-  mutating func clearReminderMinutes() {self._reminderMinutes = nil}
+  public mutating func clearReminderMinutes() {self._reminderMinutes = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _title: String? = nil
   fileprivate var _description_p: String? = nil
@@ -340,257 +340,257 @@ struct Calendar_EventPatch: Sendable {
   fileprivate var _reminderMinutes: Int32? = nil
 }
 
-struct Calendar_CreateEventRequest: Sendable {
+public struct Calendar_CreateEventRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var event: Calendar_Event {
-    get {return _event ?? Calendar_Event()}
+  public var event: Calendar_Event {
+    get {_event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  var hasEvent: Bool {return self._event != nil}
+  public var hasEvent: Bool {self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
-  mutating func clearEvent() {self._event = nil}
+  public mutating func clearEvent() {self._event = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _event: Calendar_Event? = nil
 }
 
-struct Calendar_CreateEventResponse: Sendable {
+public struct Calendar_CreateEventResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var event: Calendar_Event {
-    get {return _event ?? Calendar_Event()}
+  public var event: Calendar_Event {
+    get {_event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  var hasEvent: Bool {return self._event != nil}
+  public var hasEvent: Bool {self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
-  mutating func clearEvent() {self._event = nil}
+  public mutating func clearEvent() {self._event = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _event: Calendar_Event? = nil
 }
 
-struct Calendar_GetEventRequest: Sendable {
+public struct Calendar_GetEventRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var id: String = String()
+  public var id: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Calendar_GetEventResponse: Sendable {
+public struct Calendar_GetEventResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var event: Calendar_Event {
-    get {return _event ?? Calendar_Event()}
+  public var event: Calendar_Event {
+    get {_event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  var hasEvent: Bool {return self._event != nil}
+  public var hasEvent: Bool {self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
-  mutating func clearEvent() {self._event = nil}
+  public mutating func clearEvent() {self._event = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _event: Calendar_Event? = nil
 }
 
-struct Calendar_UpdateEventRequest: Sendable {
+public struct Calendar_UpdateEventRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var id: String = String()
+  public var id: String = String()
 
-  var patch: Calendar_EventPatch {
-    get {return _patch ?? Calendar_EventPatch()}
+  public var patch: Calendar_EventPatch {
+    get {_patch ?? Calendar_EventPatch()}
     set {_patch = newValue}
   }
   /// Returns true if `patch` has been explicitly set.
-  var hasPatch: Bool {return self._patch != nil}
+  public var hasPatch: Bool {self._patch != nil}
   /// Clears the value of `patch`. Subsequent reads from it will return its default value.
-  mutating func clearPatch() {self._patch = nil}
+  public mutating func clearPatch() {self._patch = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _patch: Calendar_EventPatch? = nil
 }
 
-struct Calendar_UpdateEventResponse: Sendable {
+public struct Calendar_UpdateEventResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var event: Calendar_Event {
-    get {return _event ?? Calendar_Event()}
+  public var event: Calendar_Event {
+    get {_event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  var hasEvent: Bool {return self._event != nil}
+  public var hasEvent: Bool {self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
-  mutating func clearEvent() {self._event = nil}
+  public mutating func clearEvent() {self._event = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _event: Calendar_Event? = nil
 }
 
-struct Calendar_DeleteEventRequest: Sendable {
+public struct Calendar_DeleteEventRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var id: String = String()
+  public var id: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Calendar_DeleteEventResponse: Sendable {
+public struct Calendar_DeleteEventResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var success: Bool = false
+  public var success: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Calendar_ListEventsRequest: Sendable {
+public struct Calendar_ListEventsRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var fromTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var fromTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_fromTime = newValue}
   }
   /// Returns true if `fromTime` has been explicitly set.
-  var hasFromTime: Bool {return self._fromTime != nil}
+  public var hasFromTime: Bool {self._fromTime != nil}
   /// Clears the value of `fromTime`. Subsequent reads from it will return its default value.
-  mutating func clearFromTime() {self._fromTime = nil}
+  public mutating func clearFromTime() {self._fromTime = nil}
 
-  var toTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _toTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var toTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_toTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_toTime = newValue}
   }
   /// Returns true if `toTime` has been explicitly set.
-  var hasToTime: Bool {return self._toTime != nil}
+  public var hasToTime: Bool {self._toTime != nil}
   /// Clears the value of `toTime`. Subsequent reads from it will return its default value.
-  mutating func clearToTime() {self._toTime = nil}
+  public mutating func clearToTime() {self._toTime = nil}
 
-  var pageSize: Int32 = 0
+  public var pageSize: Int32 = 0
 
-  var pageToken: String = String()
+  public var pageToken: String = String()
 
-  var sort: Calendar_SortOrder = .sortStartAsc
+  public var sort: Calendar_SortOrder = .sortStartAsc
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _fromTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
   fileprivate var _toTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
-struct Calendar_ListEventsResponse: Sendable {
+public struct Calendar_ListEventsResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var events: [Calendar_Event] = []
+  public var events: [Calendar_Event] = []
 
-  var nextPageToken: String = String()
+  public var nextPageToken: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Calendar_ListUpcomingRequest: Sendable {
+public struct Calendar_ListUpcomingRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var limit: Int32 = 0
+  public var limit: Int32 = 0
 
-  var fromTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+  public var fromTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_fromTime = newValue}
   }
   /// Returns true if `fromTime` has been explicitly set.
-  var hasFromTime: Bool {return self._fromTime != nil}
+  public var hasFromTime: Bool {self._fromTime != nil}
   /// Clears the value of `fromTime`. Subsequent reads from it will return its default value.
-  mutating func clearFromTime() {self._fromTime = nil}
+  public mutating func clearFromTime() {self._fromTime = nil}
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 
   fileprivate var _fromTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
-struct Calendar_ListUpcomingResponse: Sendable {
+public struct Calendar_ListUpcomingResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var events: [Calendar_Event] = []
+  public var events: [Calendar_Event] = []
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Calendar_DeleteUserDataRequest: Sendable {
+public struct Calendar_DeleteUserDataRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var userID: UInt32 = 0
+  public var userID: UInt32 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Calendar_DeleteUserDataResponse: Sendable {
+public struct Calendar_DeleteUserDataResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var ok: Bool = false
+  public var ok: Bool = false
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -598,42 +598,16 @@ struct Calendar_DeleteUserDataResponse: Sendable {
 fileprivate let _protobuf_package = "calendar"
 
 extension Calendar_EventType: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "EVENT_TYPE_UNSPECIFIED"),
-    1: .same(proto: "INTERVIEW"),
-    2: .same(proto: "CALL"),
-    3: .same(proto: "MEETING"),
-    4: .same(proto: "TEST_TASK"),
-    5: .same(proto: "PREP"),
-    6: .same(proto: "DEADLINE"),
-    7: .same(proto: "OTHER"),
-  ]
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0EVENT_TYPE_UNSPECIFIED\0\u{1}INTERVIEW\0\u{1}CALL\0\u{1}MEETING\0\u{1}TEST_TASK\0\u{1}PREP\0\u{1}DEADLINE\0\u{1}OTHER\0")
 }
 
 extension Calendar_SortOrder: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "SORT_START_ASC"),
-    1: .same(proto: "SORT_START_DESC"),
-  ]
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SORT_START_ASC\0\u{1}SORT_START_DESC\0")
 }
 
 extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Event"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-    2: .same(proto: "title"),
-    3: .same(proto: "description"),
-    4: .standard(proto: "event_type"),
-    5: .standard(proto: "start_time"),
-    6: .standard(proto: "end_time"),
-    7: .same(proto: "timezone"),
-    8: .same(proto: "location"),
-    9: .standard(proto: "related_vacancy_id"),
-    10: .standard(proto: "reminder_enabled"),
-    11: .standard(proto: "reminder_minutes"),
-    12: .standard(proto: "created_at"),
-    13: .standard(proto: "updated_at"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".Event"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}title\0\u{1}description\0\u{3}event_type\0\u{3}start_time\0\u{3}end_time\0\u{1}timezone\0\u{1}location\0\u{3}related_vacancy_id\0\u{3}reminder_enabled\0\u{3}reminder_minutes\0\u{3}created_at\0\u{3}updated_at\0")
 
   fileprivate class _StorageClass {
     var _id: String = String()
@@ -650,15 +624,11 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 
-    #if swift(>=5.10)
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
       // This will force a copy to be made of this reference when the first mutation occurs;
       // hence, it is safe to mark this as `nonisolated(unsafe)`.
       static nonisolated(unsafe) let defaultInstance = _StorageClass()
-    #else
-      static let defaultInstance = _StorageClass()
-    #endif
 
     private init() {}
 
@@ -686,7 +656,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     return _storage
   }
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     _ = _uniqueStorage()
     try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
       while let fieldNumber = try decoder.nextFieldNumber() {
@@ -713,7 +683,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every if/case branch local when no optimizations
@@ -762,7 +732,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_Event, rhs: Calendar_Event) -> Bool {
+  public static func ==(lhs: Calendar_Event, rhs: Calendar_Event) -> Bool {
     if lhs._storage !== rhs._storage {
       let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
         let _storage = _args.0
@@ -790,21 +760,10 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
 }
 
 extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".EventPatch"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "title"),
-    2: .same(proto: "description"),
-    3: .standard(proto: "event_type"),
-    4: .standard(proto: "start_time"),
-    5: .standard(proto: "end_time"),
-    6: .same(proto: "timezone"),
-    7: .same(proto: "location"),
-    8: .standard(proto: "related_vacancy_id"),
-    9: .standard(proto: "reminder_enabled"),
-    10: .standard(proto: "reminder_minutes"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".EventPatch"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}title\0\u{1}description\0\u{3}event_type\0\u{3}start_time\0\u{3}end_time\0\u{1}timezone\0\u{1}location\0\u{3}related_vacancy_id\0\u{3}reminder_enabled\0\u{3}reminder_minutes\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -825,7 +784,7 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -863,7 +822,7 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_EventPatch, rhs: Calendar_EventPatch) -> Bool {
+  public static func ==(lhs: Calendar_EventPatch, rhs: Calendar_EventPatch) -> Bool {
     if lhs._title != rhs._title {return false}
     if lhs._description_p != rhs._description_p {return false}
     if lhs._eventType != rhs._eventType {return false}
@@ -880,12 +839,10 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
 }
 
 extension Calendar_CreateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".CreateEventRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "event"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".CreateEventRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -897,7 +854,7 @@ extension Calendar_CreateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -908,7 +865,7 @@ extension Calendar_CreateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_CreateEventRequest, rhs: Calendar_CreateEventRequest) -> Bool {
+  public static func ==(lhs: Calendar_CreateEventRequest, rhs: Calendar_CreateEventRequest) -> Bool {
     if lhs._event != rhs._event {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -916,12 +873,10 @@ extension Calendar_CreateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Calendar_CreateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".CreateEventResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "event"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".CreateEventResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -933,7 +888,7 @@ extension Calendar_CreateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -944,7 +899,7 @@ extension Calendar_CreateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_CreateEventResponse, rhs: Calendar_CreateEventResponse) -> Bool {
+  public static func ==(lhs: Calendar_CreateEventResponse, rhs: Calendar_CreateEventResponse) -> Bool {
     if lhs._event != rhs._event {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -952,12 +907,10 @@ extension Calendar_CreateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Calendar_GetEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetEventRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".GetEventRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -969,14 +922,14 @@ extension Calendar_GetEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_GetEventRequest, rhs: Calendar_GetEventRequest) -> Bool {
+  public static func ==(lhs: Calendar_GetEventRequest, rhs: Calendar_GetEventRequest) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -984,12 +937,10 @@ extension Calendar_GetEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
 }
 
 extension Calendar_GetEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GetEventResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "event"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".GetEventResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1001,7 +952,7 @@ extension Calendar_GetEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Messa
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1012,7 +963,7 @@ extension Calendar_GetEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Messa
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_GetEventResponse, rhs: Calendar_GetEventResponse) -> Bool {
+  public static func ==(lhs: Calendar_GetEventResponse, rhs: Calendar_GetEventResponse) -> Bool {
     if lhs._event != rhs._event {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1020,13 +971,10 @@ extension Calendar_GetEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Messa
 }
 
 extension Calendar_UpdateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpdateEventRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-    2: .same(proto: "patch"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpdateEventRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}patch\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1039,7 +987,7 @@ extension Calendar_UpdateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1053,7 +1001,7 @@ extension Calendar_UpdateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_UpdateEventRequest, rhs: Calendar_UpdateEventRequest) -> Bool {
+  public static func ==(lhs: Calendar_UpdateEventRequest, rhs: Calendar_UpdateEventRequest) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs._patch != rhs._patch {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1062,12 +1010,10 @@ extension Calendar_UpdateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Calendar_UpdateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".UpdateEventResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "event"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".UpdateEventResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1079,7 +1025,7 @@ extension Calendar_UpdateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1090,7 +1036,7 @@ extension Calendar_UpdateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_UpdateEventResponse, rhs: Calendar_UpdateEventResponse) -> Bool {
+  public static func ==(lhs: Calendar_UpdateEventResponse, rhs: Calendar_UpdateEventResponse) -> Bool {
     if lhs._event != rhs._event {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1098,12 +1044,10 @@ extension Calendar_UpdateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Calendar_DeleteEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteEventRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteEventRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1115,14 +1059,14 @@ extension Calendar_DeleteEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_DeleteEventRequest, rhs: Calendar_DeleteEventRequest) -> Bool {
+  public static func ==(lhs: Calendar_DeleteEventRequest, rhs: Calendar_DeleteEventRequest) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1130,12 +1074,10 @@ extension Calendar_DeleteEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Calendar_DeleteEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteEventResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "success"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteEventResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1147,14 +1089,14 @@ extension Calendar_DeleteEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.success != false {
       try visitor.visitSingularBoolField(value: self.success, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_DeleteEventResponse, rhs: Calendar_DeleteEventResponse) -> Bool {
+  public static func ==(lhs: Calendar_DeleteEventResponse, rhs: Calendar_DeleteEventResponse) -> Bool {
     if lhs.success != rhs.success {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1162,16 +1104,10 @@ extension Calendar_DeleteEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Calendar_ListEventsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ListEventsRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "from_time"),
-    2: .standard(proto: "to_time"),
-    3: .standard(proto: "page_size"),
-    4: .standard(proto: "page_token"),
-    5: .same(proto: "sort"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ListEventsRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}from_time\0\u{3}to_time\0\u{3}page_size\0\u{3}page_token\0\u{1}sort\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1187,7 +1123,7 @@ extension Calendar_ListEventsRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1210,7 +1146,7 @@ extension Calendar_ListEventsRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_ListEventsRequest, rhs: Calendar_ListEventsRequest) -> Bool {
+  public static func ==(lhs: Calendar_ListEventsRequest, rhs: Calendar_ListEventsRequest) -> Bool {
     if lhs._fromTime != rhs._fromTime {return false}
     if lhs._toTime != rhs._toTime {return false}
     if lhs.pageSize != rhs.pageSize {return false}
@@ -1222,13 +1158,10 @@ extension Calendar_ListEventsRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
 }
 
 extension Calendar_ListEventsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ListEventsResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "events"),
-    2: .standard(proto: "next_page_token"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ListEventsResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}events\0\u{3}next_page_token\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1241,7 +1174,7 @@ extension Calendar_ListEventsResponse: SwiftProtobuf.Message, SwiftProtobuf._Mes
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.events.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.events, fieldNumber: 1)
     }
@@ -1251,7 +1184,7 @@ extension Calendar_ListEventsResponse: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_ListEventsResponse, rhs: Calendar_ListEventsResponse) -> Bool {
+  public static func ==(lhs: Calendar_ListEventsResponse, rhs: Calendar_ListEventsResponse) -> Bool {
     if lhs.events != rhs.events {return false}
     if lhs.nextPageToken != rhs.nextPageToken {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1260,13 +1193,10 @@ extension Calendar_ListEventsResponse: SwiftProtobuf.Message, SwiftProtobuf._Mes
 }
 
 extension Calendar_ListUpcomingRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ListUpcomingRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "limit"),
-    2: .standard(proto: "from_time"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ListUpcomingRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}limit\0\u{3}from_time\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1279,7 +1209,7 @@ extension Calendar_ListUpcomingRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     // The use of inline closures is to circumvent an issue where the compiler
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
@@ -1293,7 +1223,7 @@ extension Calendar_ListUpcomingRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_ListUpcomingRequest, rhs: Calendar_ListUpcomingRequest) -> Bool {
+  public static func ==(lhs: Calendar_ListUpcomingRequest, rhs: Calendar_ListUpcomingRequest) -> Bool {
     if lhs.limit != rhs.limit {return false}
     if lhs._fromTime != rhs._fromTime {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1302,12 +1232,10 @@ extension Calendar_ListUpcomingRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
 }
 
 extension Calendar_ListUpcomingResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ListUpcomingResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "events"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".ListUpcomingResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}events\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1319,14 +1247,14 @@ extension Calendar_ListUpcomingResponse: SwiftProtobuf.Message, SwiftProtobuf._M
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.events.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.events, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_ListUpcomingResponse, rhs: Calendar_ListUpcomingResponse) -> Bool {
+  public static func ==(lhs: Calendar_ListUpcomingResponse, rhs: Calendar_ListUpcomingResponse) -> Bool {
     if lhs.events != rhs.events {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1334,12 +1262,10 @@ extension Calendar_ListUpcomingResponse: SwiftProtobuf.Message, SwiftProtobuf._M
 }
 
 extension Calendar_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "user_id"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1351,14 +1277,14 @@ extension Calendar_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.userID != 0 {
       try visitor.visitSingularUInt32Field(value: self.userID, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_DeleteUserDataRequest, rhs: Calendar_DeleteUserDataRequest) -> Bool {
+  public static func ==(lhs: Calendar_DeleteUserDataRequest, rhs: Calendar_DeleteUserDataRequest) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1366,12 +1292,10 @@ extension Calendar_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._
 }
 
 extension Calendar_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ok"),
-  ]
+  public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -1383,14 +1307,14 @@ extension Calendar_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf.
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.ok != false {
       try visitor.visitSingularBoolField(value: self.ok, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Calendar_DeleteUserDataResponse, rhs: Calendar_DeleteUserDataResponse) -> Bool {
+  public static func ==(lhs: Calendar_DeleteUserDataResponse, rhs: Calendar_DeleteUserDataResponse) -> Bool {
     if lhs.ok != rhs.ok {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

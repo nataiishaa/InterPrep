@@ -33,15 +33,17 @@ public struct CalDAVSettingsView: View {
             Form {
                 // Enable toggle
                 Section {
-                    Toggle("Синхронизация CalDAV", isOn: $settings.isEnabled)
+                    Toggle("Включить синхронизацию", isOn: $settings.isEnabled)
                         .tint(.brandPrimary)
+                } header: {
+                    Text("Что это?")
                 } footer: {
-                    Text("Синхронизируйте события с внешними календарями через CalDAV")
+                    Text("Подключите ваш календарь (Google, iCloud и др.) — события и собеседования из календаря будут отображаться в приложении. Укажите сервер календаря и данные для входа.")
                 }
                 
                 if settings.isEnabled {
                     // Presets
-                    Section("Выберите сервис") {
+                    Section("Сервис календаря") {
                         ForEach(CalDAVSettings.presets, id: \.name) { preset in
                             Button {
                                 selectedPreset = preset
@@ -72,8 +74,8 @@ public struct CalDAVSettingsView: View {
                     }
                     
                     // Connection details
-                    Section("Настройки подключения") {
-                        TextField("URL сервера", text: $settings.serverURL)
+                    Section("Данные для входа") {
+                        TextField("Адрес сервера календаря", text: $settings.serverURL)
                             .textContentType(.URL)
                             .keyboardType(.URL)
                             .autocapitalization(.none)
@@ -142,7 +144,7 @@ public struct CalDAVSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("CalDAV")
+            .navigationTitle("Календарь")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

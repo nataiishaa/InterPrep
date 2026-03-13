@@ -13,7 +13,7 @@ let project = Project(
         ),
         .remote(
             url: "https://github.com/grpc/grpc-swift.git",
-            requirement: .upToNextMajor(from: "1.23.0")
+            requirement: .exact("1.23.0")  // 1.26+ требует Swift Tools 6.1; при 6.0.3 используем 1.23
         )
     ],
     targets: [
@@ -31,6 +31,14 @@ let project = Project(
                     "UIApplicationSceneManifest": [
                         "UIApplicationSupportsMultipleScenes": false,
                         "UISceneConfigurations": [:]
+                    ],
+                    "NSAppTransportSecurity": [
+                        "NSExceptionDomains": [
+                            "193.124.33.223": [
+                                "NSTemporaryExceptionAllowsInsecureHTTPLoads": true,
+                                "NSTemporaryExceptionMinimumTLSVersion": "TLSv1.0"
+                            ]
+                        ]
                     ]
                 ]
             ),
@@ -197,7 +205,8 @@ let project = Project(
             ],
             dependencies: [
                 .target(name: "ArchitectureCore"),
-                .target(name: "DesignSystem")
+                .target(name: "DesignSystem"),
+                .target(name: "NetworkService")
             ]
         ),
         
@@ -246,7 +255,8 @@ let project = Project(
             ],
             dependencies: [
                 .target(name: "ArchitectureCore"),
-                .target(name: "DesignSystem")
+                .target(name: "DesignSystem"),
+                .target(name: "NetworkService")
             ]
         ),
         

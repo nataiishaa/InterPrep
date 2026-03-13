@@ -23,9 +23,9 @@ final class AppGraph {
     private lazy var authService: AuthService = AuthServiceImpl()
     private lazy var resumeService: ResumeService = ResumeServiceImpl()
     private lazy var vacancyService: VacancyService = VacancyServiceImpl()
-    private lazy var fileUploadService: FileUploadService = FileUploadServiceMock()
-    private lazy var documentService: DocumentServiceProtocol = DocumentServiceMock()
-    private lazy var chatService: ChatServiceProtocol = ChatServiceImpl()
+    private lazy var fileUploadService: FileUploadService = FileUploadServiceImpl()
+    private lazy var documentService: DocumentServiceProtocol = DocumentServiceImpl()
+    private lazy var chatService: ChatServiceProtocol = ChatServiceMock()
     
     // MARK: - State
     

@@ -13,6 +13,7 @@ struct ProfileView: View {
     let model: Model
     @State private var showEditProfile = false
     @State private var showCalDAVSettings = false
+    @State private var showContactDevelopers = false
     @State private var showLogoutAlert = false
     @State private var showDeleteAccountAlert = false
     @Environment(\.colorScheme) var colorScheme
@@ -22,7 +23,6 @@ struct ProfileView: View {
             VStack(spacing: 24) {
                 profileHeader
                 resumeSection
-                statisticsSection
                 settingsSection
                 actionsSection
                 aboutSection
@@ -43,6 +43,9 @@ struct ProfileView: View {
                     CalDAVSettingsManager.shared.saveSettings(settings)
                 }
             )
+        }
+        .sheet(isPresented: $showContactDevelopers) {
+            ProfileContactDevelopersView(onDismiss: { showContactDevelopers = false })
         }
         .alert("Выйти из аккаунта?", isPresented: $showLogoutAlert) {
             Button("Отмена", role: .cancel) {}
@@ -195,50 +198,6 @@ struct ProfileView: View {
         }
     }
     
-    // MARK: - Statistics Section
-    
-    @ViewBuilder
-    private var statisticsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Статистика")
-                .font(.headline)
-                .padding(.horizontal, 4)
-            
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 12) {
-                StatCard(
-                    title: "Собеседований",
-                    value: "\(model.statistics.totalInterviews)",
-                    icon: "person.2.fill",
-                    color: .brandPrimary
-                )
-                
-                StatCard(
-                    title: "Завершено",
-                    value: "\(model.statistics.completedInterviews)",
-                    icon: "checkmark.circle.fill",
-                    color: .green
-                )
-                
-                StatCard(
-                    title: "Предстоит",
-                    value: "\(model.statistics.upcomingInterviews)",
-                    icon: "clock.fill",
-                    color: .orange
-                )
-                
-                StatCard(
-                    title: "Успешность",
-                    value: String(format: "%.0f%%", model.statistics.successRate),
-                    icon: "chart.line.uptrend.xyaxis",
-                    color: .blue
-                )
-            }
-        }
-    }
-    
     // MARK: - Settings Section
     
     @ViewBuilder
@@ -303,7 +262,7 @@ struct ProfileView: View {
                 
                 SettingsRow(
                     icon: "calendar.badge.clock",
-                    title: "CalDAV синхронизация",
+                    title: "Синхронизация с календарём",
                     color: .green
                 ) {
                     Button {
@@ -314,6 +273,13 @@ struct ProfileView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                
+                Text("Подключите Google, iCloud или другой календарь — собеседования появятся в приложении.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
             }
             .background(Color(.systemBackground))
             .cornerRadius(12)
@@ -331,11 +297,11 @@ struct ProfileView: View {
             
             VStack(spacing: 0) {
                 ActionRow(
-                    icon: "square.and.arrow.up",
-                    title: "Экспортировать данные",
+                    icon: "envelope.badge.fill",
+                    title: "Связь с разработчиками",
                     color: .blue
                 ) {
-                    model.onExportData()
+                    showContactDevelopers = true
                 }
                 
                 Divider().padding(.leading, 52)
@@ -519,6 +485,80 @@ struct ActionRow: View {
     }
 }
 
+// MARK: - Contact Developers (inline to avoid scope issues)
+
+private struct ProfileContactDevelopersView: View {
+    let onDismiss: () -> Void
+    private let supportEmail = "InterPrepSupport@mail.ru"
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Связь с разработчиками")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Text("По всем вопросам по работе приложения InterPrep вы можете написать нам на почту. Мы постараемся ответить в ближайшее время.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Email для обратной связи:")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                        
+                        Button {
+                            openMail(to: supportEmail)
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "envelope.fill")
+                                    .font(.title3)
+                                    .foregroundColor(.brandPrimary)
+                                Text(supportEmail)
+                                    .font(.body)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.brandPrimary)
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundColor(.brandPrimary)
+                            }
+                            .padding()
+                            .background(Color.brandPrimary.opacity(0.1))
+                            .cornerRadius(12)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding()
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Разработчики")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Готово") {
+                        onDismiss()
+                    }
+                    .fontWeight(.medium)
+                }
+            }
+        }
+    }
+    
+    private func openMail(to email: String) {
+        let subject = "InterPrep — обратная связь"
+        let encoded = "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        guard let url = URL(string: encoded) else { return }
+        UIApplication.shared.open(url)
+    }
+}
+
 // MARK: - Model
 
 extension ProfileView {
@@ -530,7 +570,6 @@ extension ProfileView {
         let onEmailNotificationsToggled: (Bool) -> Void
         let onThemeChanged: (ProfileState.AppSettings.Theme) -> Void
         let onChangeResume: () -> Void
-        let onExportData: () -> Void
         let onLogout: () -> Void
         let onDeleteAccount: () -> Void
         let editModel: ProfileEditView.Model
@@ -564,23 +603,14 @@ extension ProfileView {
         onEmailNotificationsToggled: { _ in },
         onThemeChanged: { _ in },
         onChangeResume: {},
-        onExportData: {},
         onLogout: {},
         onDeleteAccount: {},
         editModel: .init(
             firstName: "Иван",
             lastName: "Иванов",
-            email: "ivan@example.com",
-            phone: "+7 999 123-45-67",
-            position: "iOS Developer",
-            experience: "3 года",
             errorMessage: nil,
             onFirstNameChanged: { _ in },
             onLastNameChanged: { _ in },
-            onEmailChanged: { _ in },
-            onPhoneChanged: { _ in },
-            onPositionChanged: { _ in },
-            onExperienceChanged: { _ in },
             onSave: {},
             onCancel: {}
         )
