@@ -15,7 +15,8 @@ struct ProfileView: View {
     @State private var showCalDAVSettings = false
     @State private var showContactDevelopers = false
     @State private var showLogoutAlert = false
-    @State private var showDeleteAccountAlert = false
+    @State private var showDeleteAccountSheet = false
+    @State private var deletePassword = ""
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -23,6 +24,7 @@ struct ProfileView: View {
             VStack(spacing: 24) {
                 profileHeader
                 resumeSection
+                statisticsSection
                 settingsSection
                 actionsSection
                 aboutSection
@@ -52,14 +54,22 @@ struct ProfileView: View {
             Button("Выйти", role: .destructive) {
                 model.onLogout()
             }
-        }
-        .alert("Удалить аккаунт?", isPresented: $showDeleteAccountAlert) {
-            Button("Отмена", role: .cancel) {}
-            Button("Удалить", role: .destructive) {
-                model.onDeleteAccount()
-            }
         } message: {
-            Text("Это действие нельзя отменить. Все ваши данные будут удалены.")
+            Text("Вы сможете снова войти с тем же email и паролем.")
+        }
+        .sheet(isPresented: $showDeleteAccountSheet) {
+            DeleteAccountSheet(
+                password: $deletePassword,
+                errorMessage: model.deleteAccountError,
+                onConfirm: {
+                    model.onDeleteAccount(deletePassword)
+                },
+                onDismiss: {
+                    deletePassword = ""
+                    model.onClearDeleteAccountError()
+                    showDeleteAccountSheet = false
+                }
+            )
         }
     }
     
@@ -143,7 +153,6 @@ struct ProfileView: View {
             
             VStack(spacing: 0) {
                 HStack(spacing: 12) {
-                    // Icon
                     Image(systemName: "doc.text.fill")
                         .font(.title2)
                         .foregroundColor(.white)
@@ -162,7 +171,7 @@ struct ProfileView: View {
                             .font(.body)
                             .fontWeight(.medium)
                         
-                        Text("Если что-то поменялось, можно загрузить новое резюме")
+                        Text("Посмотрите данные или загрузите новое резюме")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .lineLimit(2)
@@ -171,6 +180,26 @@ struct ProfileView: View {
                     Spacer()
                 }
                 .padding()
+                
+                Divider()
+                
+                Button {
+                    model.onViewResume()
+                } label: {
+                    HStack {
+                        Image(systemName: "doc.text.magnifyingglass")
+                            .font(.body)
+                        Text("Посмотреть резюме")
+                            .font(.body)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .foregroundColor(.primary)
+                    .padding()
+                }
                 
                 Divider()
                 
@@ -198,6 +227,24 @@ struct ProfileView: View {
         }
     }
     
+    // MARK: - Statistics Section
+    
+    @ViewBuilder
+    private var statisticsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Статистика")
+                .font(.headline)
+                .padding(.horizontal, 4)
+            
+            StatCard(
+                title: "Собеседований прошло",
+                value: "\(model.statistics.completedInterviews)",
+                icon: "checkmark.circle.fill",
+                color: .green
+            )
+        }
+    }
+    
     // MARK: - Settings Section
     
     @ViewBuilder
@@ -216,20 +263,6 @@ struct ProfileView: View {
                     Toggle("", isOn: Binding(
                         get: { model.settings.notificationsEnabled },
                         set: { model.onNotificationsToggled($0) }
-                    ))
-                    .tint(.brandPrimary)
-                }
-                
-                Divider().padding(.leading, 52)
-                
-                SettingsRow(
-                    icon: "envelope.fill",
-                    title: "Email уведомления",
-                    color: .blue
-                ) {
-                    Toggle("", isOn: Binding(
-                        get: { model.settings.emailNotifications },
-                        set: { model.onEmailNotificationsToggled($0) }
                     ))
                     .tint(.brandPrimary)
                 }
@@ -321,7 +354,7 @@ struct ProfileView: View {
                     title: "Удалить аккаунт",
                     color: .red
                 ) {
-                    showDeleteAccountAlert = true
+                    showDeleteAccountSheet = true
                 }
             }
             .background(Color.cardBackground)
@@ -485,6 +518,54 @@ struct ActionRow: View {
     }
 }
 
+// MARK: - Delete Account Sheet
+
+private struct DeleteAccountSheet: View {
+    @Binding var password: String
+    let errorMessage: String?
+    let onConfirm: () -> Void
+    let onDismiss: () -> Void
+    
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Введите пароль для подтверждения. Это действие нельзя отменить, все данные будут удалены.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                SecureField("Пароль", text: $password)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.password)
+                    .autocapitalization(.none)
+                
+                if let errorMessage = errorMessage, !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+                
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Удалить аккаунт")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Отмена") {
+                        onDismiss()
+                    }
+                }
+                ToolbarItem(placement: .destructiveAction) {
+                    Button("Удалить") {
+                        onConfirm()
+                    }
+                    .disabled(password.isEmpty)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Contact Developers (inline to avoid scope issues)
 
 private struct ProfileContactDevelopersView: View {
@@ -566,12 +647,14 @@ extension ProfileView {
         let user: ProfileState.User?
         let statistics: ProfileState.Statistics
         let settings: ProfileState.AppSettings
+        let deleteAccountError: String?
         let onNotificationsToggled: (Bool) -> Void
-        let onEmailNotificationsToggled: (Bool) -> Void
         let onThemeChanged: (ProfileState.AppSettings.Theme) -> Void
         let onChangeResume: () -> Void
+        let onViewResume: () -> Void
         let onLogout: () -> Void
-        let onDeleteAccount: () -> Void
+        let onDeleteAccount: (String) -> Void
+        let onClearDeleteAccountError: () -> Void
         let editModel: ProfileEditView.Model
     }
 }
@@ -599,12 +682,14 @@ extension ProfileView {
             responseRate: 0.75
         ),
         settings: .init(),
+        deleteAccountError: nil,
         onNotificationsToggled: { _ in },
-        onEmailNotificationsToggled: { _ in },
         onThemeChanged: { _ in },
         onChangeResume: {},
+        onViewResume: {},
         onLogout: {},
-        onDeleteAccount: {},
+        onDeleteAccount: { _ in },
+        onClearDeleteAccountError: {},
         editModel: .init(
             firstName: "Иван",
             lastName: "Иванов",

@@ -10,18 +10,35 @@ import ArchitectureCore
 
 public struct ProfileContainer: View {
     @StateObject private var store: Store<ProfileState, ProfileEffectHandler>
+    private let onLogoutComplete: (() -> Void)?
+    private let onNavigateToResumeUpload: (() -> Void)?
+    private let onViewResume: (() -> Void)?
     
-    public init() {
+    public init(
+        sessionService: (any ProfileSessionService)? = nil,
+        onLogoutComplete: (() -> Void)? = nil,
+        onNavigateToResumeUpload: (() -> Void)? = nil,
+        onViewResume: (() -> Void)? = nil
+    ) {
         _store = StateObject(wrappedValue: Store(
             state: ProfileState(),
-            effectHandler: ProfileEffectHandler()
+            effectHandler: ProfileEffectHandler(sessionService: sessionService)
         ))
+        self.onLogoutComplete = onLogoutComplete
+        self.onNavigateToResumeUpload = onNavigateToResumeUpload
+        self.onViewResume = onViewResume
     }
     
     public var body: some View {
         ProfileView(model: makeModel())
             .onAppear {
                 store.send(.onAppear)
+            }
+            .onChange(of: store.state.authRequired) { _, authRequired in
+                if authRequired {
+                    onLogoutComplete?()
+                    store.send(.clearAuthRequired)
+                }
             }
     }
     
@@ -30,23 +47,25 @@ public struct ProfileContainer: View {
             user: store.state.user,
             statistics: store.state.statistics,
             settings: store.state.settings,
+            deleteAccountError: store.state.deleteAccountError,
             onNotificationsToggled: { enabled in
                 store.send(.notificationsToggled(enabled))
-            },
-            onEmailNotificationsToggled: { enabled in
-                store.send(.emailNotificationsToggled(enabled))
             },
             onThemeChanged: { theme in
                 store.send(.themeChanged(theme))
             },
             onChangeResume: {
-                store.send(.changeResume)
+                onNavigateToResumeUpload?() ?? store.send(.changeResume)
             },
+            onViewResume: onViewResume ?? {},
             onLogout: {
                 store.send(.logout)
             },
-            onDeleteAccount: {
-                store.send(.deleteAccount)
+            onDeleteAccount: { password in
+                store.send(.deleteAccount(password: password))
+            },
+            onClearDeleteAccountError: {
+                store.send(.clearDeleteAccountError)
             },
             editModel: makeEditModel()
         )

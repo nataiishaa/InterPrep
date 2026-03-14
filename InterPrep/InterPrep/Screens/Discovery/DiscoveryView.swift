@@ -266,100 +266,112 @@ public struct DiscoveryView: View {
                     //     model.onVacancyTap(vacancy)
                     // }
                     
-                    // Красивая карточка вакансии
+                    // Красивая карточка вакансии: тап по карточке открывает вакансию, кнопка закладки — только избранное
                     VStack(alignment: .leading, spacing: 0) {
                         // Header с компанией и избранным
                         HStack(alignment: .top, spacing: 12) {
-                            // Логотип компании (из URL или заглушка по первой букве)
-                            Group {
-                                if let urlString = vacancy.companyLogoURL, let url = URL(string: urlString) {
-                                    AsyncImage(url: url) { phase in
-                                        switch phase {
-                                        case .success(let image):
-                                            image.resizable().aspectRatio(contentMode: .fill)
-                                        case .failure:
-                                            logoPlaceholderView(vacancy: vacancy)
-                                        case .empty:
-                                            ProgressView()
-                                        @unknown default:
-                                            logoPlaceholderView(vacancy: vacancy)
+                            // Область тапа «открыть вакансию» (логотип + название)
+                            HStack(alignment: .top, spacing: 12) {
+                                Group {
+                                    if let urlString = vacancy.companyLogoURL, let url = URL(string: urlString) {
+                                        AsyncImage(url: url) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image.resizable().aspectRatio(contentMode: .fill)
+                                            case .failure:
+                                                logoPlaceholderView(vacancy: vacancy)
+                                            case .empty:
+                                                ProgressView()
+                                            @unknown default:
+                                                logoPlaceholderView(vacancy: vacancy)
+                                            }
                                         }
+                                    } else {
+                                        logoPlaceholderView(vacancy: vacancy)
                                     }
-                                } else {
-                                    logoPlaceholderView(vacancy: vacancy)
+                                }
+                                .frame(width: 48, height: 48)
+                                .clipShape(Circle())
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(vacancy.company)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Text(vacancy.title)
+                                        .font(.headline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.primary)
+                                        .lineLimit(2)
                                 }
                             }
-                            .frame(width: 48, height: 48)
-                            .clipShape(Circle())
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(vacancy.company)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.secondary)
-                                
-                                Text(vacancy.title)
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.primary)
-                                    .lineLimit(2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                model.onVacancyTap(vacancy)
                             }
                             
-                            Spacer()
-                            
-                            // Кнопка избранного
+                            // Кнопка избранного — отдельная зона тапа, не открывает вакансию
                             Button {
-                                // TODO: toggle favorite
+                                model.onToggleFavorite(vacancy.id)
                             } label: {
                                 Image(systemName: vacancy.isFavorite ? "bookmark.fill" : "bookmark")
                                     .font(.title3)
                                     .foregroundColor(vacancy.isFavorite ? .yellow : .secondary)
                             }
+                            .buttonStyle(.plain)
                         }
                         .padding(16)
                         
-                        // Описание
-                        Text(vacancy.description)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .lineLimit(3)
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 12)
-                        
-                        // Footer с тегами (зарплата и опыт из API)
-                        HStack(spacing: 8) {
-                            if let salaryText = vacancy.salaryText {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "rublesign.circle.fill")
-                                        .font(.caption)
-                                    Text(salaryText)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                }
-                                .foregroundColor(.brandPrimary)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(Color.brandPrimary.opacity(0.1))
-                                .cornerRadius(8)
-                            }
-                            if let experienceText = vacancy.experienceText {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "briefcase.fill")
-                                        .font(.caption)
-                                    Text(experienceText)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                }
+                        // Описание и футер — тап открывает вакансию
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(vacancy.description)
+                                .font(.subheadline)
                                 .foregroundColor(.secondary)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(Color.fieldBackground)
-                                .cornerRadius(8)
+                                .lineLimit(3)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 12)
+                            
+                            HStack(spacing: 8) {
+                                if let salaryText = vacancy.salaryText {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "rublesign.circle.fill")
+                                            .font(.caption)
+                                        Text(salaryText)
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                    }
+                                    .foregroundColor(.brandPrimary)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color.brandPrimary.opacity(0.1))
+                                    .cornerRadius(8)
+                                }
+                                if let experienceText = vacancy.experienceText {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "briefcase.fill")
+                                            .font(.caption)
+                                        Text(experienceText)
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                    }
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color.fieldBackground)
+                                    .cornerRadius(8)
+                                }
+                                Spacer()
                             }
-                            Spacer()
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 16)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            model.onVacancyTap(vacancy)
+                        }
                     }
                     .background(Color.cardBackground)
                     .cornerRadius(16)
@@ -368,9 +380,6 @@ public struct DiscoveryView: View {
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(Color.divider, lineWidth: 1)
                     )
-                    .onTapGesture {
-                        model.onVacancyTap(vacancy)
-                    }
                 }
             }
             .padding(.horizontal, Layout.horizontalPadding)
@@ -428,6 +437,7 @@ extension DiscoveryView {
         public let onFilterChanged: (DiscoveryState.FilterType) -> Void
         public let onUploadResume: () -> Void
         public let onVacancyTap: (DiscoveryState.Vacancy) -> Void
+        public let onToggleFavorite: (String) -> Void
         public let onSearchQueryChanged: (String) -> Void
         public let onSearchSubmitted: () -> Void
         
@@ -440,6 +450,7 @@ extension DiscoveryView {
             onFilterChanged: @escaping (DiscoveryState.FilterType) -> Void,
             onUploadResume: @escaping () -> Void,
             onVacancyTap: @escaping (DiscoveryState.Vacancy) -> Void,
+            onToggleFavorite: @escaping (String) -> Void,
             onSearchQueryChanged: @escaping (String) -> Void,
             onSearchSubmitted: @escaping () -> Void
         ) {
@@ -451,6 +462,7 @@ extension DiscoveryView {
             self.onFilterChanged = onFilterChanged
             self.onUploadResume = onUploadResume
             self.onVacancyTap = onVacancyTap
+            self.onToggleFavorite = onToggleFavorite
             self.onSearchQueryChanged = onSearchQueryChanged
             self.onSearchSubmitted = onSearchSubmitted
         }
@@ -484,6 +496,7 @@ extension DiscoveryView.Model {
         onFilterChanged: @escaping (DiscoveryState.FilterType) -> Void = { _ in },
         onUploadResume: @escaping () -> Void = {},
         onVacancyTap: @escaping (DiscoveryState.Vacancy) -> Void = { _ in },
+        onToggleFavorite: @escaping (String) -> Void = { _ in },
         onSearchQueryChanged: @escaping (String) -> Void = { _ in },
         onSearchSubmitted: @escaping () -> Void = {}
     ) -> Self {
@@ -496,6 +509,7 @@ extension DiscoveryView.Model {
             onFilterChanged: onFilterChanged,
             onUploadResume: onUploadResume,
             onVacancyTap: onVacancyTap,
+            onToggleFavorite: onToggleFavorite,
             onSearchQueryChanged: onSearchQueryChanged,
             onSearchSubmitted: onSearchSubmitted
         )

@@ -29,7 +29,7 @@ public final actor ChatServiceImpl {
         await mock.disconnect()
     }
     
-    public func sendMessage(_ message: ChatMessage) async throws {
+    public func sendMessage(_ message: ChatMessage) async throws -> ChatMessage? {
         try await mock.sendMessage(message)
     }
     

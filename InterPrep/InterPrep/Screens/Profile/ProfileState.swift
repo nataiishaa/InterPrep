@@ -28,6 +28,11 @@ public struct ProfileState {
     public var editedPosition: String = ""
     public var editedExperience: String = ""
     
+    /// После выхода или удаления аккаунта — показать экран авторизации
+    public var authRequired: Bool = false
+    /// Ошибка при удалении аккаунта (например, неверный пароль)
+    public var deleteAccountError: String?
+    
     public init() {}
 }
 
@@ -158,7 +163,9 @@ extension ProfileState: FeatureState {
         // Actions
         case changeResume
         case logout
-        case deleteAccount
+        case deleteAccount(password: String)
+        case clearAuthRequired
+        case clearDeleteAccountError
         case openCalDAVSettings
     }
     
@@ -170,6 +177,7 @@ extension ProfileState: FeatureState {
         case loadingFailed(String)
         case logoutCompleted
         case accountDeleted
+        case deleteAccountFailed(String)
     }
     
     public enum Effect: Sendable {
@@ -179,7 +187,7 @@ extension ProfileState: FeatureState {
         case saveSettings(AppSettings)
         case navigateToResumeUpload
         case performLogout
-        case performDeleteAccount
+        case performDeleteAccount(password: String)
     }
     
     @MainActor
@@ -272,8 +280,17 @@ extension ProfileState: FeatureState {
         case .input(.logout):
             return .performLogout
             
-        case .input(.deleteAccount):
-            return .performDeleteAccount
+        case let .input(.deleteAccount(password)):
+            state.deleteAccountError = nil
+            return .performDeleteAccount(password: password)
+            
+        case .input(.clearAuthRequired):
+            state.authRequired = false
+            return nil
+            
+        case .input(.clearDeleteAccountError):
+            state.deleteAccountError = nil
+            return nil
             
         case .input(.openCalDAVSettings):
             // Handled in UI
@@ -304,9 +321,16 @@ extension ProfileState: FeatureState {
         case .feedback(.logoutCompleted):
             state.user = nil
             state.statistics = Statistics()
+            state.authRequired = true
             
         case .feedback(.accountDeleted):
             state.user = nil
+            state.statistics = Statistics()
+            state.settings = AppSettings()
+            state.authRequired = true
+            
+        case let .feedback(.deleteAccountFailed(message)):
+            state.deleteAccountError = message
         }
         
         return nil

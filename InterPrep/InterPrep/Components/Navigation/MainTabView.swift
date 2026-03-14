@@ -16,10 +16,18 @@ import ChatFeature
 struct MainTabView: View {
     @State private var selectedTab: TabItem = .search
     @State private var showChatSheet: Bool = false
+    @State private var showResumeUploadSheet: Bool = false
+    @State private var showResumeDetailSheet: Bool = false
+    /// Store чата создаётся один раз при открытии sheet, чтобы сообщения и ответы не терялись при перерисовке.
+    @State private var chatStore: ChatContainer.ChatStore?
     private let appGraph: AppGraph
+    private let onLogout: (() -> Void)?
+    private let profileSessionService: (any ProfileSessionService)?
     
-    init(appGraph: AppGraph) {
+    init(appGraph: AppGraph, onLogout: (() -> Void)? = nil, profileSessionService: (any ProfileSessionService)? = nil) {
         self.appGraph = appGraph
+        self.onLogout = onLogout
+        self.profileSessionService = profileSessionService
     }
     
     var body: some View {
@@ -32,10 +40,17 @@ struct MainTabView: View {
                     appGraph.makeDocumentsContainer()
                 case .search:
                     appGraph.makeDiscoveryContainer()
+                case .resume:
+                    ResumeProfileDetailView()
                 case .chat:
                     appGraph.makeDiscoveryContainer()
                 case .profile:
-                    ProfileContainer()
+                    ProfileContainer(
+                        sessionService: profileSessionService,
+                        onLogoutComplete: onLogout,
+                        onNavigateToResumeUpload: { showResumeUploadSheet = true },
+                        onViewResume: { showResumeDetailSheet = true }
+                    )
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -45,14 +60,28 @@ struct MainTabView: View {
         .ignoresSafeArea(.keyboard)
         .onChange(of: selectedTab) { oldValue, newValue in
             if newValue == .chat {
+                if chatStore == nil {
+                    chatStore = appGraph.makeChatStore()
+                }
                 showChatSheet = true
                 selectedTab = oldValue
             }
         }
         .sheet(isPresented: $showChatSheet) {
-            appGraph.makeChatContainer()
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+            if let store = chatStore {
+                ChatContainer(store: store)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
+        }
+        .sheet(isPresented: $showResumeUploadSheet) {
+            appGraph.makeResumeUploadContainer(
+                onComplete: { showResumeUploadSheet = false },
+                onCancel: { showResumeUploadSheet = false }
+            )
+        }
+        .sheet(isPresented: $showResumeDetailSheet) {
+            ResumeProfileDetailView()
         }
     }
 }

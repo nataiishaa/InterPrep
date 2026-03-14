@@ -48,8 +48,10 @@ struct ChatView: View {
                 ChatInputBar(
                     text: model.inputText,
                     isSending: model.isSending,
+                    systemHints: model.systemHints,
                     onTextChanged: model.onInputTextChanged,
-                    onSend: model.onSendMessage
+                    onSend: model.onSendMessage,
+                    onHintTapped: model.onHintTapped
                 )
             }
             .background(Color.backgroundPrimary)
@@ -90,8 +92,10 @@ extension ChatView {
         let isLoading: Bool
         let isSending: Bool
         let isConnected: Bool
+        let systemHints: [String]
         let onInputTextChanged: (String) -> Void
         let onSendMessage: () -> Void
+        let onHintTapped: (String) -> Void
         let onButtonTapped: (MessageButton) -> Void
     }
 }
@@ -118,8 +122,10 @@ extension ChatView.Model {
             isLoading: false,
             isSending: false,
             isConnected: true,
+            systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
+            onHintTapped: { _ in },
             onButtonTapped: { _ in }
         )
     }
@@ -137,8 +143,10 @@ extension ChatView.Model {
             isLoading: false,
             isSending: false,
             isConnected: true,
+            systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
+            onHintTapped: { _ in },
             onButtonTapped: { _ in }
         )
     }
@@ -161,8 +169,10 @@ extension ChatView.Model {
             isLoading: false,
             isSending: false,
             isConnected: true,
+            systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
+            onHintTapped: { _ in },
             onButtonTapped: { _ in }
         )
     }
@@ -175,8 +185,10 @@ extension ChatView.Model {
             isLoading: true,
             isSending: false,
             isConnected: true,
+            systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
+            onHintTapped: { _ in },
             onButtonTapped: { _ in }
         )
     }
@@ -192,8 +204,10 @@ extension ChatView.Model {
             isLoading: false,
             isSending: true,
             isConnected: true,
+            systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
+            onHintTapped: { _ in },
             onButtonTapped: { _ in }
         )
     }

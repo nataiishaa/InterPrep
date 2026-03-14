@@ -7,12 +7,14 @@
 
 import SwiftUI
 import ArchitectureCore
+import NetworkService
 import OnboardingFeature
 import AuthFeature
 import DiscoveryModule
 import ResumeUploadFeature
 import DocumentsFeature
 import ChatFeature
+import ProfileFeature
 
 @MainActor
 final class AppGraph {
@@ -61,8 +63,12 @@ final class AppGraph {
         return AuthContainer(store: store, onAuthComplete: onComplete)
     }
     
-    func makeMainContainer() -> some View {
-        MainTabView(appGraph: self)
+    func makeMainContainer(onLogout: @escaping () -> Void) -> some View {
+        MainTabView(
+            appGraph: self,
+            onLogout: onLogout,
+            profileSessionService: AppProfileSessionService()
+        )
     }
     
     func makeDiscoveryContainer() -> some View {
@@ -104,12 +110,48 @@ final class AppGraph {
     }
     
     func makeChatContainer() -> some View {
+        makeChatContainer(store: makeChatStore())
+    }
+    
+    /// Store чата — создаётся один раз и передаётся в sheet, чтобы состояние не сбрасывалось при перерисовке родителя.
+    func makeChatStore() -> ChatContainer.ChatStore {
         let effectHandler = ChatEffectHandler(
             chatService: self.chatService
         )
-        return ChatContainer(store: Store(
+        return Store(
             state: ChatState(),
             effectHandler: effectHandler
-        ))
+        )
+    }
+    
+    private func makeChatContainer(store: ChatContainer.ChatStore) -> some View {
+        ChatContainer(store: store)
+    }
+}
+
+// MARK: - Profile session service (адаптер к NetworkServiceV2)
+
+private struct AppProfileSessionService: ProfileSessionService {
+    func clearTokens() async {
+        await NetworkServiceV2.shared.clearTokens()
+    }
+
+    func deleteAccount(password: String) async -> Result<Void, ProfileSessionError> {
+        let result = await NetworkServiceV2.shared.deleteAccount(password: password)
+        switch result {
+        case .success(let response):
+            return response.deleted ? .success(()) : .failure(ProfileSessionError("Не удалось удалить аккаунт"))
+        case .failure(let error):
+            let message: String
+            switch error {
+            case .unauthorized:
+                message = "Неверный пароль"
+            case .httpError(let code, _):
+                message = code == 401 ? "Неверный пароль" : "Ошибка сервера. Попробуйте позже."
+            case .transportError, .decodingFailed, .noData, .invalidURL, .encodingFailed, .unknown:
+                message = "Ошибка сети. Проверьте подключение."
+            }
+            return .failure(ProfileSessionError(message))
+        }
     }
 }
