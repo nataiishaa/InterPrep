@@ -51,6 +51,7 @@ let project = Project(
                 "InterPrep/Services/VacancyServiceImpl.swift",
                 "InterPrep/Services/ChatServiceImpl.swift",
                 "InterPrep/Components/Navigation/MainTabView.swift",
+                "InterPrep/Components/Navigation/ResumeProfileDetailView.swift",
                 "InterPrep/Components/Navigation/TabBarView.swift",
                 "InterPrep/Components/Navigation/TabBarButton.swift",
                 "InterPrep/Components/Navigation/TabBarLayout.swift",

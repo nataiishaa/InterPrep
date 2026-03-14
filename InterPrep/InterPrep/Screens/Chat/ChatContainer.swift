@@ -34,11 +34,15 @@ public struct ChatContainer: View {
             isLoading: store.state.isLoading,
             isSending: store.state.isSending,
             isConnected: store.state.isConnected,
+            systemHints: ChatState.systemHints,
             onInputTextChanged: { text in
                 store.send(.inputTextChanged(text))
             },
             onSendMessage: {
                 store.send(.sendMessage)
+            },
+            onHintTapped: { hint in
+                store.send(.systemHintTapped(hint))
             },
             onButtonTapped: { button in
                 store.send(.buttonTapped(button))

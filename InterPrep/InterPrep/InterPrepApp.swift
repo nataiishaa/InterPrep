@@ -65,7 +65,11 @@ final class AppCoordinator: ObservableObject {
                 }
                 
             case .main:
-                appGraph.makeMainContainer()
+                appGraph.makeMainContainer(onLogout: {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        self.appState = .auth
+                    }
+                })
             }
         }
         .transition(.opacity)

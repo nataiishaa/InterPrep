@@ -10,6 +10,19 @@ import SwiftUI
 import ArchitectureCore
 import DesignSystem
 
+/// Ошибка сервиса сессии (удаление аккаунта и т.п.)
+public struct ProfileSessionError: Error, Sendable, LocalizedError {
+    public let message: String
+    public init(_ message: String) { self.message = message }
+    public var errorDescription: String? { message }
+}
+
+/// Сервис выхода и удаления аккаунта (реализуется в приложении, чтобы не тянуть NetworkService в модуль профиля).
+public protocol ProfileSessionService: Sendable {
+    func clearTokens() async
+    func deleteAccount(password: String) async -> Result<Void, ProfileSessionError>
+}
+
 public actor ProfileEffectHandler: EffectHandler {
     public typealias S = ProfileState
     
@@ -17,8 +30,11 @@ public actor ProfileEffectHandler: EffectHandler {
     private let userKey = "user_profile"
     private let settingsKey = "app_settings"
     private let statisticsKey = "user_statistics"
+    private let sessionService: (any ProfileSessionService)?
     
-    public init() {}
+    public init(sessionService: (any ProfileSessionService)? = nil) {
+        self.sessionService = sessionService
+    }
     
     public func handle(effect: ProfileState.Effect) async -> ProfileState.Feedback? {
         switch effect {
@@ -41,8 +57,8 @@ public actor ProfileEffectHandler: EffectHandler {
         case .performLogout:
             return await performLogout()
             
-        case .performDeleteAccount:
-            return await performDeleteAccount()
+        case let .performDeleteAccount(password):
+            return await performDeleteAccount(password: password)
         }
     }
     
@@ -140,28 +156,30 @@ public actor ProfileEffectHandler: EffectHandler {
     }
     
     private func performLogout() async -> ProfileState.Feedback {
-        // Clear user data
+        await sessionService?.clearTokens()
         userDefaults.removeObject(forKey: userKey)
         userDefaults.removeObject(forKey: statisticsKey)
         userDefaults.set(false, forKey: "isOnboardingCompleted")
-        
-        // Note: App restart/navigation should be handled by the app coordinator
-        // The effect handler should only handle data operations
         return .logoutCompleted
     }
     
-    private func performDeleteAccount() async -> ProfileState.Feedback {
-        // Clear all user data
-        userDefaults.removeObject(forKey: userKey)
-        userDefaults.removeObject(forKey: statisticsKey)
-        userDefaults.removeObject(forKey: settingsKey)
-        userDefaults.removeObject(forKey: "calendar_events")
-        userDefaults.removeObject(forKey: "caldav_settings")
-        userDefaults.set(false, forKey: "isOnboardingCompleted")
-        
-        // Note: App restart/navigation should be handled by the app coordinator
-        // The effect handler should only handle data operations
-        return .accountDeleted
+    private func performDeleteAccount(password: String) async -> ProfileState.Feedback {
+        guard let sessionService = sessionService else {
+            return .deleteAccountFailed("Сервис недоступен")
+        }
+        let result = await sessionService.deleteAccount(password: password)
+        switch result {
+        case .success:
+            userDefaults.removeObject(forKey: userKey)
+            userDefaults.removeObject(forKey: statisticsKey)
+            userDefaults.removeObject(forKey: settingsKey)
+            userDefaults.removeObject(forKey: "calendar_events")
+            userDefaults.removeObject(forKey: "caldav_settings")
+            userDefaults.set(false, forKey: "isOnboardingCompleted")
+            return .accountDeleted
+        case .failure(let error):
+            return .deleteAccountFailed(error.message)
+        }
     }
     
 }

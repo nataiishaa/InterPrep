@@ -19,6 +19,14 @@ public struct ChatState {
     public var error: String?
     public var consultant: Consultant?
     public var currentScenario: ChatScenario?
+    /// Системные подсказки над полем ввода. При выборе только подставляют текст; запрос уходит только по «Отправить».
+    public static let systemHints: [String] = [
+        "Расскажи про свой опыт",
+        "Какие вопросы задают на интервью?",
+        "Как рассказать о проектах?",
+        "Помоги с ответом на слабые стороны",
+        "Подготовь к техническому интервью"
+    ]
     
     public init() {}
 }
@@ -140,15 +148,20 @@ extension ChatState: FeatureState {
         case sendMessage
         case messageReceived(ChatMessage)
         case buttonTapped(MessageButton)
+        /// Выбор системной подсказки — только подставить текст в поле, запрос не отправлять
+        case systemHintTapped(String)
     }
     
     public enum Feedback: Sendable {
         case messagesLoaded([ChatMessage])
         case consultantLoaded(Consultant)
-        case messageSent(ChatMessage)
+        case messageSent(ChatMessage, consultantReply: ChatMessage?)
         case connectionStatusChanged(Bool)
         case loadingFailed(String)
         case consultantResponded(ChatMessage)
+        /// Чанк длинного (стримингового) ответа консультанта — задел на будущее
+        case consultantChunk(messageId: UUID, chunk: String)
+        case consultantStreamFinished(messageId: UUID)
     }
     
     public enum Effect: Sendable {
@@ -173,6 +186,10 @@ extension ChatState: FeatureState {
             
         case .input(.inputTextChanged(let text)):
             state.inputText = text
+            return nil
+            
+        case .input(.systemHintTapped(let hint)):
+            state.inputText = hint
             return nil
             
         case .input(.sendMessage):
@@ -208,11 +225,39 @@ extension ChatState: FeatureState {
             state.messages.append(message)
             return nil
             
+        case .feedback(.consultantChunk(let messageId, let chunk)):
+            if let index = state.messages.firstIndex(where: { $0.id == messageId }) {
+                let current = state.messages[index]
+                state.messages[index] = ChatMessage(
+                    id: current.id,
+                    text: current.text + chunk,
+                    sender: current.sender,
+                    timestamp: current.timestamp,
+                    status: current.status,
+                    buttons: current.buttons
+                )
+            }
+            return nil
+            
+        case .feedback(.consultantStreamFinished(let messageId)):
+            if let index = state.messages.firstIndex(where: { $0.id == messageId }) {
+                let current = state.messages[index]
+                state.messages[index] = ChatMessage(
+                    id: current.id,
+                    text: current.text,
+                    sender: current.sender,
+                    timestamp: current.timestamp,
+                    status: .sent,
+                    buttons: current.buttons
+                )
+            }
+            return nil
+            
         case .feedback(.consultantLoaded(let consultant)):
             state.consultant = consultant
             return nil
             
-        case .feedback(.messageSent(let message)):
+        case .feedback(.messageSent(let message, let consultantReply)):
             if let index = state.messages.firstIndex(where: { $0.id == message.id }) {
                 state.messages[index] = ChatMessage(
                     id: message.id,
@@ -221,6 +266,9 @@ extension ChatState: FeatureState {
                     timestamp: message.timestamp,
                     status: .sent
                 )
+            }
+            if let reply = consultantReply {
+                state.messages.append(reply)
             }
             state.isSending = false
             return nil

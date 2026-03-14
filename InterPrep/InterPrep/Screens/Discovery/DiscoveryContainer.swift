@@ -62,6 +62,9 @@ public struct DiscoveryContainer: View {
             onVacancyTap: { vacancy in
                 selectedVacancy = vacancy
             },
+            onToggleFavorite: { id in
+                store.send(.toggleFavorite(id))
+            },
             onSearchQueryChanged: { query in
                 store.send(.searchQueryChanged(query))
             },

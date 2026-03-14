@@ -11,13 +11,54 @@ import DesignSystem
 struct ChatInputBar: View {
     let text: String
     let isSending: Bool
+    let systemHints: [String]
     let onTextChanged: (String) -> Void
     let onSend: () -> Void
+    let onHintTapped: (String) -> Void
     
     @FocusState private var isFocused: Bool
     @Environment(\.colorScheme) var colorScheme
     
+    init(
+        text: String,
+        isSending: Bool,
+        systemHints: [String] = ChatState.systemHints,
+        onTextChanged: @escaping (String) -> Void,
+        onSend: @escaping () -> Void,
+        onHintTapped: @escaping (String) -> Void
+    ) {
+        self.text = text
+        self.isSending = isSending
+        self.systemHints = systemHints
+        self.onTextChanged = onTextChanged
+        self.onSend = onSend
+        self.onHintTapped = onHintTapped
+    }
+    
     var body: some View {
+        VStack(spacing: 8) {
+            if !systemHints.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(systemHints, id: \.self) { hint in
+                            Button(action: { onHintTapped(hint) }) {
+                                Text(hint)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Color.fieldBackground)
+                                    .foregroundColor(Color.primary)
+                                    .cornerRadius(16)
+                            }
+                            .disabled(isSending)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical, 4)
+            }
+        
         HStack(spacing: 12) {
             // Text field
             TextField("Сообщение", text: .init(
@@ -50,6 +91,7 @@ struct ChatInputBar: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+        }
         .background(Color.cardBackground)
         .shadow(color: shadowColor, radius: 4, x: 0, y: -2)
     }
@@ -73,7 +115,8 @@ struct ChatInputBar: View {
             text: "",
             isSending: false,
             onTextChanged: { _ in },
-            onSend: {}
+            onSend: {},
+            onHintTapped: { _ in }
         )
     }
 }
@@ -86,7 +129,8 @@ struct ChatInputBar: View {
             text: "Привет! Как дела?",
             isSending: false,
             onTextChanged: { _ in },
-            onSend: {}
+            onSend: {},
+            onHintTapped: { _ in }
         )
     }
 }
@@ -99,7 +143,8 @@ struct ChatInputBar: View {
             text: "",
             isSending: true,
             onTextChanged: { _ in },
-            onSend: {}
+            onSend: {},
+            onHintTapped: { _ in }
         )
     }
 }

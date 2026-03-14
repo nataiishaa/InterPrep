@@ -52,8 +52,8 @@ public actor ChatEffectHandler: EffectHandler {
             
         case .sendMessage(let message):
             do {
-                try await chatService.sendMessage(message)
-                return .messageSent(message)
+                let consultantReply = try await chatService.sendMessage(message)
+                return .messageSent(message, consultantReply: consultantReply)
             } catch {
                 return .loadingFailed(error.localizedDescription)
             }
@@ -76,7 +76,8 @@ public protocol ChatServiceProtocol: Actor {
     func fetchConsultant() async throws -> Consultant
     func connect() async throws
     func disconnect() async
-    func sendMessage(_ message: ChatMessage) async throws
+    /// Отправляет сообщение; возвращает опциональный ответ консультанта (длинный ответ приходит одним сообщением).
+    func sendMessage(_ message: ChatMessage) async throws -> ChatMessage?
     func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage
 }
 
@@ -121,8 +122,12 @@ public final actor ChatServiceMock: ChatServiceProtocol {
         try? await Task.sleep(nanoseconds: 200_000_000)
     }
     
-    public func sendMessage(_ message: ChatMessage) async throws {
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+    public func sendMessage(_ message: ChatMessage) async throws -> ChatMessage? {
+        try await Task.sleep(nanoseconds: 600_000_000) // 0.6 c
+        return ChatMessage(
+            text: "Принял. По вашему запросу могу подсказать: подготовьте краткий рассказ о себе, примеры проектов и типичные вопросы по вашей области. Если нужна помощь с конкретным вопросом — напишите его.",
+            sender: .consultant
+        )
     }
     
     public func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage {
