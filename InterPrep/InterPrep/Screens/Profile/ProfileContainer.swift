@@ -10,15 +10,14 @@ import ArchitectureCore
 
 public struct ProfileContainer: View {
     @StateObject private var store: ProfileStore
+    @State private var showResumeDetailSheet = false
     private let onLogoutComplete: (() -> Void)?
     private let onNavigateToResumeUpload: (() -> Void)?
-    private let onViewResume: (() -> Void)?
     
     public init(
         sessionService: (any ProfileSessionService)? = nil,
         onLogoutComplete: (() -> Void)? = nil,
-        onNavigateToResumeUpload: (() -> Void)? = nil,
-        onViewResume: (() -> Void)? = nil
+        onNavigateToResumeUpload: (() -> Void)? = nil
     ) {
         _store = StateObject(wrappedValue: Store(
             state: ProfileState(),
@@ -26,7 +25,6 @@ public struct ProfileContainer: View {
         ))
         self.onLogoutComplete = onLogoutComplete
         self.onNavigateToResumeUpload = onNavigateToResumeUpload
-        self.onViewResume = onViewResume
     }
     
     public var body: some View {
@@ -40,17 +38,9 @@ public struct ProfileContainer: View {
                     store.send(.clearAuthRequired)
                 }
             }
-            .sheet(item: Binding(
-                get: { store.state.resumePDFURL.map { PDFDocument(url: $0) } },
-                set: { _ in }
-            )) { pdfDoc in
-                PDFViewerSheet(pdfURL: pdfDoc.url)
+            .sheet(isPresented: $showResumeDetailSheet) {
+                ResumeProfileDetailView()
             }
-    }
-    
-    private struct PDFDocument: Identifiable {
-        let id = UUID()
-        let url: URL
     }
     
     private func makeModel() -> ProfileView.Model {
@@ -69,7 +59,7 @@ public struct ProfileContainer: View {
                 onNavigateToResumeUpload?() ?? store.send(.changeResume)
             },
             onViewResume: {
-                store.send(.viewResume)
+                showResumeDetailSheet = true
             },
             onLogout: {
                 store.send(.logout)

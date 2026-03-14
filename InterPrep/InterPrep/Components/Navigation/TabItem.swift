@@ -4,7 +4,6 @@ enum TabItem: CaseIterable, Hashable {
     case calendar
     case documents
     case search
-    case resume
     case chat
     case profile
 
@@ -13,7 +12,6 @@ enum TabItem: CaseIterable, Hashable {
         case .calendar: return "Календарь"
         case .documents: return "Документы"
         case .search: return "Поиск"
-        case .resume: return "Резюме"
         case .chat: return "Чат"
         case .profile: return "Профиль"
         }
@@ -24,7 +22,6 @@ enum TabItem: CaseIterable, Hashable {
         case .calendar: return "calendar"
         case .documents: return "doc.text"
         case .search: return "magnifyingglass"
-        case .resume: return "doc.richtext"
         case .chat: return "message"
         case .profile: return "person"
         }
@@ -35,7 +32,6 @@ enum TabItem: CaseIterable, Hashable {
         case .calendar: return "calendar"
         case .documents: return "doc.text.fill"
         case .search: return "magnifyingglass"
-        case .resume: return "doc.richtext.fill"
         case .chat: return "message.fill"
         case .profile: return "person.fill"
         }
@@ -49,8 +45,6 @@ enum TabItem: CaseIterable, Hashable {
             return "Управляйте резюме и документами для собеседований"
         case .search:
             return "Ищите вакансии и получайте персональные рекомендации"
-        case .resume:
-            return "Просмотр и редактирование вашего резюме"
         case .chat:
             return "AI-ассистент для подготовки к собеседованиям"
         case .profile:

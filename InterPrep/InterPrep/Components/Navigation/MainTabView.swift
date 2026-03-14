@@ -17,7 +17,6 @@ struct MainTabView: View {
     @State private var selectedTab: TabItem = .search
     @State private var showChatSheet: Bool = false
     @State private var showResumeUploadSheet: Bool = false
-    @State private var showResumeDetailSheet: Bool = false
     /// Store чата создаётся один раз при открытии sheet, чтобы сообщения и ответы не терялись при перерисовке.
     @State private var chatStore: ChatStore?
     private let appGraph: AppGraph
@@ -40,16 +39,13 @@ struct MainTabView: View {
                     appGraph.makeDocumentsContainer()
                 case .search:
                     appGraph.makeDiscoveryContainer()
-                case .resume:
-                    ResumeProfileDetailView()
                 case .chat:
                     appGraph.makeDiscoveryContainer()
                 case .profile:
                     ProfileContainer(
                         sessionService: profileSessionService,
                         onLogoutComplete: onLogout,
-                        onNavigateToResumeUpload: { showResumeUploadSheet = true },
-                        onViewResume: { showResumeDetailSheet = true }
+                        onNavigateToResumeUpload: { showResumeUploadSheet = true }
                     )
                 }
             }
@@ -79,9 +75,6 @@ struct MainTabView: View {
                 onComplete: { showResumeUploadSheet = false },
                 onCancel: { showResumeUploadSheet = false }
             )
-        }
-        .sheet(isPresented: $showResumeDetailSheet) {
-            ResumeProfileDetailView()
         }
     }
 }
