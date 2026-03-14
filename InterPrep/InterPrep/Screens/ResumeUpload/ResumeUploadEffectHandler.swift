@@ -32,8 +32,12 @@ public actor ResumeUploadEffectHandler: EffectHandler {
             
         case let .uploadFile(file):
             uploadTask?.cancel()
+            
             do {
+                // Perform actual upload
                 try await fileService.uploadFile(file)
+                
+                // Return success feedback
                 return .uploadCompleted
             } catch is CancellationError {
                 return .uploadFailed("Загрузка отменена")
@@ -109,7 +113,15 @@ public final actor FileUploadServiceImpl: FileUploadService {
     }
     
     public func uploadFile(_ file: ResumeUploadState.SelectedFile) async throws {
+        print("📤 Starting file upload: \(file.name)")
+        
+        guard FileManager.default.fileExists(atPath: file.url.path) else {
+            print("❌ File not found at path: \(file.url.path)")
+            throw FileUploadError.fileNotFound
+        }
+        
         let fileData = try Data(contentsOf: file.url)
+        print("📦 File data loaded: \(fileData.count) bytes")
         
         let result = await networkService.uploadFile(
             fileContent: fileData,
@@ -119,9 +131,20 @@ public final actor FileUploadServiceImpl: FileUploadService {
         )
         
         switch result {
-        case .success:
+        case .success(let response):
+            print("✅ File uploaded successfully!")
+            print("   Material ID: \(response.materialID)")
+            print("   Name: \(response.name)")
+            print("   Size: \(response.size)")
             return
-        case .failure:
+        case .failure(let error):
+            print("❌ Upload failed: \(error)")
+            
+            // Check for specific network errors
+            if (error as? NetworkError)?.isConnectionError == true {
+                throw FileUploadError.networkUnavailable
+            }
+            
             throw FileUploadError.uploadFailed
         }
     }
@@ -132,6 +155,8 @@ public final actor FileUploadServiceImpl: FileUploadService {
 enum FileUploadError: LocalizedError {
     case unsupportedFormat
     case fileTooLarge
+    case fileNotFound
+    case networkUnavailable
     case uploadFailed
     
     var errorDescription: String? {
@@ -140,6 +165,10 @@ enum FileUploadError: LocalizedError {
             return "Неподдерживаемый формат файла. Используйте PDF, DOC, DOCX или TXT"
         case .fileTooLarge:
             return "Файл слишком большой. Максимальный размер: 10 МБ"
+        case .fileNotFound:
+            return "Файл не найден. Попробуйте выбрать файл снова"
+        case .networkUnavailable:
+            return "Нет соединения с интернетом. Проверьте подключение и попробуйте снова"
         case .uploadFailed:
             return "Не удалось загрузить файл. Попробуйте еще раз"
         }

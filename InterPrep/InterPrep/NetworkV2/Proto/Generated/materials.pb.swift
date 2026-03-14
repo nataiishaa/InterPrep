@@ -8,11 +8,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
 import Foundation
-#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -25,7 +21,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-public struct Materials_UploadFileRequest: Sendable {
+public struct Materials_UploadFileRequest: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -35,20 +31,20 @@ public struct Materials_UploadFileRequest: Sendable {
   public var filename: String = String()
 
   public var parentID: UInt32 {
-    get {_parentID ?? 0}
+    get {return _parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  public var hasParentID: Bool {self._parentID != nil}
+  public var hasParentID: Bool {return self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
   public mutating func clearParentID() {self._parentID = nil}
 
   public var name: String {
-    get {_name ?? String()}
+    get {return _name ?? String()}
     set {_name = newValue}
   }
   /// Returns true if `name` has been explicitly set.
-  public var hasName: Bool {self._name != nil}
+  public var hasName: Bool {return self._name != nil}
   /// Clears the value of `name`. Subsequent reads from it will return its default value.
   public mutating func clearName() {self._name = nil}
 
@@ -74,11 +70,11 @@ public struct Materials_UploadFileResponse: Sendable {
   public var mimeType: String = String()
 
   public var downloadURL: String {
-    get {_downloadURL ?? String()}
+    get {return _downloadURL ?? String()}
     set {_downloadURL = newValue}
   }
   /// Returns true if `downloadURL` has been explicitly set.
-  public var hasDownloadURL: Bool {self._downloadURL != nil}
+  public var hasDownloadURL: Bool {return self._downloadURL != nil}
   /// Clears the value of `downloadURL`. Subsequent reads from it will return its default value.
   public mutating func clearDownloadURL() {self._downloadURL = nil}
 
@@ -101,7 +97,7 @@ public struct Materials_DownloadFileRequest: Sendable {
   public init() {}
 }
 
-public struct Materials_DownloadFileResponse: Sendable {
+public struct Materials_DownloadFileResponse: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -116,11 +112,11 @@ public struct Materials_DownloadFileResponse: Sendable {
 
   /// Контент файла в формате base64 для удобства передачи через gRPC
   public var contentBase64: String {
-    get {_contentBase64 ?? String()}
+    get {return _contentBase64 ?? String()}
     set {_contentBase64 = newValue}
   }
   /// Returns true if `contentBase64` has been explicitly set.
-  public var hasContentBase64: Bool {self._contentBase64 != nil}
+  public var hasContentBase64: Bool {return self._contentBase64 != nil}
   /// Clears the value of `contentBase64`. Subsequent reads from it will return its default value.
   public mutating func clearContentBase64() {self._contentBase64 = nil}
 
@@ -137,11 +133,11 @@ public struct Materials_ListFolderRequest: Sendable {
   // methods supported on all messages.
 
   public var parentID: UInt32 {
-    get {_parentID ?? 0}
+    get {return _parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  public var hasParentID: Bool {self._parentID != nil}
+  public var hasParentID: Bool {return self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
   public mutating func clearParentID() {self._parentID = nil}
 
@@ -162,11 +158,11 @@ public struct Materials_Node: Sendable {
   public var userID: UInt32 = 0
 
   public var parentID: UInt32 {
-    get {_parentID ?? 0}
+    get {return _parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  public var hasParentID: Bool {self._parentID != nil}
+  public var hasParentID: Bool {return self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
   public mutating func clearParentID() {self._parentID = nil}
 
@@ -175,20 +171,20 @@ public struct Materials_Node: Sendable {
   public var name: String = String()
 
   public var file: Materials_FileInfo {
-    get {_file ?? Materials_FileInfo()}
+    get {return _file ?? Materials_FileInfo()}
     set {_file = newValue}
   }
   /// Returns true if `file` has been explicitly set.
-  public var hasFile: Bool {self._file != nil}
+  public var hasFile: Bool {return self._file != nil}
   /// Clears the value of `file`. Subsequent reads from it will return its default value.
   public mutating func clearFile() {self._file = nil}
 
   public var link: Materials_LinkInfo {
-    get {_link ?? Materials_LinkInfo()}
+    get {return _link ?? Materials_LinkInfo()}
     set {_link = newValue}
   }
   /// Returns true if `link` has been explicitly set.
-  public var hasLink: Bool {self._link != nil}
+  public var hasLink: Bool {return self._link != nil}
   /// Clears the value of `link`. Subsequent reads from it will return its default value.
   public mutating func clearLink() {self._link = nil}
 
@@ -198,11 +194,11 @@ public struct Materials_Node: Sendable {
 
   /// UUID for download/API
   public var materialID: String {
-    get {_materialID ?? String()}
+    get {return _materialID ?? String()}
     set {_materialID = newValue}
   }
   /// Returns true if `materialID` has been explicitly set.
-  public var hasMaterialID: Bool {self._materialID != nil}
+  public var hasMaterialID: Bool {return self._materialID != nil}
   /// Clears the value of `materialID`. Subsequent reads from it will return its default value.
   public mutating func clearMaterialID() {self._materialID = nil}
 
@@ -240,20 +236,20 @@ public struct Materials_LinkInfo: Sendable {
   public var url: String = String()
 
   public var title: String {
-    get {_title ?? String()}
+    get {return _title ?? String()}
     set {_title = newValue}
   }
   /// Returns true if `title` has been explicitly set.
-  public var hasTitle: Bool {self._title != nil}
+  public var hasTitle: Bool {return self._title != nil}
   /// Clears the value of `title`. Subsequent reads from it will return its default value.
   public mutating func clearTitle() {self._title = nil}
 
   public var description_p: String {
-    get {_description_p ?? String()}
+    get {return _description_p ?? String()}
     set {_description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  public var hasDescription_p: Bool {self._description_p != nil}
+  public var hasDescription_p: Bool {return self._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
   public mutating func clearDescription_p() {self._description_p = nil}
 
@@ -285,11 +281,11 @@ public struct Materials_CreateFolderRequest: Sendable {
   public var name: String = String()
 
   public var parentID: UInt32 {
-    get {_parentID ?? 0}
+    get {return _parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  public var hasParentID: Bool {self._parentID != nil}
+  public var hasParentID: Bool {return self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
   public mutating func clearParentID() {self._parentID = nil}
 
@@ -306,11 +302,11 @@ public struct Materials_CreateFolderResponse: Sendable {
   // methods supported on all messages.
 
   public var node: Materials_Node {
-    get {_node ?? Materials_Node()}
+    get {return _node ?? Materials_Node()}
     set {_node = newValue}
   }
   /// Returns true if `node` has been explicitly set.
-  public var hasNode: Bool {self._node != nil}
+  public var hasNode: Bool {return self._node != nil}
   /// Clears the value of `node`. Subsequent reads from it will return its default value.
   public mutating func clearNode() {self._node = nil}
 
@@ -331,29 +327,29 @@ public struct Materials_CreateLinkRequest: Sendable {
   public var url: String = String()
 
   public var title: String {
-    get {_title ?? String()}
+    get {return _title ?? String()}
     set {_title = newValue}
   }
   /// Returns true if `title` has been explicitly set.
-  public var hasTitle: Bool {self._title != nil}
+  public var hasTitle: Bool {return self._title != nil}
   /// Clears the value of `title`. Subsequent reads from it will return its default value.
   public mutating func clearTitle() {self._title = nil}
 
   public var description_p: String {
-    get {_description_p ?? String()}
+    get {return _description_p ?? String()}
     set {_description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  public var hasDescription_p: Bool {self._description_p != nil}
+  public var hasDescription_p: Bool {return self._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
   public mutating func clearDescription_p() {self._description_p = nil}
 
   public var parentID: UInt32 {
-    get {_parentID ?? 0}
+    get {return _parentID ?? 0}
     set {_parentID = newValue}
   }
   /// Returns true if `parentID` has been explicitly set.
-  public var hasParentID: Bool {self._parentID != nil}
+  public var hasParentID: Bool {return self._parentID != nil}
   /// Clears the value of `parentID`. Subsequent reads from it will return its default value.
   public mutating func clearParentID() {self._parentID = nil}
 
@@ -372,11 +368,11 @@ public struct Materials_CreateLinkResponse: Sendable {
   // methods supported on all messages.
 
   public var node: Materials_Node {
-    get {_node ?? Materials_Node()}
+    get {return _node ?? Materials_Node()}
     set {_node = newValue}
   }
   /// Returns true if `node` has been explicitly set.
-  public var hasNode: Bool {self._node != nil}
+  public var hasNode: Bool {return self._node != nil}
   /// Clears the value of `node`. Subsequent reads from it will return its default value.
   public mutating func clearNode() {self._node = nil}
 
@@ -467,7 +463,12 @@ fileprivate let _protobuf_package = "materials"
 
 extension Materials_UploadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UploadFileRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}file_content\0\u{1}filename\0\u{3}parent_id\0\u{1}name\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "file_content"),
+    2: .same(proto: "filename"),
+    3: .standard(proto: "parent_id"),
+    4: .same(proto: "name"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -516,7 +517,13 @@ extension Materials_UploadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Materials_UploadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UploadFileResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}material_id\0\u{1}name\0\u{1}size\0\u{3}mime_type\0\u{3}download_url\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "material_id"),
+    2: .same(proto: "name"),
+    3: .same(proto: "size"),
+    4: .standard(proto: "mime_type"),
+    5: .standard(proto: "download_url"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -570,7 +577,9 @@ extension Materials_UploadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Materials_DownloadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DownloadFileRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}material_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "material_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -600,7 +609,13 @@ extension Materials_DownloadFileRequest: SwiftProtobuf.Message, SwiftProtobuf._M
 
 extension Materials_DownloadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DownloadFileResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}content\0\u{1}filename\0\u{3}mime_type\0\u{1}size\0\u{3}content_base64\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "content"),
+    2: .same(proto: "filename"),
+    3: .standard(proto: "mime_type"),
+    4: .same(proto: "size"),
+    5: .standard(proto: "content_base64"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -654,7 +669,9 @@ extension Materials_DownloadFileResponse: SwiftProtobuf.Message, SwiftProtobuf._
 
 extension Materials_ListFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListFolderRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}parent_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "parent_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -688,7 +705,18 @@ extension Materials_ListFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Materials_Node: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Node"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}user_id\0\u{3}parent_id\0\u{1}type\0\u{1}name\0\u{1}file\0\u{1}link\0\u{3}created_at\0\u{3}updated_at\0\u{3}material_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .standard(proto: "user_id"),
+    3: .standard(proto: "parent_id"),
+    4: .same(proto: "type"),
+    5: .same(proto: "name"),
+    6: .same(proto: "file"),
+    7: .same(proto: "link"),
+    8: .standard(proto: "created_at"),
+    9: .standard(proto: "updated_at"),
+    10: .standard(proto: "material_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -767,7 +795,11 @@ extension Materials_Node: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
 
 extension Materials_FileInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".FileInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}object_key\0\u{3}mime_type\0\u{1}size\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "object_key"),
+    2: .standard(proto: "mime_type"),
+    3: .same(proto: "size"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -807,7 +839,11 @@ extension Materials_FileInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 
 extension Materials_LinkInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".LinkInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}url\0\u{1}title\0\u{1}description\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "url"),
+    2: .same(proto: "title"),
+    3: .same(proto: "description"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -851,7 +887,9 @@ extension Materials_LinkInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 
 extension Materials_ListFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListFolderResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}nodes\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "nodes"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -881,7 +919,10 @@ extension Materials_ListFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Materials_CreateFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CreateFolderRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}parent_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "name"),
+    2: .standard(proto: "parent_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -920,7 +961,9 @@ extension Materials_CreateFolderRequest: SwiftProtobuf.Message, SwiftProtobuf._M
 
 extension Materials_CreateFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CreateFolderResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}node\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "node"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -954,7 +997,13 @@ extension Materials_CreateFolderResponse: SwiftProtobuf.Message, SwiftProtobuf._
 
 extension Materials_CreateLinkRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CreateLinkRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}url\0\u{1}title\0\u{1}description\0\u{3}parent_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "name"),
+    2: .same(proto: "url"),
+    3: .same(proto: "title"),
+    4: .same(proto: "description"),
+    5: .standard(proto: "parent_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1008,7 +1057,9 @@ extension Materials_CreateLinkRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Materials_CreateLinkResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CreateLinkResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}node\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "node"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1042,7 +1093,10 @@ extension Materials_CreateLinkResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Materials_RenameNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".RenameNodeRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}node_id\0\u{3}new_name\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "node_id"),
+    2: .standard(proto: "new_name"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1077,7 +1131,9 @@ extension Materials_RenameNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Materials_RenameNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".RenameNodeResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "success"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1107,7 +1163,9 @@ extension Materials_RenameNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Materials_DeleteNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteNodeRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}node_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "node_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1137,7 +1195,9 @@ extension Materials_DeleteNodeRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Materials_DeleteNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteNodeResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "success"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1167,7 +1227,9 @@ extension Materials_DeleteNodeResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Materials_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1197,7 +1259,9 @@ extension Materials_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf.
 
 extension Materials_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ok"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

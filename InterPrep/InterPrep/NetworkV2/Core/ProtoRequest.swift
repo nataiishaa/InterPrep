@@ -135,9 +135,10 @@ public struct ProtoRequest<Response: Message>: Sendable {
         request.cachePolicy = cachePolicy
         request.timeoutInterval = timeout
         
-        // Headers some servers/proxies expect (avoid connection reset from strict middleboxes)
+        // Headers for protobuf over HTTP
         request.setValue("InterPrep/1.0 (iOS)", forHTTPHeaderField: "User-Agent")
-        request.setValue("application/json, application/x-protobuf, */*", forHTTPHeaderField: "Accept")
+        request.setValue("application/x-protobuf", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/x-protobuf", forHTTPHeaderField: "Accept")
         
         // Add headers
         for header in headers {

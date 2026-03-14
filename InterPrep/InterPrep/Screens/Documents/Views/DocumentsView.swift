@@ -120,7 +120,8 @@ struct DocumentsView: View {
             }
             .sheet(isPresented: .constant(model.showingUploadSheet)) {
                 UploadFileSheet(
-                    onDismiss: model.onDismissSheet
+                    onDismiss: model.onDismissSheet,
+                    onFileSelected: model.onFileUpload
                 )
             }
             .sheet(isPresented: Binding(
@@ -199,6 +200,7 @@ extension DocumentsView {
         let onCreateNoteTap: () -> Void
         let onDismissSheet: () -> Void
         let onFolderCreate: (String) -> Void
+        let onFileUpload: (URL) -> Void
         let onDocumentDelete: (Document) -> Void
         let onClearDocumentToOpen: () -> Void
     }
@@ -237,6 +239,7 @@ extension DocumentsView {
             onCreateNoteTap: {},
             onDismissSheet: {},
             onFolderCreate: { _ in },
+            onFileUpload: { _ in },
             onDocumentDelete: { _ in },
             onClearDocumentToOpen: {}
         )

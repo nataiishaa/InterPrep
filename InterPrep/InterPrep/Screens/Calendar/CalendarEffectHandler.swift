@@ -2,21 +2,91 @@
 //  CalendarEffectHandler.swift
 //  InterPrep
 //
-//  Calendar effect handler with notifications
+//  Calendar effect handler with notifications and gRPC integration
 //
 
 import Foundation
 import UserNotifications
 import ArchitectureCore
 
+// MARK: - Service Protocol
+
+public protocol CalendarServiceProtocol: Actor {
+    func createEvent(title: String, description: String, startTime: Date, endTime: Date, eventType: CalendarEventType, location: String?, reminderEnabled: Bool, reminderMinutes: Int32) async throws -> CalendarEvent
+    func listEvents(fromTime: Date, toTime: Date) async throws -> [CalendarEvent]
+    func listUpcoming(limit: Int32) async throws -> [CalendarEvent]
+    func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?) async throws -> CalendarEvent
+    func deleteEvent(id: String) async throws -> Bool
+}
+
+public enum CalendarEventType: Sendable {
+    case unspecified
+    case interview
+    case call
+    case meeting
+    case testTask
+    case prep
+    case deadline
+    case other
+}
+
+public struct CalendarEvent: Sendable {
+    public let id: String
+    public let title: String
+    public let description: String
+    public let eventType: CalendarEventType
+    public let startTime: Date
+    public let endTime: Date
+    public let timezone: String?
+    public let location: String?
+    public let relatedVacancyId: String?
+    public let reminderEnabled: Bool
+    public let reminderMinutes: Int32
+    public let createdAt: Date
+    public let updatedAt: Date
+    
+    public init(
+        id: String,
+        title: String,
+        description: String,
+        eventType: CalendarEventType,
+        startTime: Date,
+        endTime: Date,
+        timezone: String? = nil,
+        location: String? = nil,
+        relatedVacancyId: String? = nil,
+        reminderEnabled: Bool,
+        reminderMinutes: Int32,
+        createdAt: Date,
+        updatedAt: Date
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.eventType = eventType
+        self.startTime = startTime
+        self.endTime = endTime
+        self.timezone = timezone
+        self.location = location
+        self.relatedVacancyId = relatedVacancyId
+        self.reminderEnabled = reminderEnabled
+        self.reminderMinutes = reminderMinutes
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+// MARK: - Effect Handler
+
 public actor CalendarEffectHandler: EffectHandler {
     public typealias S = CalendarState
     
     private let notificationCenter = UNUserNotificationCenter.current()
-    private let userDefaults = UserDefaults.standard
-    private let eventsKey = "calendar_events"
+    private let calendarService: CalendarServiceProtocol
     
-    public init() {}
+    public init(calendarService: CalendarServiceProtocol) {
+        self.calendarService = calendarService
+    }
     
     public func handle(effect: CalendarState.Effect) async -> CalendarState.Feedback? {
         switch effect {
@@ -45,59 +115,119 @@ public actor CalendarEffectHandler: EffectHandler {
     
     private func loadEvents() async -> CalendarState.Feedback {
         do {
-            if let data = userDefaults.data(forKey: eventsKey) {
-                let events = try JSONDecoder().decode([CalendarState.CalendarEvent].self, from: data)
-                return .eventsLoaded(events)
-            } else {
-                return .eventsLoaded([])
-            }
+            let currentMonth = Date()
+            let calendar = Calendar.current
+            let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth))!
+            let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+            
+            let serviceEvents = try await calendarService.listEvents(fromTime: startOfMonth, toTime: endOfMonth)
+            let events = serviceEvents.map { mapServiceToCalendarEvent($0) }
+            return .eventsLoaded(events)
         } catch {
-            return .loadingFailed("Не удалось загрузить события")
+            return .loadingFailed("Не удалось загрузить события: \(error.localizedDescription)")
         }
     }
     
     private func saveEvent(_ event: CalendarState.CalendarEvent) async -> CalendarState.Feedback {
         do {
-            var events = await loadEventsSync()
-            events.append(event)
+            let serviceEvent = try await calendarService.createEvent(
+                title: event.title,
+                description: event.description,
+                startTime: event.date,
+                endTime: event.date.addingTimeInterval(3600),
+                eventType: mapEventTypeToService(event.type),
+                location: nil,
+                reminderEnabled: event.reminderEnabled,
+                reminderMinutes: Int32(event.reminderMinutesBefore)
+            )
             
-            let data = try JSONEncoder().encode(events)
-            userDefaults.set(data, forKey: eventsKey)
-            
-            return .eventCreated(event)
+            let createdEvent = mapServiceToCalendarEvent(serviceEvent)
+            return .eventCreated(createdEvent)
         } catch {
-            return .loadingFailed("Не удалось сохранить событие")
+            return .loadingFailed("Не удалось сохранить событие: \(error.localizedDescription)")
         }
     }
     
     private func updateEvent(_ event: CalendarState.CalendarEvent) async -> CalendarState.Feedback {
         do {
-            var events = await loadEventsSync()
-            if let index = events.firstIndex(where: { $0.id == event.id }) {
-                events[index] = event
-                
-                let data = try JSONEncoder().encode(events)
-                userDefaults.set(data, forKey: eventsKey)
-                
-                return .eventUpdated(event)
-            }
-            return .loadingFailed("Событие не найдено")
+            let serviceEvent = try await calendarService.updateEvent(
+                id: event.id,
+                title: event.title,
+                description: event.description,
+                startTime: event.date,
+                endTime: event.date.addingTimeInterval(3600),
+                eventType: mapEventTypeToService(event.type),
+                location: nil,
+                reminderEnabled: event.reminderEnabled,
+                reminderMinutes: Int32(event.reminderMinutesBefore)
+            )
+            
+            let updatedEvent = mapServiceToCalendarEvent(serviceEvent)
+            return .eventUpdated(updatedEvent)
         } catch {
-            return .loadingFailed("Не удалось обновить событие")
+            return .loadingFailed("Не удалось обновить событие: \(error.localizedDescription)")
         }
     }
     
     private func deleteEvent(_ id: String) async -> CalendarState.Feedback {
         do {
-            var events = await loadEventsSync()
-            events.removeAll { $0.id == id }
-            
-            let data = try JSONEncoder().encode(events)
-            userDefaults.set(data, forKey: eventsKey)
-            
-            return .eventDeleted(id)
+            let success = try await calendarService.deleteEvent(id: id)
+            if success {
+                return .eventDeleted(id)
+            } else {
+                return .loadingFailed("Не удалось удалить событие")
+            }
         } catch {
-            return .loadingFailed("Не удалось удалить событие")
+            return .loadingFailed("Не удалось удалить событие: \(error.localizedDescription)")
+        }
+    }
+    
+    // MARK: - Mapping Helpers
+    
+    private func mapServiceToCalendarEvent(_ serviceEvent: CalendarEvent) -> CalendarState.CalendarEvent {
+        CalendarState.CalendarEvent(
+            id: serviceEvent.id,
+            title: serviceEvent.title,
+            description: serviceEvent.description,
+            date: serviceEvent.startTime,
+            type: mapServiceToEventType(serviceEvent.eventType),
+            reminderEnabled: serviceEvent.reminderEnabled,
+            reminderMinutesBefore: Int(serviceEvent.reminderMinutes),
+            isCompleted: false
+        )
+    }
+    
+    private func mapServiceToEventType(_ serviceType: CalendarEventType) -> CalendarState.EventType {
+        switch serviceType {
+        case .interview:
+            return .interview
+        case .call:
+            return .call
+        case .meeting:
+            return .meeting
+        case .testTask:
+            return .test
+        case .deadline:
+            return .deadline
+        case .other, .unspecified, .prep:
+            return .other
+        }
+    }
+    
+    private func mapEventTypeToService(_ type: CalendarState.EventType) -> CalendarEventType {
+        switch type {
+        case .interview:
+            return .interview
+        case .call:
+            return .call
+        case .meeting:
+            return .meeting
+        case .test:
+            return .testTask
+        case .deadline:
+            return .deadline
+        case .other:
+            return .other
         }
     }
     
@@ -154,12 +284,54 @@ public actor CalendarEffectHandler: EffectHandler {
             return false
         }
     }
+}
+
+// MARK: - Mock Service for Preview
+
+public final actor MockCalendarService: CalendarServiceProtocol {
+    public init() {}
     
-    private func loadEventsSync() async -> [CalendarState.CalendarEvent] {
-        guard let data = userDefaults.data(forKey: eventsKey),
-              let events = try? JSONDecoder().decode([CalendarState.CalendarEvent].self, from: data) else {
-            return []
-        }
-        return events
+    public func createEvent(title: String, description: String, startTime: Date, endTime: Date, eventType: CalendarEventType, location: String?, reminderEnabled: Bool, reminderMinutes: Int32) async throws -> CalendarEvent {
+        CalendarEvent(
+            id: UUID().uuidString,
+            title: title,
+            description: description,
+            eventType: eventType,
+            startTime: startTime,
+            endTime: endTime,
+            location: location,
+            reminderEnabled: reminderEnabled,
+            reminderMinutes: reminderMinutes,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+    }
+    
+    public func listEvents(fromTime: Date, toTime: Date) async throws -> [CalendarEvent] {
+        []
+    }
+    
+    public func listUpcoming(limit: Int32) async throws -> [CalendarEvent] {
+        []
+    }
+    
+    public func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?) async throws -> CalendarEvent {
+        CalendarEvent(
+            id: id,
+            title: title ?? "Updated Event",
+            description: description ?? "",
+            eventType: eventType ?? .other,
+            startTime: startTime ?? Date(),
+            endTime: endTime ?? Date(),
+            location: location,
+            reminderEnabled: reminderEnabled ?? false,
+            reminderMinutes: reminderMinutes ?? 30,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+    }
+    
+    public func deleteEvent(id: String) async throws -> Bool {
+        true
     }
 }

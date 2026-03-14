@@ -74,11 +74,11 @@ public struct User_GetMeResponse: Sendable {
   // methods supported on all messages.
 
   public var user: User_UserProfile {
-    get {_user ?? User_UserProfile()}
+    get {return _user ?? User_UserProfile()}
     set {_user = newValue}
   }
   /// Returns true if `user` has been explicitly set.
-  public var hasUser: Bool {self._user != nil}
+  public var hasUser: Bool {return self._user != nil}
   /// Clears the value of `user`. Subsequent reads from it will return its default value.
   public mutating func clearUser() {self._user = nil}
 
@@ -127,31 +127,31 @@ public struct User_ResumeProfile: Sendable {
   public var targetRoles: [String] = []
 
   public var experienceLevel: String {
-    get {_experienceLevel ?? String()}
+    get {return _experienceLevel ?? String()}
     set {_experienceLevel = newValue}
   }
   /// Returns true if `experienceLevel` has been explicitly set.
-  public var hasExperienceLevel: Bool {self._experienceLevel != nil}
+  public var hasExperienceLevel: Bool {return self._experienceLevel != nil}
   /// Clears the value of `experienceLevel`. Subsequent reads from it will return its default value.
   public mutating func clearExperienceLevel() {self._experienceLevel = nil}
 
   public var areas: [User_Area] = []
 
   public var salaryMin: Double {
-    get {_salaryMin ?? 0}
+    get {return _salaryMin ?? 0}
     set {_salaryMin = newValue}
   }
   /// Returns true if `salaryMin` has been explicitly set.
-  public var hasSalaryMin: Bool {self._salaryMin != nil}
+  public var hasSalaryMin: Bool {return self._salaryMin != nil}
   /// Clears the value of `salaryMin`. Subsequent reads from it will return its default value.
   public mutating func clearSalaryMin() {self._salaryMin = nil}
 
   public var currency: String {
-    get {_currency ?? String()}
+    get {return _currency ?? String()}
     set {_currency = newValue}
   }
   /// Returns true if `currency` has been explicitly set.
-  public var hasCurrency: Bool {self._currency != nil}
+  public var hasCurrency: Bool {return self._currency != nil}
   /// Clears the value of `currency`. Subsequent reads from it will return its default value.
   public mutating func clearCurrency() {self._currency = nil}
 
@@ -160,20 +160,20 @@ public struct User_ResumeProfile: Sendable {
   public var skillsTop: [String] = []
 
   public var educationLevel: String {
-    get {_educationLevel ?? String()}
+    get {return _educationLevel ?? String()}
     set {_educationLevel = newValue}
   }
   /// Returns true if `educationLevel` has been explicitly set.
-  public var hasEducationLevel: Bool {self._educationLevel != nil}
+  public var hasEducationLevel: Bool {return self._educationLevel != nil}
   /// Clears the value of `educationLevel`. Subsequent reads from it will return its default value.
   public mutating func clearEducationLevel() {self._educationLevel = nil}
 
   public var notes: String {
-    get {_notes ?? String()}
+    get {return _notes ?? String()}
     set {_notes = newValue}
   }
   /// Returns true if `notes` has been explicitly set.
-  public var hasNotes: Bool {self._notes != nil}
+  public var hasNotes: Bool {return self._notes != nil}
   /// Clears the value of `notes`. Subsequent reads from it will return its default value.
   public mutating func clearNotes() {self._notes = nil}
 
@@ -196,31 +196,31 @@ public struct User_ResumeProfilePatch: Sendable {
   public var targetRoles: [String] = []
 
   public var experienceLevel: String {
-    get {_experienceLevel ?? String()}
+    get {return _experienceLevel ?? String()}
     set {_experienceLevel = newValue}
   }
   /// Returns true if `experienceLevel` has been explicitly set.
-  public var hasExperienceLevel: Bool {self._experienceLevel != nil}
+  public var hasExperienceLevel: Bool {return self._experienceLevel != nil}
   /// Clears the value of `experienceLevel`. Subsequent reads from it will return its default value.
   public mutating func clearExperienceLevel() {self._experienceLevel = nil}
 
   public var areas: [User_Area] = []
 
   public var salaryMin: Double {
-    get {_salaryMin ?? 0}
+    get {return _salaryMin ?? 0}
     set {_salaryMin = newValue}
   }
   /// Returns true if `salaryMin` has been explicitly set.
-  public var hasSalaryMin: Bool {self._salaryMin != nil}
+  public var hasSalaryMin: Bool {return self._salaryMin != nil}
   /// Clears the value of `salaryMin`. Subsequent reads from it will return its default value.
   public mutating func clearSalaryMin() {self._salaryMin = nil}
 
   public var currency: String {
-    get {_currency ?? String()}
+    get {return _currency ?? String()}
     set {_currency = newValue}
   }
   /// Returns true if `currency` has been explicitly set.
-  public var hasCurrency: Bool {self._currency != nil}
+  public var hasCurrency: Bool {return self._currency != nil}
   /// Clears the value of `currency`. Subsequent reads from it will return its default value.
   public mutating func clearCurrency() {self._currency = nil}
 
@@ -229,20 +229,20 @@ public struct User_ResumeProfilePatch: Sendable {
   public var skillsTop: [String] = []
 
   public var educationLevel: String {
-    get {_educationLevel ?? String()}
+    get {return _educationLevel ?? String()}
     set {_educationLevel = newValue}
   }
   /// Returns true if `educationLevel` has been explicitly set.
-  public var hasEducationLevel: Bool {self._educationLevel != nil}
+  public var hasEducationLevel: Bool {return self._educationLevel != nil}
   /// Clears the value of `educationLevel`. Subsequent reads from it will return its default value.
   public mutating func clearEducationLevel() {self._educationLevel = nil}
 
   public var notes: String {
-    get {_notes ?? String()}
+    get {return _notes ?? String()}
     set {_notes = newValue}
   }
   /// Returns true if `notes` has been explicitly set.
-  public var hasNotes: Bool {self._notes != nil}
+  public var hasNotes: Bool {return self._notes != nil}
   /// Clears the value of `notes`. Subsequent reads from it will return its default value.
   public mutating func clearNotes() {self._notes = nil}
 
@@ -287,11 +287,11 @@ public struct User_GetResumeProfileResponse: Sendable {
   // methods supported on all messages.
 
   public var profile: User_ResumeProfile {
-    get {_profile ?? User_ResumeProfile()}
+    get {return _profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  public var hasProfile: Bool {self._profile != nil}
+  public var hasProfile: Bool {return self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
   public mutating func clearProfile() {self._profile = nil}
 
@@ -300,11 +300,11 @@ public struct User_GetResumeProfileResponse: Sendable {
   public var version: Int64 = 0
 
   public var sourceMaterialID: String {
-    get {_sourceMaterialID ?? String()}
+    get {return _sourceMaterialID ?? String()}
     set {_sourceMaterialID = newValue}
   }
   /// Returns true if `sourceMaterialID` has been explicitly set.
-  public var hasSourceMaterialID: Bool {self._sourceMaterialID != nil}
+  public var hasSourceMaterialID: Bool {return self._sourceMaterialID != nil}
   /// Clears the value of `sourceMaterialID`. Subsequent reads from it will return its default value.
   public mutating func clearSourceMaterialID() {self._sourceMaterialID = nil}
 
@@ -338,11 +338,11 @@ public struct User_GetResumeProfileInternalResponse: Sendable {
   // methods supported on all messages.
 
   public var profile: User_ResumeProfile {
-    get {_profile ?? User_ResumeProfile()}
+    get {return _profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  public var hasProfile: Bool {self._profile != nil}
+  public var hasProfile: Bool {return self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
   public mutating func clearProfile() {self._profile = nil}
 
@@ -351,11 +351,11 @@ public struct User_GetResumeProfileInternalResponse: Sendable {
   public var version: Int64 = 0
 
   public var sourceMaterialID: String {
-    get {_sourceMaterialID ?? String()}
+    get {return _sourceMaterialID ?? String()}
     set {_sourceMaterialID = newValue}
   }
   /// Returns true if `sourceMaterialID` has been explicitly set.
-  public var hasSourceMaterialID: Bool {self._sourceMaterialID != nil}
+  public var hasSourceMaterialID: Bool {return self._sourceMaterialID != nil}
   /// Clears the value of `sourceMaterialID`. Subsequent reads from it will return its default value.
   public mutating func clearSourceMaterialID() {self._sourceMaterialID = nil}
 
@@ -381,11 +381,11 @@ public struct User_UpsertResumeProfileInternalRequest: Sendable {
   public var sourceMaterialID: String = String()
 
   public var profile: User_ResumeProfile {
-    get {_profile ?? User_ResumeProfile()}
+    get {return _profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  public var hasProfile: Bool {self._profile != nil}
+  public var hasProfile: Bool {return self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
   public mutating func clearProfile() {self._profile = nil}
 
@@ -422,11 +422,11 @@ public struct User_PatchResumeProfileInternalRequest: Sendable {
   public var userID: UInt32 = 0
 
   public var patch: User_ResumeProfilePatch {
-    get {_patch ?? User_ResumeProfilePatch()}
+    get {return _patch ?? User_ResumeProfilePatch()}
     set {_patch = newValue}
   }
   /// Returns true if `patch` has been explicitly set.
-  public var hasPatch: Bool {self._patch != nil}
+  public var hasPatch: Bool {return self._patch != nil}
   /// Clears the value of `patch`. Subsequent reads from it will return its default value.
   public mutating func clearPatch() {self._patch = nil}
 
@@ -435,11 +435,11 @@ public struct User_PatchResumeProfileInternalRequest: Sendable {
   public var setConfidence: Dictionary<String,Double> = [:]
 
   public var status: User_ResumeProfileStatus {
-    get {_status ?? .unspecified}
+    get {return _status ?? .unspecified}
     set {_status = newValue}
   }
   /// Returns true if `status` has been explicitly set.
-  public var hasStatus: Bool {self._status != nil}
+  public var hasStatus: Bool {return self._status != nil}
   /// Clears the value of `status`. Subsequent reads from it will return its default value.
   public mutating func clearStatus() {self._status = nil}
 
@@ -471,11 +471,11 @@ public struct User_UpdateResumeProfileRequest: Sendable {
   public var userID: UInt32 = 0
 
   public var profile: User_ResumeProfile {
-    get {_profile ?? User_ResumeProfile()}
+    get {return _profile ?? User_ResumeProfile()}
     set {_profile = newValue}
   }
   /// Returns true if `profile` has been explicitly set.
-  public var hasProfile: Bool {self._profile != nil}
+  public var hasProfile: Bool {return self._profile != nil}
   /// Clears the value of `profile`. Subsequent reads from it will return its default value.
   public mutating func clearProfile() {self._profile = nil}
 
@@ -606,38 +606,38 @@ public struct User_UpdateUserProfileRequest: Sendable {
   // methods supported on all messages.
 
   public var firstName: String {
-    get {_firstName ?? String()}
+    get {return _firstName ?? String()}
     set {_firstName = newValue}
   }
   /// Returns true if `firstName` has been explicitly set.
-  public var hasFirstName: Bool {self._firstName != nil}
+  public var hasFirstName: Bool {return self._firstName != nil}
   /// Clears the value of `firstName`. Subsequent reads from it will return its default value.
   public mutating func clearFirstName() {self._firstName = nil}
 
   public var lastName: String {
-    get {_lastName ?? String()}
+    get {return _lastName ?? String()}
     set {_lastName = newValue}
   }
   /// Returns true if `lastName` has been explicitly set.
-  public var hasLastName: Bool {self._lastName != nil}
+  public var hasLastName: Bool {return self._lastName != nil}
   /// Clears the value of `lastName`. Subsequent reads from it will return its default value.
   public mutating func clearLastName() {self._lastName = nil}
 
   public var email: String {
-    get {_email ?? String()}
+    get {return _email ?? String()}
     set {_email = newValue}
   }
   /// Returns true if `email` has been explicitly set.
-  public var hasEmail: Bool {self._email != nil}
+  public var hasEmail: Bool {return self._email != nil}
   /// Clears the value of `email`. Subsequent reads from it will return its default value.
   public mutating func clearEmail() {self._email = nil}
 
   public var notificationsEnabled: Bool {
-    get {_notificationsEnabled ?? false}
+    get {return _notificationsEnabled ?? false}
     set {_notificationsEnabled = newValue}
   }
   /// Returns true if `notificationsEnabled` has been explicitly set.
-  public var hasNotificationsEnabled: Bool {self._notificationsEnabled != nil}
+  public var hasNotificationsEnabled: Bool {return self._notificationsEnabled != nil}
   /// Clears the value of `notificationsEnabled`. Subsequent reads from it will return its default value.
   public mutating func clearNotificationsEnabled() {self._notificationsEnabled = nil}
 
@@ -668,7 +668,11 @@ public struct User_UpdateUserProfileResponse: Sendable {
 fileprivate let _protobuf_package = "user"
 
 extension User_ResumeProfileStatus: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0RESUME_PROFILE_STATUS_UNSPECIFIED\0\u{1}DRAFT\0\u{1}CONFIRMED\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "RESUME_PROFILE_STATUS_UNSPECIFIED"),
+    1: .same(proto: "DRAFT"),
+    2: .same(proto: "CONFIRMED"),
+  ]
 }
 
 extension User_GetMeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
@@ -692,7 +696,9 @@ extension User_GetMeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
 
 extension User_GetMeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetMeResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}user\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "user"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -726,7 +732,18 @@ extension User_GetMeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 
 extension User_UserProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UserProfile"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}first_name\0\u{3}last_name\0\u{1}email\0\u{1}username\0\u{3}resume_uploaded\0\u{3}total_interviews\0\u{3}completed_interviews\0\u{3}upcoming_interviews\0\u{3}notifications_enabled\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .standard(proto: "first_name"),
+    3: .standard(proto: "last_name"),
+    4: .same(proto: "email"),
+    5: .same(proto: "username"),
+    6: .standard(proto: "resume_uploaded"),
+    7: .standard(proto: "total_interviews"),
+    8: .standard(proto: "completed_interviews"),
+    9: .standard(proto: "upcoming_interviews"),
+    10: .standard(proto: "notifications_enabled"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -801,7 +818,17 @@ extension User_UserProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
 
 extension User_ResumeProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ResumeProfile"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}target_roles\0\u{3}experience_level\0\u{1}areas\0\u{3}salary_min\0\u{1}currency\0\u{3}work_format\0\u{3}skills_top\0\u{3}education_level\0\u{1}notes\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "target_roles"),
+    2: .standard(proto: "experience_level"),
+    3: .same(proto: "areas"),
+    4: .standard(proto: "salary_min"),
+    5: .same(proto: "currency"),
+    6: .standard(proto: "work_format"),
+    7: .standard(proto: "skills_top"),
+    8: .standard(proto: "education_level"),
+    9: .same(proto: "notes"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -875,7 +902,17 @@ extension User_ResumeProfile: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 
 extension User_ResumeProfilePatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ResumeProfilePatch"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}target_roles\0\u{3}experience_level\0\u{1}areas\0\u{3}salary_min\0\u{1}currency\0\u{3}work_format\0\u{3}skills_top\0\u{3}education_level\0\u{1}notes\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "target_roles"),
+    2: .standard(proto: "experience_level"),
+    3: .same(proto: "areas"),
+    4: .standard(proto: "salary_min"),
+    5: .same(proto: "currency"),
+    6: .standard(proto: "work_format"),
+    7: .standard(proto: "skills_top"),
+    8: .standard(proto: "education_level"),
+    9: .same(proto: "notes"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -949,7 +986,10 @@ extension User_ResumeProfilePatch: SwiftProtobuf.Message, SwiftProtobuf._Message
 
 extension User_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Area"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "name"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1003,7 +1043,14 @@ extension User_GetResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension User_GetResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetResumeProfileResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profile\0\u{1}status\0\u{1}version\0\u{3}source_material_id\0\u{3}confirmed_fields\0\u{1}confidence\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "profile"),
+    2: .same(proto: "status"),
+    3: .same(proto: "version"),
+    4: .standard(proto: "source_material_id"),
+    5: .standard(proto: "confirmed_fields"),
+    6: .same(proto: "confidence"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1062,7 +1109,9 @@ extension User_GetResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._M
 
 extension User_GetResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetResumeProfileInternalRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1092,7 +1141,14 @@ extension User_GetResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProt
 
 extension User_GetResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetResumeProfileInternalResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}profile\0\u{1}status\0\u{1}version\0\u{3}source_material_id\0\u{3}confirmed_fields\0\u{1}confidence\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "profile"),
+    2: .same(proto: "status"),
+    3: .same(proto: "version"),
+    4: .standard(proto: "source_material_id"),
+    5: .standard(proto: "confirmed_fields"),
+    6: .same(proto: "confidence"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1151,7 +1207,14 @@ extension User_GetResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftPro
 
 extension User_UpsertResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpsertResumeProfileInternalRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{3}source_material_id\0\u{1}profile\0\u{1}status\0\u{3}confirmed_fields\0\u{1}confidence\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .standard(proto: "source_material_id"),
+    3: .same(proto: "profile"),
+    4: .same(proto: "status"),
+    5: .standard(proto: "confirmed_fields"),
+    6: .same(proto: "confidence"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1210,7 +1273,9 @@ extension User_UpsertResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftP
 
 extension User_UpsertResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpsertResumeProfileInternalResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "version"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1240,7 +1305,13 @@ extension User_UpsertResumeProfileInternalResponse: SwiftProtobuf.Message, Swift
 
 extension User_PatchResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".PatchResumeProfileInternalRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}patch\0\u{3}set_confirmed_fields\0\u{3}set_confidence\0\u{1}status\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .same(proto: "patch"),
+    3: .standard(proto: "set_confirmed_fields"),
+    4: .standard(proto: "set_confidence"),
+    5: .same(proto: "status"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1294,7 +1365,9 @@ extension User_PatchResumeProfileInternalRequest: SwiftProtobuf.Message, SwiftPr
 
 extension User_PatchResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".PatchResumeProfileInternalResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "version"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1324,7 +1397,10 @@ extension User_PatchResumeProfileInternalResponse: SwiftProtobuf.Message, SwiftP
 
 extension User_UpdateResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpdateResumeProfileRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}profile\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .same(proto: "profile"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1363,7 +1439,9 @@ extension User_UpdateResumeProfileRequest: SwiftProtobuf.Message, SwiftProtobuf.
 
 extension User_UpdateResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpdateResumeProfileResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "success"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1393,7 +1471,9 @@ extension User_UpdateResumeProfileResponse: SwiftProtobuf.Message, SwiftProtobuf
 
 extension User_RequestPasswordResetRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".RequestPasswordResetRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}email\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "email"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1423,7 +1503,9 @@ extension User_RequestPasswordResetRequest: SwiftProtobuf.Message, SwiftProtobuf
 
 extension User_RequestPasswordResetResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".RequestPasswordResetResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ok"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1453,7 +1535,10 @@ extension User_RequestPasswordResetResponse: SwiftProtobuf.Message, SwiftProtobu
 
 extension User_VerifyPasswordResetCodeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".VerifyPasswordResetCodeRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}email\0\u{1}code\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "email"),
+    2: .same(proto: "code"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1488,7 +1573,9 @@ extension User_VerifyPasswordResetCodeRequest: SwiftProtobuf.Message, SwiftProto
 
 extension User_VerifyPasswordResetCodeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".VerifyPasswordResetCodeResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}valid\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "valid"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1518,7 +1605,11 @@ extension User_VerifyPasswordResetCodeResponse: SwiftProtobuf.Message, SwiftProt
 
 extension User_ResetPasswordRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ResetPasswordRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}email\0\u{1}code\0\u{3}new_password\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "email"),
+    2: .same(proto: "code"),
+    3: .standard(proto: "new_password"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1558,7 +1649,9 @@ extension User_ResetPasswordRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
 
 extension User_ResetPasswordResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ResetPasswordResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ok"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1588,7 +1681,9 @@ extension User_ResetPasswordResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
 extension User_DeleteAccountRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteAccountRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}password\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "password"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1618,7 +1713,9 @@ extension User_DeleteAccountRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
 
 extension User_DeleteAccountResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteAccountResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}deleted\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "deleted"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1648,7 +1745,12 @@ extension User_DeleteAccountResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
 extension User_UpdateUserProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpdateUserProfileRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}first_name\0\u{3}last_name\0\u{1}email\0\u{3}notifications_enabled\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "first_name"),
+    2: .standard(proto: "last_name"),
+    3: .same(proto: "email"),
+    4: .standard(proto: "notifications_enabled"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1697,7 +1799,9 @@ extension User_UpdateUserProfileRequest: SwiftProtobuf.Message, SwiftProtobuf._M
 
 extension User_UpdateUserProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpdateUserProfileResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "success"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

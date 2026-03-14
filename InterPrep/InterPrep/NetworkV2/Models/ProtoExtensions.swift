@@ -15,6 +15,12 @@ extension SwiftProtobuf.Google_Protobuf_Timestamp {
     }
 }
 
+extension Date {
+    func toProtoTimestamp() -> SwiftProtobuf.Google_Protobuf_Timestamp {
+        SwiftProtobuf.Google_Protobuf_Timestamp(date: self)
+    }
+}
+
 // MARK: - UserProfile Extensions
 
 extension User_UserProfile {

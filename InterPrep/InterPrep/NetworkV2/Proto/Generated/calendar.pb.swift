@@ -126,99 +126,99 @@ public struct Calendar_Event: @unchecked Sendable {
   // methods supported on all messages.
 
   public var id: String {
-    get {_storage._id}
+    get {return _storage._id}
     set {_uniqueStorage()._id = newValue}
   }
 
   public var title: String {
-    get {_storage._title}
+    get {return _storage._title}
     set {_uniqueStorage()._title = newValue}
   }
 
   public var description_p: String {
-    get {_storage._description_p ?? String()}
+    get {return _storage._description_p ?? String()}
     set {_uniqueStorage()._description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  public var hasDescription_p: Bool {_storage._description_p != nil}
+  public var hasDescription_p: Bool {return _storage._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
   public mutating func clearDescription_p() {_uniqueStorage()._description_p = nil}
 
   public var eventType: Calendar_EventType {
-    get {_storage._eventType}
+    get {return _storage._eventType}
     set {_uniqueStorage()._eventType = newValue}
   }
 
   public var startTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_storage._startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _storage._startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._startTime = newValue}
   }
   /// Returns true if `startTime` has been explicitly set.
-  public var hasStartTime: Bool {_storage._startTime != nil}
+  public var hasStartTime: Bool {return _storage._startTime != nil}
   /// Clears the value of `startTime`. Subsequent reads from it will return its default value.
   public mutating func clearStartTime() {_uniqueStorage()._startTime = nil}
 
   public var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_storage._endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _storage._endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._endTime = newValue}
   }
   /// Returns true if `endTime` has been explicitly set.
-  public var hasEndTime: Bool {_storage._endTime != nil}
+  public var hasEndTime: Bool {return _storage._endTime != nil}
   /// Clears the value of `endTime`. Subsequent reads from it will return its default value.
   public mutating func clearEndTime() {_uniqueStorage()._endTime = nil}
 
   public var timezone: String {
-    get {_storage._timezone ?? String()}
+    get {return _storage._timezone ?? String()}
     set {_uniqueStorage()._timezone = newValue}
   }
   /// Returns true if `timezone` has been explicitly set.
-  public var hasTimezone: Bool {_storage._timezone != nil}
+  public var hasTimezone: Bool {return _storage._timezone != nil}
   /// Clears the value of `timezone`. Subsequent reads from it will return its default value.
   public mutating func clearTimezone() {_uniqueStorage()._timezone = nil}
 
   public var location: String {
-    get {_storage._location ?? String()}
+    get {return _storage._location ?? String()}
     set {_uniqueStorage()._location = newValue}
   }
   /// Returns true if `location` has been explicitly set.
-  public var hasLocation: Bool {_storage._location != nil}
+  public var hasLocation: Bool {return _storage._location != nil}
   /// Clears the value of `location`. Subsequent reads from it will return its default value.
   public mutating func clearLocation() {_uniqueStorage()._location = nil}
 
   public var relatedVacancyID: String {
-    get {_storage._relatedVacancyID ?? String()}
+    get {return _storage._relatedVacancyID ?? String()}
     set {_uniqueStorage()._relatedVacancyID = newValue}
   }
   /// Returns true if `relatedVacancyID` has been explicitly set.
-  public var hasRelatedVacancyID: Bool {_storage._relatedVacancyID != nil}
+  public var hasRelatedVacancyID: Bool {return _storage._relatedVacancyID != nil}
   /// Clears the value of `relatedVacancyID`. Subsequent reads from it will return its default value.
   public mutating func clearRelatedVacancyID() {_uniqueStorage()._relatedVacancyID = nil}
 
   public var reminderEnabled: Bool {
-    get {_storage._reminderEnabled}
+    get {return _storage._reminderEnabled}
     set {_uniqueStorage()._reminderEnabled = newValue}
   }
 
   public var reminderMinutes: Int32 {
-    get {_storage._reminderMinutes}
+    get {return _storage._reminderMinutes}
     set {_uniqueStorage()._reminderMinutes = newValue}
   }
 
   public var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_storage._createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _storage._createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._createdAt = newValue}
   }
   /// Returns true if `createdAt` has been explicitly set.
-  public var hasCreatedAt: Bool {_storage._createdAt != nil}
+  public var hasCreatedAt: Bool {return _storage._createdAt != nil}
   /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
   public mutating func clearCreatedAt() {_uniqueStorage()._createdAt = nil}
 
   public var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_storage._updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _storage._updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_uniqueStorage()._updatedAt = newValue}
   }
   /// Returns true if `updatedAt` has been explicitly set.
-  public var hasUpdatedAt: Bool {_storage._updatedAt != nil}
+  public var hasUpdatedAt: Bool {return _storage._updatedAt != nil}
   /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
   public mutating func clearUpdatedAt() {_uniqueStorage()._updatedAt = nil}
 
@@ -235,92 +235,92 @@ public struct Calendar_EventPatch: Sendable {
   // methods supported on all messages.
 
   public var title: String {
-    get {_title ?? String()}
+    get {return _title ?? String()}
     set {_title = newValue}
   }
   /// Returns true if `title` has been explicitly set.
-  public var hasTitle: Bool {self._title != nil}
+  public var hasTitle: Bool {return self._title != nil}
   /// Clears the value of `title`. Subsequent reads from it will return its default value.
   public mutating func clearTitle() {self._title = nil}
 
   public var description_p: String {
-    get {_description_p ?? String()}
+    get {return _description_p ?? String()}
     set {_description_p = newValue}
   }
   /// Returns true if `description_p` has been explicitly set.
-  public var hasDescription_p: Bool {self._description_p != nil}
+  public var hasDescription_p: Bool {return self._description_p != nil}
   /// Clears the value of `description_p`. Subsequent reads from it will return its default value.
   public mutating func clearDescription_p() {self._description_p = nil}
 
   public var eventType: Calendar_EventType {
-    get {_eventType ?? .unspecified}
+    get {return _eventType ?? .unspecified}
     set {_eventType = newValue}
   }
   /// Returns true if `eventType` has been explicitly set.
-  public var hasEventType: Bool {self._eventType != nil}
+  public var hasEventType: Bool {return self._eventType != nil}
   /// Clears the value of `eventType`. Subsequent reads from it will return its default value.
   public mutating func clearEventType() {self._eventType = nil}
 
   public var startTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_startTime = newValue}
   }
   /// Returns true if `startTime` has been explicitly set.
-  public var hasStartTime: Bool {self._startTime != nil}
+  public var hasStartTime: Bool {return self._startTime != nil}
   /// Clears the value of `startTime`. Subsequent reads from it will return its default value.
   public mutating func clearStartTime() {self._startTime = nil}
 
   public var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_endTime = newValue}
   }
   /// Returns true if `endTime` has been explicitly set.
-  public var hasEndTime: Bool {self._endTime != nil}
+  public var hasEndTime: Bool {return self._endTime != nil}
   /// Clears the value of `endTime`. Subsequent reads from it will return its default value.
   public mutating func clearEndTime() {self._endTime = nil}
 
   public var timezone: String {
-    get {_timezone ?? String()}
+    get {return _timezone ?? String()}
     set {_timezone = newValue}
   }
   /// Returns true if `timezone` has been explicitly set.
-  public var hasTimezone: Bool {self._timezone != nil}
+  public var hasTimezone: Bool {return self._timezone != nil}
   /// Clears the value of `timezone`. Subsequent reads from it will return its default value.
   public mutating func clearTimezone() {self._timezone = nil}
 
   public var location: String {
-    get {_location ?? String()}
+    get {return _location ?? String()}
     set {_location = newValue}
   }
   /// Returns true if `location` has been explicitly set.
-  public var hasLocation: Bool {self._location != nil}
+  public var hasLocation: Bool {return self._location != nil}
   /// Clears the value of `location`. Subsequent reads from it will return its default value.
   public mutating func clearLocation() {self._location = nil}
 
   public var relatedVacancyID: String {
-    get {_relatedVacancyID ?? String()}
+    get {return _relatedVacancyID ?? String()}
     set {_relatedVacancyID = newValue}
   }
   /// Returns true if `relatedVacancyID` has been explicitly set.
-  public var hasRelatedVacancyID: Bool {self._relatedVacancyID != nil}
+  public var hasRelatedVacancyID: Bool {return self._relatedVacancyID != nil}
   /// Clears the value of `relatedVacancyID`. Subsequent reads from it will return its default value.
   public mutating func clearRelatedVacancyID() {self._relatedVacancyID = nil}
 
   public var reminderEnabled: Bool {
-    get {_reminderEnabled ?? false}
+    get {return _reminderEnabled ?? false}
     set {_reminderEnabled = newValue}
   }
   /// Returns true if `reminderEnabled` has been explicitly set.
-  public var hasReminderEnabled: Bool {self._reminderEnabled != nil}
+  public var hasReminderEnabled: Bool {return self._reminderEnabled != nil}
   /// Clears the value of `reminderEnabled`. Subsequent reads from it will return its default value.
   public mutating func clearReminderEnabled() {self._reminderEnabled = nil}
 
   public var reminderMinutes: Int32 {
-    get {_reminderMinutes ?? 0}
+    get {return _reminderMinutes ?? 0}
     set {_reminderMinutes = newValue}
   }
   /// Returns true if `reminderMinutes` has been explicitly set.
-  public var hasReminderMinutes: Bool {self._reminderMinutes != nil}
+  public var hasReminderMinutes: Bool {return self._reminderMinutes != nil}
   /// Clears the value of `reminderMinutes`. Subsequent reads from it will return its default value.
   public mutating func clearReminderMinutes() {self._reminderMinutes = nil}
 
@@ -346,11 +346,11 @@ public struct Calendar_CreateEventRequest: Sendable {
   // methods supported on all messages.
 
   public var event: Calendar_Event {
-    get {_event ?? Calendar_Event()}
+    get {return _event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  public var hasEvent: Bool {self._event != nil}
+  public var hasEvent: Bool {return self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
   public mutating func clearEvent() {self._event = nil}
 
@@ -367,11 +367,11 @@ public struct Calendar_CreateEventResponse: Sendable {
   // methods supported on all messages.
 
   public var event: Calendar_Event {
-    get {_event ?? Calendar_Event()}
+    get {return _event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  public var hasEvent: Bool {self._event != nil}
+  public var hasEvent: Bool {return self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
   public mutating func clearEvent() {self._event = nil}
 
@@ -400,11 +400,11 @@ public struct Calendar_GetEventResponse: Sendable {
   // methods supported on all messages.
 
   public var event: Calendar_Event {
-    get {_event ?? Calendar_Event()}
+    get {return _event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  public var hasEvent: Bool {self._event != nil}
+  public var hasEvent: Bool {return self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
   public mutating func clearEvent() {self._event = nil}
 
@@ -423,11 +423,11 @@ public struct Calendar_UpdateEventRequest: Sendable {
   public var id: String = String()
 
   public var patch: Calendar_EventPatch {
-    get {_patch ?? Calendar_EventPatch()}
+    get {return _patch ?? Calendar_EventPatch()}
     set {_patch = newValue}
   }
   /// Returns true if `patch` has been explicitly set.
-  public var hasPatch: Bool {self._patch != nil}
+  public var hasPatch: Bool {return self._patch != nil}
   /// Clears the value of `patch`. Subsequent reads from it will return its default value.
   public mutating func clearPatch() {self._patch = nil}
 
@@ -444,11 +444,11 @@ public struct Calendar_UpdateEventResponse: Sendable {
   // methods supported on all messages.
 
   public var event: Calendar_Event {
-    get {_event ?? Calendar_Event()}
+    get {return _event ?? Calendar_Event()}
     set {_event = newValue}
   }
   /// Returns true if `event` has been explicitly set.
-  public var hasEvent: Bool {self._event != nil}
+  public var hasEvent: Bool {return self._event != nil}
   /// Clears the value of `event`. Subsequent reads from it will return its default value.
   public mutating func clearEvent() {self._event = nil}
 
@@ -489,20 +489,20 @@ public struct Calendar_ListEventsRequest: Sendable {
   // methods supported on all messages.
 
   public var fromTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_fromTime = newValue}
   }
   /// Returns true if `fromTime` has been explicitly set.
-  public var hasFromTime: Bool {self._fromTime != nil}
+  public var hasFromTime: Bool {return self._fromTime != nil}
   /// Clears the value of `fromTime`. Subsequent reads from it will return its default value.
   public mutating func clearFromTime() {self._fromTime = nil}
 
   public var toTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_toTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _toTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_toTime = newValue}
   }
   /// Returns true if `toTime` has been explicitly set.
-  public var hasToTime: Bool {self._toTime != nil}
+  public var hasToTime: Bool {return self._toTime != nil}
   /// Clears the value of `toTime`. Subsequent reads from it will return its default value.
   public mutating func clearToTime() {self._toTime = nil}
 
@@ -542,11 +542,11 @@ public struct Calendar_ListUpcomingRequest: Sendable {
   public var limit: Int32 = 0
 
   public var fromTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    get {return _fromTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_fromTime = newValue}
   }
   /// Returns true if `fromTime` has been explicitly set.
-  public var hasFromTime: Bool {self._fromTime != nil}
+  public var hasFromTime: Bool {return self._fromTime != nil}
   /// Clears the value of `fromTime`. Subsequent reads from it will return its default value.
   public mutating func clearFromTime() {self._fromTime = nil}
 
@@ -598,16 +598,42 @@ public struct Calendar_DeleteUserDataResponse: Sendable {
 fileprivate let _protobuf_package = "calendar"
 
 extension Calendar_EventType: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0EVENT_TYPE_UNSPECIFIED\0\u{1}INTERVIEW\0\u{1}CALL\0\u{1}MEETING\0\u{1}TEST_TASK\0\u{1}PREP\0\u{1}DEADLINE\0\u{1}OTHER\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "EVENT_TYPE_UNSPECIFIED"),
+    1: .same(proto: "INTERVIEW"),
+    2: .same(proto: "CALL"),
+    3: .same(proto: "MEETING"),
+    4: .same(proto: "TEST_TASK"),
+    5: .same(proto: "PREP"),
+    6: .same(proto: "DEADLINE"),
+    7: .same(proto: "OTHER"),
+  ]
 }
 
 extension Calendar_SortOrder: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SORT_START_ASC\0\u{1}SORT_START_DESC\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "SORT_START_ASC"),
+    1: .same(proto: "SORT_START_DESC"),
+  ]
 }
 
 extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Event"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}title\0\u{1}description\0\u{3}event_type\0\u{3}start_time\0\u{3}end_time\0\u{1}timezone\0\u{1}location\0\u{3}related_vacancy_id\0\u{3}reminder_enabled\0\u{3}reminder_minutes\0\u{3}created_at\0\u{3}updated_at\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "title"),
+    3: .same(proto: "description"),
+    4: .standard(proto: "event_type"),
+    5: .standard(proto: "start_time"),
+    6: .standard(proto: "end_time"),
+    7: .same(proto: "timezone"),
+    8: .same(proto: "location"),
+    9: .standard(proto: "related_vacancy_id"),
+    10: .standard(proto: "reminder_enabled"),
+    11: .standard(proto: "reminder_minutes"),
+    12: .standard(proto: "created_at"),
+    13: .standard(proto: "updated_at"),
+  ]
 
   fileprivate class _StorageClass {
     var _id: String = String()
@@ -624,11 +650,15 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 
+    #if swift(>=5.10)
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
       // This will force a copy to be made of this reference when the first mutation occurs;
       // hence, it is safe to mark this as `nonisolated(unsafe)`.
       static nonisolated(unsafe) let defaultInstance = _StorageClass()
+    #else
+      static let defaultInstance = _StorageClass()
+    #endif
 
     private init() {}
 
@@ -761,7 +791,18 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
 
 extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".EventPatch"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}title\0\u{1}description\0\u{3}event_type\0\u{3}start_time\0\u{3}end_time\0\u{1}timezone\0\u{1}location\0\u{3}related_vacancy_id\0\u{3}reminder_enabled\0\u{3}reminder_minutes\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "title"),
+    2: .same(proto: "description"),
+    3: .standard(proto: "event_type"),
+    4: .standard(proto: "start_time"),
+    5: .standard(proto: "end_time"),
+    6: .same(proto: "timezone"),
+    7: .same(proto: "location"),
+    8: .standard(proto: "related_vacancy_id"),
+    9: .standard(proto: "reminder_enabled"),
+    10: .standard(proto: "reminder_minutes"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -840,7 +881,9 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
 
 extension Calendar_CreateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CreateEventRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "event"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -874,7 +917,9 @@ extension Calendar_CreateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Calendar_CreateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CreateEventResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "event"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -908,7 +953,9 @@ extension Calendar_CreateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Calendar_GetEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetEventRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -938,7 +985,9 @@ extension Calendar_GetEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
 
 extension Calendar_GetEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetEventResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "event"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -972,7 +1021,10 @@ extension Calendar_GetEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Messa
 
 extension Calendar_UpdateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpdateEventRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}patch\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "patch"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1011,7 +1063,9 @@ extension Calendar_UpdateEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Calendar_UpdateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".UpdateEventResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}event\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "event"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1045,7 +1099,9 @@ extension Calendar_UpdateEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Calendar_DeleteEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteEventRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1075,7 +1131,9 @@ extension Calendar_DeleteEventRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Calendar_DeleteEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteEventResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "success"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1105,7 +1163,13 @@ extension Calendar_DeleteEventResponse: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Calendar_ListEventsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListEventsRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}from_time\0\u{3}to_time\0\u{3}page_size\0\u{3}page_token\0\u{1}sort\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "from_time"),
+    2: .standard(proto: "to_time"),
+    3: .standard(proto: "page_size"),
+    4: .standard(proto: "page_token"),
+    5: .same(proto: "sort"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1159,7 +1223,10 @@ extension Calendar_ListEventsRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
 extension Calendar_ListEventsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListEventsResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}events\0\u{3}next_page_token\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "events"),
+    2: .standard(proto: "next_page_token"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1194,7 +1261,10 @@ extension Calendar_ListEventsResponse: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Calendar_ListUpcomingRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListUpcomingRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}limit\0\u{3}from_time\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "limit"),
+    2: .standard(proto: "from_time"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1233,7 +1303,9 @@ extension Calendar_ListUpcomingRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
 
 extension Calendar_ListUpcomingResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListUpcomingResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}events\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "events"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1263,7 +1335,9 @@ extension Calendar_ListUpcomingResponse: SwiftProtobuf.Message, SwiftProtobuf._M
 
 extension Calendar_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1293,7 +1367,9 @@ extension Calendar_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._
 
 extension Calendar_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ok"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

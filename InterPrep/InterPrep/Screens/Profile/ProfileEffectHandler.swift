@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import ArchitectureCore
 import DesignSystem
+import NetworkService
 
 /// Ошибка сервиса сессии (удаление аккаунта и т.п.)
 public struct ProfileSessionError: Error, Sendable, LocalizedError {
@@ -49,6 +50,9 @@ public actor ProfileEffectHandler: EffectHandler {
             
         case let .saveSettings(settings):
             return await saveSettings(settings)
+            
+        case .downloadResume:
+            return await downloadResume()
             
         case .navigateToResumeUpload:
             // Navigation handled by coordinator
@@ -179,6 +183,54 @@ public actor ProfileEffectHandler: EffectHandler {
             return .accountDeleted
         case .failure(let error):
             return .deleteAccountFailed(error.message)
+        }
+    }
+    
+    private func downloadResume() async -> ProfileState.Feedback {
+        print("📥 Downloading resume...")
+        
+        // Step 1: Get ResumeProfile to get source_material_id
+        let profileResult = await NetworkServiceV2.shared.getUser_ResumeProfile()
+        
+        switch profileResult {
+        case .success(let response):
+            guard response.hasSourceMaterialID, !response.sourceMaterialID.isEmpty else {
+                print("❌ No source material ID found")
+                return .resumeDownloadFailed("Резюме еще не загружено. Пожалуйста, загрузите резюме сначала.")
+            }
+            
+            let materialId = response.sourceMaterialID
+            print("📄 Found material ID: \(materialId)")
+            
+            // Step 2: Download the file
+            let downloadResult = await NetworkServiceV2.shared.downloadFile(materialId: materialId)
+            
+            switch downloadResult {
+            case .success(let downloadResponse):
+                print("✅ File downloaded: \(downloadResponse.content.count) bytes")
+                
+                // Step 3: Save to temporary directory
+                let tempDir = FileManager.default.temporaryDirectory
+                let fileName = downloadResponse.filename.isEmpty ? "resume.pdf" : downloadResponse.filename
+                let fileURL = tempDir.appendingPathComponent(fileName)
+                
+                do {
+                    try downloadResponse.content.write(to: fileURL)
+                    print("💾 Saved to: \(fileURL.path)")
+                    return .resumeDownloaded(fileURL)
+                } catch {
+                    print("❌ Failed to save file: \(error)")
+                    return .resumeDownloadFailed("Не удалось сохранить файл")
+                }
+                
+            case .failure(let error):
+                print("❌ Download failed: \(error)")
+                return .resumeDownloadFailed("Не удалось скачать резюме")
+            }
+            
+        case .failure(let error):
+            print("❌ Failed to get resume profile: \(error)")
+            return .resumeDownloadFailed("Не удалось получить информацию о резюме")
         }
     }
     

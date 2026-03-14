@@ -9,8 +9,6 @@ import SwiftUI
 import ArchitectureCore
 
 public struct DocumentsContainer: View {
-    public typealias DocumentsStore = Store<DocumentsState, DocumentsEffectHandler>
-    
     @StateObject private var store: DocumentsStore
     
     public init(store: @autoclosure @escaping () -> DocumentsStore) {
@@ -54,6 +52,9 @@ public struct DocumentsContainer: View {
             },
             onFolderCreate: { name in
                 store.send(.folderCreated(name))
+            },
+            onFileUpload: { url in
+                store.send(.fileUploaded(url))
             },
             onDocumentDelete: { document in
                 store.send(.documentDeleted(document))

@@ -26,22 +26,22 @@ public struct Coach_AskRequest: Sendable {
   // methods supported on all messages.
 
   public var conversationID: String {
-    get {_conversationID ?? String()}
+    get {return _conversationID ?? String()}
     set {_conversationID = newValue}
   }
   /// Returns true if `conversationID` has been explicitly set.
-  public var hasConversationID: Bool {self._conversationID != nil}
+  public var hasConversationID: Bool {return self._conversationID != nil}
   /// Clears the value of `conversationID`. Subsequent reads from it will return its default value.
   public mutating func clearConversationID() {self._conversationID = nil}
 
   public var question: String = String()
 
   public var resumeProfile: User_ResumeProfile {
-    get {_resumeProfile ?? User_ResumeProfile()}
+    get {return _resumeProfile ?? User_ResumeProfile()}
     set {_resumeProfile = newValue}
   }
   /// Returns true if `resumeProfile` has been explicitly set.
-  public var hasResumeProfile: Bool {self._resumeProfile != nil}
+  public var hasResumeProfile: Bool {return self._resumeProfile != nil}
   /// Clears the value of `resumeProfile`. Subsequent reads from it will return its default value.
   public mutating func clearResumeProfile() {self._resumeProfile = nil}
 
@@ -107,31 +107,31 @@ public struct Coach_ResumeProfileDraft: Sendable {
   public var professionalRoleCandidates: [Coach_ProfessionalRoleCandidate] = []
 
   public var experienceLevel: String {
-    get {_experienceLevel ?? String()}
+    get {return _experienceLevel ?? String()}
     set {_experienceLevel = newValue}
   }
   /// Returns true if `experienceLevel` has been explicitly set.
-  public var hasExperienceLevel: Bool {self._experienceLevel != nil}
+  public var hasExperienceLevel: Bool {return self._experienceLevel != nil}
   /// Clears the value of `experienceLevel`. Subsequent reads from it will return its default value.
   public mutating func clearExperienceLevel() {self._experienceLevel = nil}
 
   public var areas: [Coach_Area] = []
 
   public var salaryMin: Double {
-    get {_salaryMin ?? 0}
+    get {return _salaryMin ?? 0}
     set {_salaryMin = newValue}
   }
   /// Returns true if `salaryMin` has been explicitly set.
-  public var hasSalaryMin: Bool {self._salaryMin != nil}
+  public var hasSalaryMin: Bool {return self._salaryMin != nil}
   /// Clears the value of `salaryMin`. Subsequent reads from it will return its default value.
   public mutating func clearSalaryMin() {self._salaryMin = nil}
 
   public var currency: String {
-    get {_currency ?? String()}
+    get {return _currency ?? String()}
     set {_currency = newValue}
   }
   /// Returns true if `currency` has been explicitly set.
-  public var hasCurrency: Bool {self._currency != nil}
+  public var hasCurrency: Bool {return self._currency != nil}
   /// Clears the value of `currency`. Subsequent reads from it will return its default value.
   public mutating func clearCurrency() {self._currency = nil}
 
@@ -140,11 +140,11 @@ public struct Coach_ResumeProfileDraft: Sendable {
   public var skillsTop: [String] = []
 
   public var notes: String {
-    get {_notes ?? String()}
+    get {return _notes ?? String()}
     set {_notes = newValue}
   }
   /// Returns true if `notes` has been explicitly set.
-  public var hasNotes: Bool {self._notes != nil}
+  public var hasNotes: Bool {return self._notes != nil}
   /// Clears the value of `notes`. Subsequent reads from it will return its default value.
   public mutating func clearNotes() {self._notes = nil}
 
@@ -219,11 +219,11 @@ public struct Coach_ParseResumeResponse: Sendable {
   public var sessionID: String = String()
 
   public var draft: Coach_ResumeProfileDraft {
-    get {_draft ?? Coach_ResumeProfileDraft()}
+    get {return _draft ?? Coach_ResumeProfileDraft()}
     set {_draft = newValue}
   }
   /// Returns true if `draft` has been explicitly set.
-  public var hasDraft: Bool {self._draft != nil}
+  public var hasDraft: Bool {return self._draft != nil}
   /// Clears the value of `draft`. Subsequent reads from it will return its default value.
   public mutating func clearDraft() {self._draft = nil}
 
@@ -274,11 +274,11 @@ public struct Coach_AnswerResumeResponse: Sendable {
   public var sessionID: String = String()
 
   public var draft: Coach_ResumeProfileDraft {
-    get {_draft ?? Coach_ResumeProfileDraft()}
+    get {return _draft ?? Coach_ResumeProfileDraft()}
     set {_draft = newValue}
   }
   /// Returns true if `draft` has been explicitly set.
-  public var hasDraft: Bool {self._draft != nil}
+  public var hasDraft: Bool {return self._draft != nil}
   /// Clears the value of `draft`. Subsequent reads from it will return its default value.
   public mutating func clearDraft() {self._draft = nil}
 
@@ -314,11 +314,11 @@ public struct Coach_GetResumeSessionResponse: Sendable {
   public var sessionID: String = String()
 
   public var draft: Coach_ResumeProfileDraft {
-    get {_draft ?? Coach_ResumeProfileDraft()}
+    get {return _draft ?? Coach_ResumeProfileDraft()}
     set {_draft = newValue}
   }
   /// Returns true if `draft` has been explicitly set.
-  public var hasDraft: Bool {self._draft != nil}
+  public var hasDraft: Bool {return self._draft != nil}
   /// Clears the value of `draft`. Subsequent reads from it will return its default value.
   public mutating func clearDraft() {self._draft = nil}
 
@@ -363,7 +363,12 @@ fileprivate let _protobuf_package = "coach"
 
 extension Coach_AskRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AskRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}conversation_id\0\u{1}question\0\u{3}resume_profile\0\u{3}context_chunks\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "conversation_id"),
+    2: .same(proto: "question"),
+    3: .standard(proto: "resume_profile"),
+    4: .standard(proto: "context_chunks"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -412,7 +417,11 @@ extension Coach_AskRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
 
 extension Coach_ContextChunk: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ContextChunk"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}source\0\u{1}title\0\u{1}content\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "source"),
+    2: .same(proto: "title"),
+    3: .same(proto: "content"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -452,7 +461,10 @@ extension Coach_ContextChunk: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 
 extension Coach_AskResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AskResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}conversation_id\0\u{1}answer\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "conversation_id"),
+    2: .same(proto: "answer"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -487,7 +499,9 @@ extension Coach_AskResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
 
 extension Coach_ParseResumeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ParseResumeRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}material_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "material_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -517,7 +531,18 @@ extension Coach_ParseResumeRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
 
 extension Coach_ResumeProfileDraft: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ResumeProfileDraft"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}target_roles\0\u{3}professional_role_candidates\0\u{3}experience_level\0\u{1}areas\0\u{3}salary_min\0\u{1}currency\0\u{3}work_format\0\u{3}skills_top\0\u{1}notes\0\u{1}confidence\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "target_roles"),
+    2: .standard(proto: "professional_role_candidates"),
+    3: .standard(proto: "experience_level"),
+    4: .same(proto: "areas"),
+    5: .standard(proto: "salary_min"),
+    6: .same(proto: "currency"),
+    7: .standard(proto: "work_format"),
+    8: .standard(proto: "skills_top"),
+    9: .same(proto: "notes"),
+    10: .same(proto: "confidence"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -596,7 +621,11 @@ extension Coach_ResumeProfileDraft: SwiftProtobuf.Message, SwiftProtobuf._Messag
 
 extension Coach_ProfessionalRoleCandidate: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ProfessionalRoleCandidate"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}confidence\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "name"),
+    3: .same(proto: "confidence"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -636,7 +665,11 @@ extension Coach_ProfessionalRoleCandidate: SwiftProtobuf.Message, SwiftProtobuf.
 
 extension Coach_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Area"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}confidence\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "name"),
+    3: .same(proto: "confidence"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -676,7 +709,12 @@ extension Coach_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementatio
 
 extension Coach_Question: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Question"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}text\0\u{1}type\0\u{1}options\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "text"),
+    3: .same(proto: "type"),
+    4: .same(proto: "options"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -721,7 +759,12 @@ extension Coach_Question: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
 
 extension Coach_ParseResumeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ParseResumeResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}session_id\0\u{1}draft\0\u{1}questions\0\u{1}status\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+    2: .same(proto: "draft"),
+    3: .same(proto: "questions"),
+    4: .same(proto: "status"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -770,7 +813,10 @@ extension Coach_ParseResumeResponse: SwiftProtobuf.Message, SwiftProtobuf._Messa
 
 extension Coach_QuestionAnswer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".QuestionAnswer"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}question_id\0\u{1}value\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "question_id"),
+    2: .same(proto: "value"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -805,7 +851,10 @@ extension Coach_QuestionAnswer: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
 
 extension Coach_AnswerResumeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AnswerResumeRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}session_id\0\u{1}answers\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+    2: .same(proto: "answers"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -840,7 +889,12 @@ extension Coach_AnswerResumeRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
 
 extension Coach_AnswerResumeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AnswerResumeResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}session_id\0\u{1}draft\0\u{1}questions\0\u{1}status\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+    2: .same(proto: "draft"),
+    3: .same(proto: "questions"),
+    4: .same(proto: "status"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -889,7 +943,9 @@ extension Coach_AnswerResumeResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
 extension Coach_GetResumeSessionRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetResumeSessionRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}session_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -919,7 +975,12 @@ extension Coach_GetResumeSessionRequest: SwiftProtobuf.Message, SwiftProtobuf._M
 
 extension Coach_GetResumeSessionResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetResumeSessionResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}session_id\0\u{1}draft\0\u{1}questions\0\u{1}status\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+    2: .same(proto: "draft"),
+    3: .same(proto: "questions"),
+    4: .same(proto: "status"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -968,7 +1029,9 @@ extension Coach_GetResumeSessionResponse: SwiftProtobuf.Message, SwiftProtobuf._
 
 extension Coach_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -998,7 +1061,9 @@ extension Coach_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Coach_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ok"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

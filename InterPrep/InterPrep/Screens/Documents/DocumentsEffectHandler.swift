@@ -25,11 +25,8 @@ public actor DocumentsEffectHandler: EffectHandler {
         case .loadFolders:
             do {
                 let folders = try await documentService.fetchFolders()
-                // Also load recent documents after folders
                 let documents = try await documentService.fetchRecentDocuments()
-                // Note: We can only return one feedback at a time
-                // In a real app, you might want to chain these differently
-                return .foldersLoaded(folders)
+                return .foldersAndDocumentsLoaded(folders, documents)
             } catch {
                 return .loadingFailed(error.localizedDescription)
             }
@@ -46,7 +43,8 @@ public actor DocumentsEffectHandler: EffectHandler {
             do {
                 try await documentService.createFolder(name: name)
                 let folders = try await documentService.fetchFolders()
-                return .foldersLoaded(folders)
+                let documents = try await documentService.fetchRecentDocuments()
+                return .foldersAndDocumentsLoaded(folders, documents)
             } catch {
                 return .loadingFailed(error.localizedDescription)
             }
