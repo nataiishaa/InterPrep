@@ -50,7 +50,7 @@ struct LoginView: View {
                 .fontWeight(.bold)
                 .foregroundColor(.textPrimary)
             
-            Text("Давайте знакомиться!\nКак вас зовут?")
+            Text("Уже есть аккаунт?\nВойдите, чтобы продолжить")
                 .font(.title3)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.textSecondary)
