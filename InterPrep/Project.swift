@@ -12,10 +12,23 @@ let project = Project(
             requirement: .upToNextMajor(from: "1.28.0")
         ),
         .remote(
+            url: "https://github.com/apple/swift-log.git",
+            requirement: .upToNextMajor(from: "1.5.0")
+        ),
+        .remote(
+            url: "https://github.com/apple/swift-nio.git",
+            requirement: .upToNextMajor(from: "2.62.0")
+        ),
+        .remote(
             url: "https://github.com/grpc/grpc-swift.git",
             requirement: .exact("1.23.0")  // 1.26+ требует Swift Tools 6.1; при 6.0.3 используем 1.23
         )
     ],
+    settings: .settings(
+        base: [
+            "IPHONEOS_DEPLOYMENT_TARGET": "17.0"
+        ]
+    ),
     targets: [
         // MARK: - App Target
         
@@ -50,6 +63,7 @@ let project = Project(
                 "InterPrep/Services/ResumeServiceImpl.swift",
                 "InterPrep/Services/VacancyServiceImpl.swift",
                 "InterPrep/Services/ChatServiceImpl.swift",
+                "InterPrep/Services/CalendarServiceImpl.swift",
                 "InterPrep/Components/Navigation/MainTabView.swift",
                 "InterPrep/Components/Navigation/ResumeProfileDetailView.swift",
                 "InterPrep/Components/Navigation/TabBarView.swift",
@@ -106,7 +120,10 @@ let project = Project(
             ],
             dependencies: [
                 .package(product: "SwiftProtobuf"),
-                .package(product: "GRPC")
+                .package(product: "GRPC"),
+                .package(product: "Logging"),
+                .package(product: "NIOCore"),
+                .package(product: "NIOHTTP2")
             ]
         ),
         
@@ -240,7 +257,13 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
-                .target(name: "CalendarFeature")
+                .target(name: "CalendarFeature"),
+                .target(name: "NetworkService"),
+                .package(product: "SwiftProtobuf"),
+                .package(product: "GRPC"),
+                .package(product: "Logging"),
+                .package(product: "NIOCore"),
+                .package(product: "NIOHTTP2")
             ]
         ),
         

@@ -26,9 +26,11 @@ public final class NetworkServiceV2: ObservableObject {
         )
         
         let sessionConfiguration = URLSessionConfiguration.default
-        sessionConfiguration.timeoutIntervalForRequest = 30
-        sessionConfiguration.timeoutIntervalForResource = 60
+        sessionConfiguration.timeoutIntervalForRequest = 60  // Increased for file uploads
+        sessionConfiguration.timeoutIntervalForResource = 300  // 5 minutes for large files
         sessionConfiguration.waitsForConnectivity = true
+        sessionConfiguration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        
         let session = URLSession(configuration: sessionConfiguration)
         
         let tokenProvider = DefaultTokenProvider(tokenStorage: tokenStorage)
@@ -257,12 +259,38 @@ public final class NetworkServiceV2: ObservableObject {
         if let name = name {
             request.name = name
         }
+        
+        // Use gRPC client for file upload (more reliable for large files)
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.uploadFile(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                print("❌ gRPC upload failed: \(error)")
+                return .failure(.transportError(error))
+            }
+        }
+        
+        // Fallback to URLSession (not recommended for gRPC backend)
         return await networkService.perform(factory.uploadFile(request))
     }
     
     public func downloadFile(materialId: String) async -> Result<Materials_DownloadFileResponse, NetworkError> {
         var request = Materials_DownloadFileRequest()
         request.materialID = materialId
+        
+        // Use gRPC client for file download
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.downloadFile(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
+        
         return await networkService.perform(factory.downloadFile(request))
     }
     
@@ -271,6 +299,18 @@ public final class NetworkServiceV2: ObservableObject {
         if let parentId = parentId {
             request.parentID = parentId
         }
+        
+        // Use gRPC client for listing folders
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.listFolder(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
+        
         return await networkService.perform(factory.listFolder(request))
     }
     
@@ -354,6 +394,33 @@ public final class NetworkServiceV2: ObservableObject {
         return await networkService.perform(factory.createEvent(request))
     }
     
+    public func createEvent(
+        title: String,
+        description: String,
+        startTime: Date,
+        endTime: Date,
+        eventType: Calendar_EventType,
+        location: String?,
+        reminderEnabled: Bool,
+        reminderMinutes: Int32
+    ) async -> Result<Calendar_CreateEventResponse, NetworkError> {
+        var event = Calendar_Event()
+        event.title = title
+        event.description_p = description
+        event.eventType = eventType
+        event.startTime = startTime.toProtoTimestamp()
+        event.endTime = endTime.toProtoTimestamp()
+        if let location = location {
+            event.location = location
+        }
+        event.reminderEnabled = reminderEnabled
+        event.reminderMinutes = reminderMinutes
+        
+        var request = Calendar_CreateEventRequest()
+        request.event = event
+        return await networkService.perform(factory.createEvent(request))
+    }
+    
     public func getCalendar_Event(id: String) async -> Result<Calendar_GetEventResponse, NetworkError> {
         var request = Calendar_GetEventRequest()
         request.id = id
@@ -367,7 +434,50 @@ public final class NetworkServiceV2: ObservableObject {
         return await networkService.perform(factory.updateEvent(request))
     }
     
-    public func deleteCalendar_Event(id: String) async -> Result<Calendar_DeleteEventResponse, NetworkError> {
+    public func updateEvent(
+        id: String,
+        title: String?,
+        description: String?,
+        startTime: Date?,
+        endTime: Date?,
+        eventType: Calendar_EventType?,
+        location: String?,
+        reminderEnabled: Bool?,
+        reminderMinutes: Int32?
+    ) async -> Result<Calendar_UpdateEventResponse, NetworkError> {
+        var patch = Calendar_EventPatch()
+        if let title = title {
+            patch.title = title
+        }
+        if let description = description {
+            patch.description_p = description
+        }
+        if let startTime = startTime {
+            patch.startTime = startTime.toProtoTimestamp()
+        }
+        if let endTime = endTime {
+            patch.endTime = endTime.toProtoTimestamp()
+        }
+        if let eventType = eventType {
+            patch.eventType = eventType
+        }
+        if let location = location {
+            patch.location = location
+        }
+        if let reminderEnabled = reminderEnabled {
+            patch.reminderEnabled = reminderEnabled
+        }
+        if let reminderMinutes = reminderMinutes {
+            patch.reminderMinutes = reminderMinutes
+        }
+        
+        var request = Calendar_UpdateEventRequest()
+        request.id = id
+        request.patch = patch
+        return await networkService.perform(factory.updateEvent(request))
+    }
+    
+    public func deleteEvent(id: String) async -> Result<Calendar_DeleteEventResponse, NetworkError> {
         var request = Calendar_DeleteEventRequest()
         request.id = id
         return await networkService.perform(factory.deleteEvent(request))
@@ -383,12 +493,37 @@ public final class NetworkServiceV2: ObservableObject {
         return await networkService.perform(factory.listEvents(request))
     }
     
+    public func listEvents(
+        fromTime: Date,
+        toTime: Date,
+        pageSize: Int32,
+        pageToken: String? = nil,
+        sort: Calendar_SortOrder = .sortStartAsc
+    ) async -> Result<Calendar_ListEventsResponse, NetworkError> {
+        var request = Calendar_ListEventsRequest()
+        request.fromTime = fromTime.toProtoTimestamp()
+        request.toTime = toTime.toProtoTimestamp()
+        request.pageSize = pageSize
+        if let pageToken = pageToken {
+            request.pageToken = pageToken
+        }
+        request.sort = sort
+        return await networkService.perform(factory.listEvents(request))
+    }
+    
     func listUpcoming(limit: Int32, fromTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil) async -> Result<Calendar_ListUpcomingResponse, NetworkError> {
         var request = Calendar_ListUpcomingRequest()
         request.limit = limit
         if let fromTime = fromTime {
             request.fromTime = fromTime
         }
+        return await networkService.perform(factory.listUpcoming(request))
+    }
+    
+    public func listUpcoming(limit: Int32, fromTime: Date) async -> Result<Calendar_ListUpcomingResponse, NetworkError> {
+        var request = Calendar_ListUpcomingRequest()
+        request.limit = limit
+        request.fromTime = fromTime.toProtoTimestamp()
         return await networkService.perform(factory.listUpcoming(request))
     }
     
@@ -455,6 +590,41 @@ public final class BackendGatewayGRPCClient: Sendable {
         let request = Jobs_ListFavoritesRequest()
         let options = callOptions(with: accessToken)
         let call = client.listFavorites(request, callOptions: options)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    // MARK: - Materials (using low-level gRPC API)
+    
+    public func uploadFile(request: Materials_UploadFileRequest, accessToken: String?) async throws -> Materials_UploadFileResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Materials_UploadFileRequest, Materials_UploadFileResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/UploadFile",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func downloadFile(request: Materials_DownloadFileRequest, accessToken: String?) async throws -> Materials_DownloadFileResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Materials_DownloadFileRequest, Materials_DownloadFileResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/DownloadFile",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func listFolder(request: Materials_ListFolderRequest, accessToken: String?) async throws -> Materials_ListFolderResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Materials_ListFolderRequest, Materials_ListFolderResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/ListFolder",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
         return try await eventLoopFutureToAsync(call.response)
     }
 

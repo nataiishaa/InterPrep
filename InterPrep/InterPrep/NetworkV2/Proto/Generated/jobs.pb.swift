@@ -48,40 +48,40 @@ public struct Jobs_Vacancy: Sendable {
   public var description_p: String = String()
 
   public var salary: Jobs_Salary {
-    get {_salary ?? Jobs_Salary()}
+    get {return _salary ?? Jobs_Salary()}
     set {_salary = newValue}
   }
   /// Returns true if `salary` has been explicitly set.
-  public var hasSalary: Bool {self._salary != nil}
+  public var hasSalary: Bool {return self._salary != nil}
   /// Clears the value of `salary`. Subsequent reads from it will return its default value.
   public mutating func clearSalary() {self._salary = nil}
 
   public var employer: Jobs_Employer {
-    get {_employer ?? Jobs_Employer()}
+    get {return _employer ?? Jobs_Employer()}
     set {_employer = newValue}
   }
   /// Returns true if `employer` has been explicitly set.
-  public var hasEmployer: Bool {self._employer != nil}
+  public var hasEmployer: Bool {return self._employer != nil}
   /// Clears the value of `employer`. Subsequent reads from it will return its default value.
   public mutating func clearEmployer() {self._employer = nil}
 
   public var area: Jobs_Area {
-    get {_area ?? Jobs_Area()}
+    get {return _area ?? Jobs_Area()}
     set {_area = newValue}
   }
   /// Returns true if `area` has been explicitly set.
-  public var hasArea: Bool {self._area != nil}
+  public var hasArea: Bool {return self._area != nil}
   /// Clears the value of `area`. Subsequent reads from it will return its default value.
   public mutating func clearArea() {self._area = nil}
 
   public var alternateURL: String = String()
 
   public var experience: String {
-    get {_experience ?? String()}
+    get {return _experience ?? String()}
     set {_experience = newValue}
   }
   /// Returns true if `experience` has been explicitly set.
-  public var hasExperience: Bool {self._experience != nil}
+  public var hasExperience: Bool {return self._experience != nil}
   /// Clears the value of `experience`. Subsequent reads from it will return its default value.
   public mutating func clearExperience() {self._experience = nil}
 
@@ -105,20 +105,20 @@ public struct Jobs_Salary: Sendable {
   // methods supported on all messages.
 
   public var from: Int32 {
-    get {_from ?? 0}
+    get {return _from ?? 0}
     set {_from = newValue}
   }
   /// Returns true if `from` has been explicitly set.
-  public var hasFrom: Bool {self._from != nil}
+  public var hasFrom: Bool {return self._from != nil}
   /// Clears the value of `from`. Subsequent reads from it will return its default value.
   public mutating func clearFrom() {self._from = nil}
 
   public var to: Int32 {
-    get {_to ?? 0}
+    get {return _to ?? 0}
     set {_to = newValue}
   }
   /// Returns true if `to` has been explicitly set.
-  public var hasTo: Bool {self._to != nil}
+  public var hasTo: Bool {return self._to != nil}
   /// Clears the value of `to`. Subsequent reads from it will return its default value.
   public mutating func clearTo() {self._to = nil}
 
@@ -140,11 +140,11 @@ public struct Jobs_Employer: Sendable {
   public var name: String = String()
 
   public var logoURL: String {
-    get {_logoURL ?? String()}
+    get {return _logoURL ?? String()}
     set {_logoURL = newValue}
   }
   /// Returns true if `logoURL` has been explicitly set.
-  public var hasLogoURL: Bool {self._logoURL != nil}
+  public var hasLogoURL: Bool {return self._logoURL != nil}
   /// Clears the value of `logoURL`. Subsequent reads from it will return its default value.
   public mutating func clearLogoURL() {self._logoURL = nil}
 
@@ -287,7 +287,10 @@ fileprivate let _protobuf_package = "jobs"
 
 extension Jobs_SearchJobsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".SearchJobsRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}page\0\u{3}per_page\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "page"),
+    2: .standard(proto: "per_page"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -322,7 +325,18 @@ extension Jobs_SearchJobsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageI
 
 extension Jobs_Vacancy: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Vacancy"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}description\0\u{1}salary\0\u{1}employer\0\u{1}area\0\u{3}alternate_url\0\u{1}experience\0\u{3}is_favorite\0\u{1}archived\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "name"),
+    3: .same(proto: "description"),
+    4: .same(proto: "salary"),
+    5: .same(proto: "employer"),
+    6: .same(proto: "area"),
+    7: .standard(proto: "alternate_url"),
+    8: .same(proto: "experience"),
+    9: .standard(proto: "is_favorite"),
+    10: .same(proto: "archived"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -401,7 +415,11 @@ extension Jobs_Vacancy: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementat
 
 extension Jobs_Salary: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Salary"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}from\0\u{1}to\0\u{1}currency\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "from"),
+    2: .same(proto: "to"),
+    3: .same(proto: "currency"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -445,7 +463,10 @@ extension Jobs_Salary: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementati
 
 extension Jobs_Employer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Employer"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}logo_url\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "name"),
+    2: .standard(proto: "logo_url"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -484,7 +505,9 @@ extension Jobs_Employer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementa
 
 extension Jobs_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Area"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "name"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -514,7 +537,13 @@ extension Jobs_Area: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementation
 
 extension Jobs_SearchJobsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".SearchJobsResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}items\0\u{1}found\0\u{1}page\0\u{1}pages\0\u{3}per_page\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "items"),
+    2: .same(proto: "found"),
+    3: .same(proto: "page"),
+    4: .same(proto: "pages"),
+    5: .standard(proto: "per_page"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -564,7 +593,9 @@ extension Jobs_SearchJobsResponse: SwiftProtobuf.Message, SwiftProtobuf._Message
 
 extension Jobs_AddFavoriteRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AddFavoriteRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}vacancy_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "vacancy_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -594,7 +625,9 @@ extension Jobs_AddFavoriteRequest: SwiftProtobuf.Message, SwiftProtobuf._Message
 
 extension Jobs_AddFavoriteResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".AddFavoriteResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "success"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -624,7 +657,9 @@ extension Jobs_AddFavoriteResponse: SwiftProtobuf.Message, SwiftProtobuf._Messag
 
 extension Jobs_RemoveFavoriteRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".RemoveFavoriteRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}vacancy_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "vacancy_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -654,7 +689,9 @@ extension Jobs_RemoveFavoriteRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
 extension Jobs_RemoveFavoriteResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".RemoveFavoriteResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "success"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -703,7 +740,9 @@ extension Jobs_ListFavoritesRequest: SwiftProtobuf.Message, SwiftProtobuf._Messa
 
 extension Jobs_ListFavoritesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ListFavoritesResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}vacancies\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "vacancies"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -733,7 +772,9 @@ extension Jobs_ListFavoritesResponse: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
 extension Jobs_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -763,7 +804,9 @@ extension Jobs_DeleteUserDataRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
 extension Jobs_DeleteUserDataResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DeleteUserDataResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}ok\0")
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "ok"),
+  ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

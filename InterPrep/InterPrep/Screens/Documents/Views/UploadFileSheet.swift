@@ -11,6 +11,12 @@ import UniformTypeIdentifiers
 struct UploadFileSheet: View {
     @State private var showingDocumentPicker = false
     let onDismiss: () -> Void
+    let onFileSelected: ((URL) -> Void)?
+    
+    init(onDismiss: @escaping () -> Void, onFileSelected: ((URL) -> Void)? = nil) {
+        self.onDismiss = onDismiss
+        self.onFileSelected = onFileSelected
+    }
     
     var body: some View {
         NavigationStack {
@@ -59,11 +65,12 @@ struct UploadFileSheet: View {
             ) { result in
                 switch result {
                 case .success(let urls):
-                    if urls.first != nil {
+                    if let url = urls.first {
+                        onFileSelected?(url)
                         onDismiss()
                     }
-                case .failure:
-                    break
+                case .failure(let error):
+                    print("File picker error: \(error.localizedDescription)")
                 }
             }
         }

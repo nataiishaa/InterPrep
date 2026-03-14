@@ -19,7 +19,7 @@ struct MainTabView: View {
     @State private var showResumeUploadSheet: Bool = false
     @State private var showResumeDetailSheet: Bool = false
     /// Store чата создаётся один раз при открытии sheet, чтобы сообщения и ответы не терялись при перерисовке.
-    @State private var chatStore: ChatContainer.ChatStore?
+    @State private var chatStore: ChatStore?
     private let appGraph: AppGraph
     private let onLogout: (() -> Void)?
     private let profileSessionService: (any ProfileSessionService)?

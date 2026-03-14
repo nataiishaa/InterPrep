@@ -9,8 +9,6 @@ import SwiftUI
 import ArchitectureCore
 
 public struct OnboardingContainer: View {
-    public typealias OnboardingStore = Store<OnboardingState, OnboardingEffectHandler>
-    
     @StateObject private var store: OnboardingStore
     
     // Callback when onboarding is completed

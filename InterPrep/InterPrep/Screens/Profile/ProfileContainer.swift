@@ -9,7 +9,7 @@ import SwiftUI
 import ArchitectureCore
 
 public struct ProfileContainer: View {
-    @StateObject private var store: Store<ProfileState, ProfileEffectHandler>
+    @StateObject private var store: ProfileStore
     private let onLogoutComplete: (() -> Void)?
     private let onNavigateToResumeUpload: (() -> Void)?
     private let onViewResume: (() -> Void)?
@@ -40,6 +40,17 @@ public struct ProfileContainer: View {
                     store.send(.clearAuthRequired)
                 }
             }
+            .sheet(item: Binding(
+                get: { store.state.resumePDFURL.map { PDFDocument(url: $0) } },
+                set: { _ in }
+            )) { pdfDoc in
+                PDFViewerSheet(pdfURL: pdfDoc.url)
+            }
+    }
+    
+    private struct PDFDocument: Identifiable {
+        let id = UUID()
+        let url: URL
     }
     
     private func makeModel() -> ProfileView.Model {
@@ -57,7 +68,9 @@ public struct ProfileContainer: View {
             onChangeResume: {
                 onNavigateToResumeUpload?() ?? store.send(.changeResume)
             },
-            onViewResume: onViewResume ?? {},
+            onViewResume: {
+                store.send(.viewResume)
+            },
             onLogout: {
                 store.send(.logout)
             },

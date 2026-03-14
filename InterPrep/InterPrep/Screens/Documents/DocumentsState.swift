@@ -137,6 +137,7 @@ extension DocumentsState: FeatureState {
     public enum Feedback: Sendable {
         case foldersLoaded([Folder])
         case recentDocumentsLoaded([Document])
+        case foldersAndDocumentsLoaded([Folder], [Document])
         case loadingFailed(String)
         case documentDownloaded(URL)
         case documentOpenFailed(String)
@@ -215,6 +216,12 @@ extension DocumentsState: FeatureState {
             
         case .feedback(.recentDocumentsLoaded(let documents)):
             state.recentDocuments = documents
+            return nil
+            
+        case .feedback(.foldersAndDocumentsLoaded(let folders, let documents)):
+            state.folders = folders
+            state.recentDocuments = documents
+            state.isLoading = false
             return nil
             
         case .feedback(.loadingFailed(let error)):

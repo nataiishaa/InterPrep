@@ -9,12 +9,17 @@ import SwiftUI
 import ArchitectureCore
 
 public struct CalendarContainer: View {
-    @StateObject private var store: Store<CalendarState, CalendarEffectHandler>
+    @StateObject private var store: CalendarStore
+    
+    public init(store: CalendarStore) {
+        _store = StateObject(wrappedValue: store)
+    }
     
     public init() {
+        // Mock service for preview - will be replaced by real service from AppGraph
         _store = StateObject(wrappedValue: Store(
             state: CalendarState(),
-            effectHandler: CalendarEffectHandler()
+            effectHandler: CalendarEffectHandler(calendarService: MockCalendarService())
         ))
     }
     

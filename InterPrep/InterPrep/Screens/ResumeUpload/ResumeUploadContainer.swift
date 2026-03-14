@@ -9,8 +9,6 @@ import SwiftUI
 import ArchitectureCore
 
 public struct ResumeUploadContainer: View {
-    public typealias ResumeUploadStore = Store<ResumeUploadState, ResumeUploadEffectHandler>
-    
     @StateObject private var store: ResumeUploadStore
     let onComplete: () -> Void
     let onCancel: () -> Void

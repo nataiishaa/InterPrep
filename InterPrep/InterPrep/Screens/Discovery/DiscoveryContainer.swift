@@ -9,8 +9,6 @@ import SwiftUI
 import ArchitectureCore
 
 public struct DiscoveryContainer: View {
-    public typealias DiscoveryStore = Store<DiscoveryState, DiscoveryEffectHandler>
-    
     @StateObject private var store: DiscoveryStore
     @State private var selectedVacancy: DiscoveryState.Vacancy?
     

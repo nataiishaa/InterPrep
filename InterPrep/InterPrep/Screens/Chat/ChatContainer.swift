@@ -9,8 +9,6 @@ import SwiftUI
 import ArchitectureCore
 
 public struct ChatContainer: View {
-    public typealias ChatStore = Store<ChatState, ChatEffectHandler>
-    
     @StateObject private var store: ChatStore
     
     public init(store: @autoclosure @escaping () -> ChatStore) {

@@ -134,6 +134,9 @@ public enum AuthError: LocalizedError {
     case invalidData
     case invalidOTP
     case networkUnavailable
+    case emailAlreadyExists
+    case invalidEmail
+    case weakPassword
     
     public var errorDescription: String? {
         switch self {
@@ -145,6 +148,12 @@ public enum AuthError: LocalizedError {
             return "Неверный код подтверждения"
         case .networkUnavailable:
             return "Нет соединения с интернетом. Проверьте подключение и попробуйте снова."
+        case .emailAlreadyExists:
+            return "Пользователь с таким email уже существует"
+        case .invalidEmail:
+            return "Неверный формат email"
+        case .weakPassword:
+            return "Пароль слишком простой. Используйте минимум 8 символов, включая буквы и цифры"
         }
     }
 }

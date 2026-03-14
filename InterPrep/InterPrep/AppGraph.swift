@@ -15,6 +15,7 @@ import ResumeUploadFeature
 import DocumentsFeature
 import ChatFeature
 import ProfileFeature
+import CalendarFeature
 
 @MainActor
 final class AppGraph {
@@ -28,6 +29,7 @@ final class AppGraph {
     private lazy var fileUploadService: FileUploadService = FileUploadServiceImpl()
     private lazy var documentService: DocumentServiceProtocol = DocumentServiceImpl()
     private lazy var chatService: ChatServiceProtocol = ChatServiceMock()
+    private lazy var calendarService: CalendarServiceProtocol = CalendarServiceImpl()
     
     // MARK: - State
     
@@ -109,12 +111,22 @@ final class AppGraph {
         ))
     }
     
+    func makeCalendarContainer() -> some View {
+        let effectHandler = CalendarEffectHandler(
+            calendarService: self.calendarService
+        )
+        return CalendarContainer(store: Store(
+            state: CalendarState(),
+            effectHandler: effectHandler
+        ))
+    }
+    
     func makeChatContainer() -> some View {
         makeChatContainer(store: makeChatStore())
     }
     
     /// Store чата — создаётся один раз и передаётся в sheet, чтобы состояние не сбрасывалось при перерисовке родителя.
-    func makeChatStore() -> ChatContainer.ChatStore {
+    func makeChatStore() -> ChatStore {
         let effectHandler = ChatEffectHandler(
             chatService: self.chatService
         )
@@ -124,7 +136,7 @@ final class AppGraph {
         )
     }
     
-    private func makeChatContainer(store: ChatContainer.ChatStore) -> some View {
+    private func makeChatContainer(store: ChatStore) -> some View {
         ChatContainer(store: store)
     }
 }

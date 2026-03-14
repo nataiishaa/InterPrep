@@ -28,6 +28,10 @@ public struct ProfileState {
     public var editedPosition: String = ""
     public var editedExperience: String = ""
     
+    // Resume
+    public var resumePDFURL: URL?
+    public var isDownloadingResume: Bool = false
+    
     /// После выхода или удаления аккаунта — показать экран авторизации
     public var authRequired: Bool = false
     /// Ошибка при удалении аккаунта (например, неверный пароль)
@@ -161,6 +165,7 @@ extension ProfileState: FeatureState {
         case crashReportsToggled(Bool)
         
         // Actions
+        case viewResume
         case changeResume
         case logout
         case deleteAccount(password: String)
@@ -178,6 +183,8 @@ extension ProfileState: FeatureState {
         case logoutCompleted
         case accountDeleted
         case deleteAccountFailed(String)
+        case resumeDownloaded(URL)
+        case resumeDownloadFailed(String)
     }
     
     public enum Effect: Sendable {
@@ -185,6 +192,7 @@ extension ProfileState: FeatureState {
         case loadStatistics
         case updateProfile(User)
         case saveSettings(AppSettings)
+        case downloadResume
         case navigateToResumeUpload
         case performLogout
         case performDeleteAccount(password: String)
@@ -274,6 +282,11 @@ extension ProfileState: FeatureState {
             return .saveSettings(state.settings)
             
         // Actions
+        case .input(.viewResume):
+            state.isDownloadingResume = true
+            state.errorMessage = nil
+            return .downloadResume
+            
         case .input(.changeResume):
             return .navigateToResumeUpload
             
@@ -331,6 +344,14 @@ extension ProfileState: FeatureState {
             
         case let .feedback(.deleteAccountFailed(message)):
             state.deleteAccountError = message
+            
+        case let .feedback(.resumeDownloaded(url)):
+            state.isDownloadingResume = false
+            state.resumePDFURL = url
+            
+        case let .feedback(.resumeDownloadFailed(error)):
+            state.isDownloadingResume = false
+            state.errorMessage = error
         }
         
         return nil

@@ -45,9 +45,30 @@ public final class AuthServiceImpl: AuthService {
             print("✅ Registration successful: \(response)")
         case .failure(let error):
             print("❌ Registration failed: \(error)")
+            
             if (error as? NetworkError)?.isConnectionError == true {
                 throw AuthError.networkUnavailable
             }
+            
+            if case .httpError(let code, let data) = error {
+                if let data = data,
+                   let errorText = String(data: data, encoding: .utf8) {
+                    if errorText.contains("already exists") || errorText.contains("уже существует") {
+                        throw AuthError.emailAlreadyExists
+                    } else if errorText.contains("invalid email") || errorText.contains("неверный email") {
+                        throw AuthError.invalidEmail
+                    } else if errorText.contains("password") && errorText.contains("weak") {
+                        throw AuthError.weakPassword
+                    }
+                }
+                
+                if code == 409 {
+                    throw AuthError.emailAlreadyExists
+                } else if code == 400 {
+                    throw AuthError.invalidData
+                }
+            }
+            
             throw AuthError.invalidData
         }
     }

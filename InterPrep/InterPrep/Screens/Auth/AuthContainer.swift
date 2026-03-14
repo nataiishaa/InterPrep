@@ -9,8 +9,6 @@ import SwiftUI
 import ArchitectureCore
 
 public struct AuthContainer: View {
-    public typealias AuthStore = Store<AuthState, AuthEffectHandler>
-    
     @StateObject private var store: AuthStore
     let onAuthComplete: () -> Void
     
