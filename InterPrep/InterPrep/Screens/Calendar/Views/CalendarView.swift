@@ -368,7 +368,7 @@ private struct MonthYearPickerView: View {
                                 .font(.title2)
                                 .foregroundColor(.brandPrimary)
                         }
-                        Text("\(selectedYear)")
+                        Text(verbatim: String(selectedYear))
                             .font(.title2)
                             .fontWeight(.semibold)
                             .frame(minWidth: 60)
