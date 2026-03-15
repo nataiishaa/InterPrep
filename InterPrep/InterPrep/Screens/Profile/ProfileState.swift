@@ -58,7 +58,8 @@ extension ProfileState {
         public var avatarURL: String?
         public var position: String?
         public var experience: String?
-        public var registeredDate: Date
+        /// Не отдаётся бэкендом — только для локального кэша при необходимости
+        public var registeredDate: Date?
         
         public var fullName: String {
             "\(firstName) \(lastName)"
@@ -67,10 +68,11 @@ extension ProfileState {
         public var initials: String {
             let first = firstName.prefix(1)
             let last = lastName.prefix(1)
-            return "\(first)\(last)".uppercased()
+            let s = "\(first)\(last)".uppercased()
+            return s.trimmingCharacters(in: .whitespaces).isEmpty ? "?" : s
         }
         
-        public init(id: String, firstName: String, lastName: String, email: String, phone: String? = nil, avatarURL: String? = nil, position: String? = nil, experience: String? = nil, registeredDate: Date) {
+        public init(id: String, firstName: String, lastName: String, email: String, phone: String? = nil, avatarURL: String? = nil, position: String? = nil, experience: String? = nil, registeredDate: Date? = nil) {
             self.id = id
             self.firstName = firstName
             self.lastName = lastName
@@ -211,6 +213,8 @@ extension ProfileState: FeatureState {
     public enum Feedback: Sendable {
         case userLoaded(User)
         case statisticsLoaded(Statistics)
+        /// Профиль и статистика загружены с бэкенда (getMe)
+        case profileLoaded(user: User, statistics: Statistics)
         case profileUpdated(User)
         case settingsSaved
         case loadingFailed(String)
@@ -285,7 +289,7 @@ extension ProfileState: FeatureState {
                 avatarURL: user.avatarURL,
                 position: user.position,
                 experience: user.experience,
-                registeredDate: user.registeredDate
+                registeredDate: user.registeredDate ?? nil
             )
             
             state.isLoading = true
@@ -363,13 +367,18 @@ extension ProfileState: FeatureState {
         case let .feedback(.userLoaded(user)):
             state.isLoading = false
             state.user = user
-            // Load both statistics and interviews
             state.isLoadingInterviews = true
             return .loadStatistics
             
         case let .feedback(.statisticsLoaded(statistics)):
             state.statistics = statistics
             return .loadInterviews
+            
+        case let .feedback(.profileLoaded(user, statistics)):
+            state.isLoading = false
+            state.user = user
+            state.statistics = statistics
+            return nil
             
         case let .feedback(.profileUpdated(user)):
             state.isLoading = false

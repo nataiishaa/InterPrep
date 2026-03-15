@@ -26,6 +26,7 @@ struct TabBarButton: View {
                         .scaleEffect(isSelected ? TabBarLayout.selectedScale : 1.0)
                 }
                 .frame(height: TabBarLayout.iconStackHeight)
+                .clipped()
 
                 Text(tab.title)
                     .font(.caption2)

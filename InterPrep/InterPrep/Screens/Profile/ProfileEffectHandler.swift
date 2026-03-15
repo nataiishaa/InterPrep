@@ -76,32 +76,68 @@ public actor ProfileEffectHandler: EffectHandler {
     // MARK: - Private Methods
     
     private func loadUser() async -> ProfileState.Feedback {
-        // Load and apply saved theme
         await loadAndApplyTheme()
         
-        do {
-            if let data = userDefaults.data(forKey: userKey) {
-                let user = try JSONDecoder().decode(ProfileState.User.self, from: data)
-                return .userLoaded(user)
-            } else {
-                // Create default user
-                let defaultUser = ProfileState.User(
-                    id: UUID().uuidString,
-                    firstName: "Пользователь",
-                    lastName: "",
-                    email: "user@example.com",
-                    phone: nil,
-                    avatarURL: nil,
-                    position: nil,
-                    experience: nil,
-                    registeredDate: Date()
-                )
-                
-                let data = try JSONEncoder().encode(defaultUser)
+        let result = await NetworkServiceV2.shared.getMe()
+        switch result {
+        case .success(let response):
+            let u = response.user
+            let user = ProfileState.User(
+                id: String(u.id),
+                firstName: u.firstName,
+                lastName: u.lastName,
+                email: u.email,
+                phone: nil,
+                avatarURL: nil,
+                position: nil,
+                experience: nil,
+                registeredDate: nil
+            )
+            let statistics = ProfileState.Statistics(
+                totalInterviews: Int(u.totalInterviews),
+                completedInterviews: Int(u.completedInterviews),
+                upcomingInterviews: Int(u.upcomingInterviews),
+                totalApplications: 0,
+                responseRate: 0,
+                averagePreparationTime: 0
+            )
+            if let data = try? JSONEncoder().encode(user) {
                 userDefaults.set(data, forKey: userKey)
-                
-                return .userLoaded(defaultUser)
             }
+            if let data = try? JSONEncoder().encode(statistics) {
+                userDefaults.set(data, forKey: statisticsKey)
+            }
+            return .profileLoaded(user: user, statistics: statistics)
+            
+        case .failure:
+            break
+        }
+        
+        do {
+            if let userData = userDefaults.data(forKey: userKey),
+               let user = try? JSONDecoder().decode(ProfileState.User.self, from: userData),
+               let statData = userDefaults.data(forKey: statisticsKey),
+               let statistics = try? JSONDecoder().decode(ProfileState.Statistics.self, from: statData) {
+                return .profileLoaded(user: user, statistics: statistics)
+            }
+            if let userData = userDefaults.data(forKey: userKey),
+               let user = try? JSONDecoder().decode(ProfileState.User.self, from: userData) {
+                return .profileLoaded(user: user, statistics: ProfileState.Statistics())
+            }
+            let defaultUser = ProfileState.User(
+                id: "",
+                firstName: "Пользователь",
+                lastName: "",
+                email: "",
+                phone: nil,
+                avatarURL: nil,
+                position: nil,
+                experience: nil,
+                registeredDate: nil
+            )
+            let data = try JSONEncoder().encode(defaultUser)
+            userDefaults.set(data, forKey: userKey)
+            return .profileLoaded(user: defaultUser, statistics: ProfileState.Statistics())
         } catch {
             return .loadingFailed("Не удалось загрузить профиль")
         }
@@ -129,12 +165,23 @@ public actor ProfileEffectHandler: EffectHandler {
     }
     
     private func updateProfile(_ user: ProfileState.User) async -> ProfileState.Feedback {
-        do {
-            let data = try JSONEncoder().encode(user)
-            userDefaults.set(data, forKey: userKey)
-            return .profileUpdated(user)
-        } catch {
-            return .loadingFailed("Не удалось сохранить профиль")
+        let result = await NetworkServiceV2.shared.updateUserProfile(
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: nil,
+            notificationsEnabled: nil
+        )
+        switch result {
+        case .success:
+            do {
+                let data = try JSONEncoder().encode(user)
+                userDefaults.set(data, forKey: userKey)
+                return .profileUpdated(user)
+            } catch {
+                return .loadingFailed("Не удалось сохранить профиль")
+            }
+        case .failure(let error):
+            return .loadingFailed(error.localizedDescription)
         }
     }
     
