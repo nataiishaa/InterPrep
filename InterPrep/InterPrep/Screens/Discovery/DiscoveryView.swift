@@ -77,6 +77,10 @@ public struct DiscoveryView: View {
                 .padding(.vertical, 10)
                 .background(Color.fieldBackground)
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.divider.opacity(0.5), lineWidth: 1)
+                )
             }
             .padding(.horizontal, Layout.horizontalPadding)
             .padding(.top, 12)
@@ -124,6 +128,10 @@ public struct DiscoveryView: View {
                     }
                 )
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(isSelected ? Color.clear : Color.divider.opacity(0.5), lineWidth: 1)
+                )
                 .shadow(
                     color: isSelected ? .brandPrimary.opacity(0.3) : .clear,
                     radius: isSelected ? 8 : 0,
