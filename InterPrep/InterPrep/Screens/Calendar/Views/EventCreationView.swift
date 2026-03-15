@@ -28,7 +28,7 @@ struct EventCreationView: View {
                     TextField("Название", text: Binding(
                         get: { model.title },
                         set: { model.onTitleChanged($0) }
-                    ), prompt: Text(""))
+                    ), prompt: Text("Название"))
                     
                     TextField("Адрес или ссылка на встречу", text: Binding(
                         get: { model.description },
@@ -51,14 +51,9 @@ struct EventCreationView: View {
                     }
                     
                     DatePicker("Начало", selection: Binding(
-                        get: { model.date },
-                        set: { model.onDateChanged($0) }
-                    ), displayedComponents: .date)
-                    
-                    DatePicker("", selection: Binding(
-                        get: { model.time },
-                        set: { model.onTimeChanged($0) }
-                    ), displayedComponents: .hourAndMinute)
+                        get: { model.startDateTime },
+                        set: { model.onStartDateTimeChanged($0) }
+                    ), displayedComponents: [.date, .hourAndMinute])
                     
                     DatePicker("Конец", selection: Binding(
                         get: { model.endDate },
@@ -129,8 +124,7 @@ extension EventCreationView {
     struct Model {
         let title: String
         let description: String
-        let date: Date
-        let time: Date
+        let startDateTime: Date
         let endDate: Date
         let type: CalendarState.EventType
         let reminderEnabled: Bool
@@ -138,8 +132,7 @@ extension EventCreationView {
         let errorMessage: String?
         let onTitleChanged: (String) -> Void
         let onDescriptionChanged: (String) -> Void
-        let onDateChanged: (Date) -> Void
-        let onTimeChanged: (Date) -> Void
+        let onStartDateTimeChanged: (Date) -> Void
         let onEndDateChanged: (Date) -> Void
         let onTypeChanged: (CalendarState.EventType) -> Void
         let onReminderToggled: (Bool) -> Void
@@ -155,8 +148,7 @@ extension EventCreationView {
     EventCreationView(model: .init(
         title: "",
         description: "",
-        date: Date(),
-        time: Date(),
+        startDateTime: Date(),
         endDate: Date().addingTimeInterval(3600),
         type: .interview,
         reminderEnabled: true,
@@ -164,8 +156,7 @@ extension EventCreationView {
         errorMessage: nil,
         onTitleChanged: { _ in },
         onDescriptionChanged: { _ in },
-        onDateChanged: { _ in },
-        onTimeChanged: { _ in },
+        onStartDateTimeChanged: { _ in },
         onEndDateChanged: { _ in },
         onTypeChanged: { _ in },
         onReminderToggled: { _ in },

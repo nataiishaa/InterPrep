@@ -158,6 +158,12 @@ extension DiscoveryState: FeatureState {
                     companyLogoURL: v.companyLogoURL
                 )
             }
+            
+            // Если мы в фильтре "Избранное", перезагружаем список
+            if state.selectedFilter == .favorites {
+                state.isLoading = true
+                return .loadVacancies(.favorites, searchQuery: state.searchQuery)
+            }
         }
         
         return nil

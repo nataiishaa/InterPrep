@@ -24,6 +24,7 @@ struct ProfileView: View {
             VStack(spacing: 24) {
                 profileHeader
                 resumeSection
+                interviewsSection
                 statisticsSection
                 settingsSection
                 actionsSection
@@ -219,6 +220,76 @@ struct ProfileView: View {
                     }
                     .foregroundColor(.brandPrimary)
                     .padding()
+                }
+            }
+            .background(Color.cardBackground)
+            .cornerRadius(12)
+            .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
+        }
+    }
+    
+    // MARK: - Interviews Section
+    
+    @ViewBuilder
+    private var interviewsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Собеседования")
+                .font(.headline)
+                .padding(.horizontal, 4)
+            
+            VStack(spacing: 0) {
+                // Tab Picker
+                Picker("", selection: Binding(
+                    get: { model.selectedInterviewTab },
+                    set: { model.onInterviewTabChanged($0) }
+                )) {
+                    ForEach(ProfileState.InterviewTab.allCases, id: \.self) { tab in
+                        Text(tab.rawValue).tag(tab)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding()
+                
+                Divider()
+                
+                // Interviews List
+                if model.isLoadingInterviews {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(40)
+                } else {
+                    let interviews = model.selectedInterviewTab == .upcoming 
+                        ? model.upcomingInterviews 
+                        : model.completedInterviews
+                    
+                    if interviews.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: model.selectedInterviewTab == .upcoming 
+                                ? "calendar.badge.clock" 
+                                : "checkmark.circle")
+                                .font(.largeTitle)
+                                .foregroundColor(.secondary)
+                            
+                            Text(model.selectedInterviewTab == .upcoming 
+                                ? "Нет запланированных собеседований" 
+                                : "Нет завершенных собеседований")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(40)
+                    } else {
+                        ForEach(interviews) { interview in
+                            InterviewRow(interview: interview) {
+                                model.onInterviewTapped(interview)
+                            }
+                            
+                            if interview.id != interviews.last?.id {
+                                Divider()
+                                    .padding(.leading, 52)
+                            }
+                        }
+                    }
                 }
             }
             .background(Color.cardBackground)
@@ -485,6 +556,64 @@ struct SettingsRow<Content: View>: View {
     }
 }
 
+// MARK: - Interview Row
+
+struct InterviewRow: View {
+    let interview: ProfileState.Interview
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                // Icon
+                Image(systemName: interview.isCompleted ? "checkmark.circle.fill" : "calendar")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .frame(width: 32, height: 32)
+                    .background(interview.isCompleted ? Color.green : Color.brandPrimary)
+                    .cornerRadius(8)
+                
+                // Content
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(interview.title)
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    HStack(spacing: 8) {
+                        if !interview.company.isEmpty {
+                            Text(interview.company)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        }
+                        
+                        Text("•")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(interview.date, style: .date)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(interview.date, style: .time)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+        }
+    }
+}
+
 // MARK: - Action Row
 
 struct ActionRow: View {
@@ -648,6 +777,10 @@ extension ProfileView {
         let statistics: ProfileState.Statistics
         let settings: ProfileState.AppSettings
         let deleteAccountError: String?
+        let selectedInterviewTab: ProfileState.InterviewTab
+        let upcomingInterviews: [ProfileState.Interview]
+        let completedInterviews: [ProfileState.Interview]
+        let isLoadingInterviews: Bool
         let onNotificationsToggled: (Bool) -> Void
         let onThemeChanged: (ProfileState.AppSettings.Theme) -> Void
         let onChangeResume: () -> Void
@@ -655,6 +788,8 @@ extension ProfileView {
         let onLogout: () -> Void
         let onDeleteAccount: (String) -> Void
         let onClearDeleteAccountError: () -> Void
+        let onInterviewTabChanged: (ProfileState.InterviewTab) -> Void
+        let onInterviewTapped: (ProfileState.Interview) -> Void
         let editModel: ProfileEditView.Model
     }
 }
@@ -683,6 +818,15 @@ extension ProfileView {
         ),
         settings: .init(),
         deleteAccountError: nil,
+        selectedInterviewTab: .upcoming,
+        upcomingInterviews: [
+            .init(id: "1", title: "iOS Developer", company: "Яндекс", date: Date().addingTimeInterval(86400), type: "Собеседование", isCompleted: false),
+            .init(id: "2", title: "Senior iOS", company: "Сбер", date: Date().addingTimeInterval(172800), type: "Собеседование", isCompleted: false)
+        ],
+        completedInterviews: [
+            .init(id: "3", title: "Middle iOS", company: "Авито", date: Date().addingTimeInterval(-86400), type: "Собеседование", isCompleted: true)
+        ],
+        isLoadingInterviews: false,
         onNotificationsToggled: { _ in },
         onThemeChanged: { _ in },
         onChangeResume: {},
@@ -690,6 +834,8 @@ extension ProfileView {
         onLogout: {},
         onDeleteAccount: { _ in },
         onClearDeleteAccountError: {},
+        onInterviewTabChanged: { _ in },
+        onInterviewTapped: { _ in },
         editModel: .init(
             firstName: "Иван",
             lastName: "Иванов",

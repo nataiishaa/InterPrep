@@ -63,6 +63,13 @@ public actor ProfileEffectHandler: EffectHandler {
             
         case let .performDeleteAccount(password):
             return await performDeleteAccount(password: password)
+            
+        case .loadInterviews:
+            return await loadInterviews()
+            
+        case .navigateToInterview:
+            // Navigation handled by coordinator
+            return nil
         }
     }
     
@@ -231,6 +238,73 @@ public actor ProfileEffectHandler: EffectHandler {
         case .failure(let error):
             print("❌ Failed to get resume profile: \(error)")
             return .resumeDownloadFailed("Не удалось получить информацию о резюме")
+        }
+    }
+    
+    private func loadInterviews() async -> ProfileState.Feedback {
+        print("📅 Loading interviews from calendar...")
+        
+        // Load interviews from calendar events
+        let result = await NetworkServiceV2.shared.listUpcoming(limit: 100, fromTime: Date())
+        
+        switch result {
+        case .success(let response):
+            print("✅ Loaded \(response.events.count) events")
+            
+            let now = Date()
+            var upcoming: [ProfileState.Interview] = []
+            var completed: [ProfileState.Interview] = []
+            
+            for event in response.events {
+                let interview = ProfileState.Interview(
+                    id: event.id,
+                    title: event.title,
+                    company: event.description_p.isEmpty ? "Компания" : event.description_p,
+                    date: event.startTime.date,
+                    type: eventTypeToString(event.eventType),
+                    isCompleted: event.completed
+                )
+                
+                if event.completed || interview.date < now {
+                    completed.append(interview)
+                } else {
+                    upcoming.append(interview)
+                }
+            }
+            
+            // Sort: upcoming by date ascending, completed by date descending
+            upcoming.sort { $0.date < $1.date }
+            completed.sort { $0.date > $1.date }
+            
+            print("   - Upcoming: \(upcoming.count)")
+            print("   - Completed: \(completed.count)")
+            
+            return .interviewsLoaded(upcoming: upcoming, completed: completed)
+            
+        case .failure(let error):
+            print("❌ Failed to load interviews: \(error)")
+            return .interviewsLoadFailed("Не удалось загрузить собеседования")
+        }
+    }
+    
+    private func eventTypeToString(_ type: Calendar_EventType) -> String {
+        switch type {
+        case .interview:
+            return "Собеседование"
+        case .call:
+            return "Звонок"
+        case .meeting:
+            return "Встреча"
+        case .testTask:
+            return "Тестовое задание"
+        case .prep:
+            return "Подготовка"
+        case .deadline:
+            return "Дедлайн"
+        case .other:
+            return "Другое"
+        default:
+            return "Событие"
         }
     }
     

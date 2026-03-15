@@ -18,6 +18,9 @@ public struct DocumentsState {
     public var error: String?
     public var showingCreateFolderSheet: Bool = false
     public var showingUploadSheet: Bool = false
+    public var showingCreateNoteSheet: Bool = false
+    public var showingEditNoteSheet: Bool = false
+    public var editingNote: Document?
     /// URL загруженного файла для просмотра (QuickLook)
     public var documentURLToOpen: URL?
     
@@ -28,6 +31,7 @@ public struct DocumentsState {
 
 public struct Folder: Identifiable, Equatable, Sendable {
     public let id: UUID
+    public var nodeId: UInt32?
     public var name: String
     public var documentsCount: Int
     public var createdAt: Date
@@ -35,12 +39,14 @@ public struct Folder: Identifiable, Equatable, Sendable {
     
     public init(
         id: UUID = UUID(),
+        nodeId: UInt32? = nil,
         name: String,
         documentsCount: Int = 0,
         createdAt: Date = Date(),
         color: FolderColor = .blue
     ) {
         self.id = id
+        self.nodeId = nodeId
         self.name = name
         self.documentsCount = documentsCount
         self.createdAt = createdAt
@@ -66,6 +72,7 @@ public struct Document: Identifiable, Equatable, Sendable {
     public var modifiedAt: Date
     public var folderId: UUID?
     public var url: URL?
+    public var content: String?
     
     public init(
         id: UUID = UUID(),
@@ -75,7 +82,8 @@ public struct Document: Identifiable, Equatable, Sendable {
         createdAt: Date = Date(),
         modifiedAt: Date = Date(),
         folderId: UUID? = nil,
-        url: URL? = nil
+        url: URL? = nil,
+        content: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -85,6 +93,7 @@ public struct Document: Identifiable, Equatable, Sendable {
         self.modifiedAt = modifiedAt
         self.folderId = folderId
         self.url = url
+        self.content = content
     }
     
     public var formattedSize: String {
@@ -92,6 +101,10 @@ public struct Document: Identifiable, Equatable, Sendable {
         formatter.allowedUnits = [.useKB, .useMB, .useGB]
         formatter.countStyle = .file
         return formatter.string(fromByteCount: size)
+    }
+    
+    public var isNote: Bool {
+        type == .note || type == .txt
     }
 }
 
@@ -128,10 +141,12 @@ extension DocumentsState: FeatureState {
         case createNoteTapped
         case dismissSheet
         case folderCreated(String)
-        case fileUploaded(URL)
+        case fileUploaded(URL, folderId: UUID?)
         case noteCreated(String, String)
+        case noteUpdated(Document, String)
         case documentDeleted(Document)
         case clearDocumentToOpen
+        case editNoteTapped(Document)
     }
     
     public enum Feedback: Sendable {
@@ -141,16 +156,19 @@ extension DocumentsState: FeatureState {
         case loadingFailed(String)
         case documentDownloaded(URL)
         case documentOpenFailed(String)
+        case noteContentLoaded(Document, String)
     }
     
     public enum Effect: Sendable {
         case loadFolders
         case loadRecentDocuments
         case createFolder(String)
-        case uploadFile(URL)
+        case uploadFile(URL, folderId: UUID?)
         case createNote(String, String)
+        case updateNote(Document, String)
         case deleteDocument(UUID)
         case openDocument(Document)
+        case loadNoteContent(Document)
     }
     
     @MainActor
@@ -181,25 +199,37 @@ extension DocumentsState: FeatureState {
             return nil
             
         case .input(.createNoteTapped):
-            state.showingCreateFolderSheet = true
+            state.showingCreateNoteSheet = true
             return nil
             
         case .input(.dismissSheet):
             state.showingCreateFolderSheet = false
             state.showingUploadSheet = false
+            state.showingCreateNoteSheet = false
+            state.showingEditNoteSheet = false
+            state.editingNote = nil
             return nil
             
         case .input(.folderCreated(let name)):
             state.showingCreateFolderSheet = false
             return .createFolder(name)
             
-        case .input(.fileUploaded(let url)):
+        case .input(.fileUploaded(let url, let folderId)):
             state.showingUploadSheet = false
-            return .uploadFile(url)
+            return .uploadFile(url, folderId: folderId)
             
         case .input(.noteCreated(let title, let content)):
-            state.showingCreateFolderSheet = false
+            state.showingCreateNoteSheet = false
             return .createNote(title, content)
+            
+        case .input(.noteUpdated(let document, let content)):
+            state.showingEditNoteSheet = false
+            state.editingNote = nil
+            return .updateNote(document, content)
+            
+        case .input(.editNoteTapped(let document)):
+            state.editingNote = document
+            return .loadNoteContent(document)
             
         case .input(.documentDeleted(let document)):
             state.recentDocuments.removeAll { $0.id == document.id }
@@ -235,6 +265,13 @@ extension DocumentsState: FeatureState {
             
         case .feedback(.documentOpenFailed(let message)):
             state.error = message
+            return nil
+            
+        case .feedback(.noteContentLoaded(let document, let content)):
+            var updatedDoc = document
+            updatedDoc.content = content
+            state.editingNote = updatedDoc
+            state.showingEditNoteSheet = true
             return nil
         }
     }

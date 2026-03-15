@@ -49,6 +49,10 @@ public struct ProfileContainer: View {
             statistics: store.state.statistics,
             settings: store.state.settings,
             deleteAccountError: store.state.deleteAccountError,
+            selectedInterviewTab: store.state.selectedInterviewTab,
+            upcomingInterviews: store.state.upcomingInterviews,
+            completedInterviews: store.state.completedInterviews,
+            isLoadingInterviews: store.state.isLoadingInterviews,
             onNotificationsToggled: { enabled in
                 store.send(.notificationsToggled(enabled))
             },
@@ -69,6 +73,12 @@ public struct ProfileContainer: View {
             },
             onClearDeleteAccountError: {
                 store.send(.clearDeleteAccountError)
+            },
+            onInterviewTabChanged: { tab in
+                store.send(.interviewTabChanged(tab))
+            },
+            onInterviewTapped: { interview in
+                store.send(.interviewTapped(interview))
             },
             editModel: makeEditModel()
         )
