@@ -28,6 +28,27 @@ public actor ProfileEffectHandler: EffectHandler {
     public typealias S = ProfileState
     
     private let userDefaults = UserDefaults.standard
+    
+    private static func profilePhotoCacheFileURL(userId: String) -> URL? {
+        guard let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("ProfilePhotos", isDirectory: true) else { return nil }
+        let safe = userId.filter { $0.isLetter || $0.isNumber }.isEmpty ? "default" : userId.filter { $0.isLetter || $0.isNumber }
+        return dir.appendingPathComponent("\(safe).jpg", isDirectory: false)
+    }
+    
+    private static func profilePhotoCachedURL(userId: String) -> URL? {
+        guard let url = profilePhotoCacheFileURL(userId: userId),
+              FileManager.default.fileExists(atPath: url.path) else { return nil }
+        return url
+    }
+    
+    private static func profilePhotoSaveSync(userId: String, data: Data) {
+        guard let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+                .appendingPathComponent("ProfilePhotos", isDirectory: true),
+              let fileURL = profilePhotoCacheFileURL(userId: userId) else { return }
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? data.write(to: fileURL)
+    }
     private let userKey = "user_profile"
     private let settingsKey = "app_settings"
     private let statisticsKey = "user_statistics"
@@ -70,6 +91,9 @@ public actor ProfileEffectHandler: EffectHandler {
         case .navigateToInterview:
             // Navigation handled by coordinator
             return nil
+            
+        case let .uploadProfilePhoto(userId, data):
+            return await uploadProfilePhoto(userId: userId, data: data)
         }
     }
     
@@ -107,7 +131,15 @@ public actor ProfileEffectHandler: EffectHandler {
             if let data = try? JSONEncoder().encode(statistics) {
                 userDefaults.set(data, forKey: statisticsKey)
             }
-            return .profileLoaded(user: user, statistics: statistics)
+            var profilePhotoURL: URL? = Self.profilePhotoCachedURL(userId: user.id)
+            if profilePhotoURL == nil {
+                let photoResult = await NetworkServiceV2.shared.getProfilePhoto()
+                if case .success(let resp) = photoResult, !resp.content.isEmpty {
+                    Self.profilePhotoSaveSync(userId: user.id, data: resp.content)
+                    profilePhotoURL = Self.profilePhotoCacheFileURL(userId: user.id)
+                }
+            }
+            return .profileLoaded(user: user, statistics: statistics, profilePhotoURL: profilePhotoURL)
             
         case .failure:
             break
@@ -118,11 +150,13 @@ public actor ProfileEffectHandler: EffectHandler {
                let user = try? JSONDecoder().decode(ProfileState.User.self, from: userData),
                let statData = userDefaults.data(forKey: statisticsKey),
                let statistics = try? JSONDecoder().decode(ProfileState.Statistics.self, from: statData) {
-                return .profileLoaded(user: user, statistics: statistics)
+                let photoURL = Self.profilePhotoCachedURL(userId: user.id)
+                return .profileLoaded(user: user, statistics: statistics, profilePhotoURL: photoURL)
             }
             if let userData = userDefaults.data(forKey: userKey),
                let user = try? JSONDecoder().decode(ProfileState.User.self, from: userData) {
-                return .profileLoaded(user: user, statistics: ProfileState.Statistics())
+                let photoURL = Self.profilePhotoCachedURL(userId: user.id)
+                return .profileLoaded(user: user, statistics: ProfileState.Statistics(), profilePhotoURL: photoURL)
             }
             let defaultUser = ProfileState.User(
                 id: "",
@@ -137,7 +171,7 @@ public actor ProfileEffectHandler: EffectHandler {
             )
             let data = try JSONEncoder().encode(defaultUser)
             userDefaults.set(data, forKey: userKey)
-            return .profileLoaded(user: defaultUser, statistics: ProfileState.Statistics())
+            return .profileLoaded(user: defaultUser, statistics: ProfileState.Statistics(), profilePhotoURL: nil)
         } catch {
             return .loadingFailed("Не удалось загрузить профиль")
         }
@@ -147,6 +181,24 @@ public actor ProfileEffectHandler: EffectHandler {
         if let data = userDefaults.data(forKey: settingsKey),
            let settings = try? JSONDecoder().decode(ProfileState.AppSettings.self, from: data) {
             await applyTheme(settings.theme)
+        }
+    }
+    
+    private func uploadProfilePhoto(userId: String, data: Data) async -> ProfileState.Feedback? {
+        guard !data.isEmpty else {
+            return .loadingFailed("Выберите изображение")
+        }
+        let result = await NetworkServiceV2.shared.uploadProfilePhoto(imageData: data, filename: "photo.jpg", mimeType: "image/jpeg")
+        switch result {
+        case .success:
+            Self.profilePhotoSaveSync(userId: userId, data: data)
+            if let url = Self.profilePhotoCacheFileURL(userId: userId) {
+                return .profilePhotoUpdated(url)
+            }
+            return nil
+        case .failure(let error):
+            let message = error.localizedDescription.isEmpty ? "Не удалось загрузить фото" : "Не удалось загрузить фото: \(error.localizedDescription)"
+            return .loadingFailed(message)
         }
     }
     
@@ -241,63 +293,44 @@ public actor ProfileEffectHandler: EffectHandler {
     }
     
     private func downloadResume() async -> ProfileState.Feedback {
-        print("📥 Downloading resume...")
-        
-        // Step 1: Get ResumeProfile to get source_material_id
         let profileResult = await NetworkServiceV2.shared.getUser_ResumeProfile()
         
         switch profileResult {
         case .success(let response):
             guard response.hasSourceMaterialID, !response.sourceMaterialID.isEmpty else {
-                print("❌ No source material ID found")
                 return .resumeDownloadFailed("Резюме еще не загружено. Пожалуйста, загрузите резюме сначала.")
             }
             
             let materialId = response.sourceMaterialID
-            print("📄 Found material ID: \(materialId)")
-            
-            // Step 2: Download the file
             let downloadResult = await NetworkServiceV2.shared.downloadFile(materialId: materialId)
             
             switch downloadResult {
             case .success(let downloadResponse):
-                print("✅ File downloaded: \(downloadResponse.content.count) bytes")
-                
-                // Step 3: Save to temporary directory
                 let tempDir = FileManager.default.temporaryDirectory
                 let fileName = downloadResponse.filename.isEmpty ? "resume.pdf" : downloadResponse.filename
                 let fileURL = tempDir.appendingPathComponent(fileName)
                 
                 do {
                     try downloadResponse.content.write(to: fileURL)
-                    print("💾 Saved to: \(fileURL.path)")
                     return .resumeDownloaded(fileURL)
                 } catch {
-                    print("❌ Failed to save file: \(error)")
                     return .resumeDownloadFailed("Не удалось сохранить файл")
                 }
                 
-            case .failure(let error):
-                print("❌ Download failed: \(error)")
+            case .failure:
                 return .resumeDownloadFailed("Не удалось скачать резюме")
             }
             
-        case .failure(let error):
-            print("❌ Failed to get resume profile: \(error)")
+        case .failure:
             return .resumeDownloadFailed("Не удалось получить информацию о резюме")
         }
     }
     
     private func loadInterviews() async -> ProfileState.Feedback {
-        print("📅 Loading interviews from calendar...")
-        
-        // Load interviews from calendar events
         let result = await NetworkServiceV2.shared.listUpcoming(limit: 100, fromTime: Date())
         
         switch result {
         case .success(let response):
-            print("✅ Loaded \(response.events.count) events")
-            
             let now = Date()
             var upcoming: [ProfileState.Interview] = []
             var completed: [ProfileState.Interview] = []
@@ -323,13 +356,9 @@ public actor ProfileEffectHandler: EffectHandler {
             upcoming.sort { $0.date < $1.date }
             completed.sort { $0.date > $1.date }
             
-            print("   - Upcoming: \(upcoming.count)")
-            print("   - Completed: \(completed.count)")
-            
             return .interviewsLoaded(upcoming: upcoming, completed: completed)
             
-        case .failure(let error):
-            print("❌ Failed to load interviews: \(error)")
+        case .failure:
             return .interviewsLoadFailed("Не удалось загрузить собеседования")
         }
     }

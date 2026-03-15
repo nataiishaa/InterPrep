@@ -2,7 +2,7 @@
 //  ResumeProfileDetailView.swift
 //  InterPrep
 //
-//  Просмотр загруженного резюме (профиль из API)
+//  Просмотр и редактирование резюме (профиль из API)
 //
 
 import SwiftUI
@@ -10,10 +10,29 @@ import DesignSystem
 import NetworkService
 
 struct ResumeProfileDetailView: View {
+    var userId: String?
     @Environment(\.dismiss) private var dismiss
     @State private var profile: User_ResumeProfile?
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var isEditing = false
+    @State private var isSaving = false
+    @State private var saveError: String?
+    
+    // Редактируемые поля (комма/перенос строки — разделители списков)
+    @State private var targetRolesText = ""
+    @State private var experienceLevel = ""
+    @State private var areasText = ""
+    @State private var salaryMinText = ""
+    @State private var currencyText = "₽"
+    @State private var workFormatText = ""
+    @State private var skillsTopText = ""
+    @State private var educationLevel = ""
+    @State private var notesText = ""
+    
+    init(userId: String? = nil) {
+        self.userId = userId
+    }
     
     var body: some View {
         NavigationStack {
@@ -40,46 +59,10 @@ struct ResumeProfileDetailView: View {
                             .padding(.horizontal)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if isEditing {
+                    editForm
                 } else if let profile = profile {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 20) {
-                            if !profile.targetRoles.isEmpty {
-                                section(title: "Целевые роли", items: profile.targetRoles)
-                            }
-                            if profile.hasExperienceLevel && !profile.experienceLevel.isEmpty {
-                                section(title: "Уровень опыта", text: profile.experienceLevel)
-                            }
-                            if !profile.areas.isEmpty {
-                                section(title: "Регионы", items: profile.areas.map { $0.name })
-                            }
-                            if profile.hasSalaryMin && profile.salaryMin > 0 {
-                                let currency = profile.currency.isEmpty ? "₽" : profile.currency
-                                section(title: "Зарплатные ожидания", text: "от \(Int(profile.salaryMin)) \(currency)")
-                            }
-                            if !profile.workFormat.isEmpty {
-                                section(title: "Формат работы", items: profile.workFormat)
-                            }
-                            if !profile.skillsTop.isEmpty {
-                                section(title: "Ключевые навыки", items: profile.skillsTop)
-                            }
-                            if profile.hasEducationLevel && !profile.educationLevel.isEmpty {
-                                section(title: "Образование", text: profile.educationLevel)
-                            }
-                            if profile.hasNotes && !profile.notes.isEmpty {
-                                section(title: "Дополнительно", text: profile.notes)
-                            }
-                            if profile.targetRoles.isEmpty && !profile.hasExperienceLevel && profile.areas.isEmpty &&
-                                !profile.hasSalaryMin && profile.workFormat.isEmpty && profile.skillsTop.isEmpty &&
-                                !profile.hasEducationLevel && !profile.hasNotes {
-                                Text("Данные резюме пока не заполнены")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                            }
-                        }
-                        .padding()
-                    }
+                    readOnlyContent(profile: profile)
                 }
             }
             .background(Color(.systemGroupedBackground))
@@ -87,8 +70,29 @@ struct ResumeProfileDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Закрыть") {
-                        dismiss()
+                    Button(isEditing ? "Отмена" : "Закрыть") {
+                        if isEditing {
+                            isEditing = false
+                            saveError = nil
+                        } else {
+                            dismiss()
+                        }
+                    }
+                }
+                if profile != nil && !isLoading && errorMessage == nil {
+                    ToolbarItem(placement: .primaryAction) {
+                        if isEditing {
+                            Button("Сохранить") {
+                                Task { await saveProfile() }
+                            }
+                            .disabled(isSaving)
+                        } else {
+                            Button("Редактировать") {
+                                copyProfileToEditState()
+                                isEditing = true
+                                saveError = nil
+                            }
+                        }
                     }
                 }
             }
@@ -96,6 +100,175 @@ struct ResumeProfileDetailView: View {
                 await loadProfile()
             }
         }
+    }
+    
+    private var editForm: some View {
+        Form {
+            if let err = saveError {
+                Section {
+                    Text(err)
+                        .foregroundColor(.red)
+                        .font(.subheadline)
+                }
+            }
+            Section("Целевые роли") {
+                TextField("Например: iOS Developer, Team Lead", text: $targetRolesText, axis: .vertical)
+                    .lineLimit(2...6)
+            }
+            Section("Уровень опыта") {
+                TextField("Junior / Middle / Senior / Lead", text: $experienceLevel)
+            }
+            Section("Регионы") {
+                TextField("Город или регион, с новой строки", text: $areasText, axis: .vertical)
+                    .lineLimit(2...6)
+            }
+            Section("Зарплатные ожидания") {
+                HStack {
+                    TextField("От (число)", text: $salaryMinText)
+                        .keyboardType(.decimalPad)
+                    TextField("₽", text: $currencyText)
+                        .frame(width: 50)
+                }
+            }
+            Section("Формат работы") {
+                TextField("Удалённо, Офис, Гибрид — через запятую", text: $workFormatText, axis: .vertical)
+                    .lineLimit(2...4)
+            }
+            Section("Ключевые навыки") {
+                TextField("Через запятую или с новой строки", text: $skillsTopText, axis: .vertical)
+                    .lineLimit(3...8)
+            }
+            Section("Образование") {
+                TextField("Уровень или вуз", text: $educationLevel)
+            }
+            Section("Дополнительно") {
+                TextField("Заметки", text: $notesText, axis: .vertical)
+                    .lineLimit(3...8)
+            }
+        }
+        .overlay {
+            if isSaving {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                ProgressView()
+                    .scaleEffect(1.2)
+                    .tint(.white)
+            }
+        }
+    }
+    
+    private func readOnlyContent(profile: User_ResumeProfile) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                if !profile.targetRoles.isEmpty {
+                    section(title: "Целевые роли", items: profile.targetRoles)
+                }
+                if profile.hasExperienceLevel && !profile.experienceLevel.isEmpty {
+                    section(title: "Уровень опыта", text: profile.experienceLevel)
+                }
+                if !profile.areas.isEmpty {
+                    section(title: "Регионы", items: profile.areas.map { $0.name })
+                }
+                if profile.hasSalaryMin && profile.salaryMin > 0 {
+                    let currency = profile.currency.isEmpty ? "₽" : profile.currency
+                    section(title: "Зарплатные ожидания", text: "от \(Int(profile.salaryMin)) \(currency)")
+                }
+                if !profile.workFormat.isEmpty {
+                    section(title: "Формат работы", items: profile.workFormat)
+                }
+                if !profile.skillsTop.isEmpty {
+                    section(title: "Ключевые навыки", items: profile.skillsTop)
+                }
+                if profile.hasEducationLevel && !profile.educationLevel.isEmpty {
+                    section(title: "Образование", text: profile.educationLevel)
+                }
+                if profile.hasNotes && !profile.notes.isEmpty {
+                    section(title: "Дополнительно", text: profile.notes)
+                }
+                if profile.targetRoles.isEmpty && !profile.hasExperienceLevel && profile.areas.isEmpty &&
+                    !profile.hasSalaryMin && profile.workFormat.isEmpty && profile.skillsTop.isEmpty &&
+                    !profile.hasEducationLevel && !profile.hasNotes {
+                    Text("Данные резюме пока не заполнены")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                }
+            }
+            .padding()
+        }
+    }
+    
+    private func copyProfileToEditState() {
+        guard let p = profile else { return }
+        targetRolesText = p.targetRoles.joined(separator: ", ")
+        experienceLevel = p.hasExperienceLevel ? p.experienceLevel : ""
+        areasText = p.areas.map { $0.name }.joined(separator: "\n")
+        if p.hasSalaryMin && p.salaryMin > 0 {
+            salaryMinText = String(Int(p.salaryMin))
+        } else {
+            salaryMinText = ""
+        }
+        currencyText = p.hasCurrency && !p.currency.isEmpty ? p.currency : "₽"
+        workFormatText = p.workFormat.joined(separator: ", ")
+        skillsTopText = p.skillsTop.joined(separator: ", ")
+        educationLevel = p.hasEducationLevel ? p.educationLevel : ""
+        notesText = p.hasNotes ? p.notes : ""
+    }
+    
+    private func saveProfile() async {
+        guard let uidString = userId, let uid = UInt32(uidString), uid > 0 else {
+            saveError = "Не удалось определить пользователя"
+            return
+        }
+        isSaving = true
+        saveError = nil
+        let updated = buildProfileFromEditState()
+        let result = await NetworkServiceV2.shared.updateUser_ResumeProfile(userId: uid, profile: updated)
+        isSaving = false
+        switch result {
+        case .success:
+            profile = updated
+            isEditing = false
+        case .failure(let error):
+            saveError = error.localizedDescription
+        }
+    }
+    
+    private func buildProfileFromEditState() -> User_ResumeProfile {
+        var p = User_ResumeProfile()
+        p.targetRoles = splitTrim(targetRolesText)
+        if !experienceLevel.isEmpty {
+            p.experienceLevel = experienceLevel.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        p.areas = areasText
+            .split(separator: "\n", omittingEmptySubsequences: true)
+            .map { line in
+                var a = User_Area()
+                a.name = String(line).trimmingCharacters(in: .whitespaces)
+                return a
+            }
+        if let salary = Double(salaryMinText.trimmingCharacters(in: .whitespaces)), salary > 0 {
+            p.salaryMin = salary
+        }
+        if !currencyText.isEmpty {
+            p.currency = currencyText.trimmingCharacters(in: .whitespaces)
+        }
+        p.workFormat = splitTrim(workFormatText)
+        p.skillsTop = splitTrim(skillsTopText)
+        if !educationLevel.isEmpty {
+            p.educationLevel = educationLevel.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        if !notesText.isEmpty {
+            p.notes = notesText.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return p
+    }
+    
+    private func splitTrim(_ s: String) -> [String] {
+        s.components(separatedBy: CharacterSet(charactersIn: ",\n"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
     }
     
     private func loadProfile() async {

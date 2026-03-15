@@ -21,7 +21,6 @@ public actor DefaultTokenProvider: TokenProvider {
     
     public func authenticateIfNeeded() async {
         // TODO: Implement re-authentication logic
-        print("⚠️ Token expired, need to re-authenticate")
     }
 }
 
@@ -103,7 +102,7 @@ public actor AsyncNetworkService {
             )
             if isConnectionError && protoRequest.shouldRetry {
                 let attempt = protoRequest.retryPolicy?.currentRetry ?? 0
-                let delaySec = 1.5 * pow(2.0, Double(attempt))
+                let delaySec = 2.0 * pow(2.0, Double(attempt))
                 try? await Task.sleep(nanoseconds: UInt64(delaySec * 1_000_000_000))
                 return await performInternal(
                     request: protoRequest.withReducedRetries(),
@@ -181,20 +180,5 @@ public struct LoggingObserver: NetworkResponseObserver {
     public init() {}
     
     public func observe(request: URLRequest, response: HTTPURLResponse?, data: Data?, error: Error?) async {
-        print("🌐 Network Request:")
-        print("   URL: \(request.url?.absoluteString ?? "N/A")")
-        print("   Method: \(request.httpMethod ?? "N/A")")
-        
-        if let response = response {
-            print("   Status: \(response.statusCode)")
-        }
-        
-        if let error = error {
-            print("   Error: \(error.localizedDescription)")
-        }
-        
-        if let data = data {
-            print("   Data size: \(data.count) bytes")
-        }
     }
 }

@@ -113,16 +113,11 @@ public final actor FileUploadServiceImpl: FileUploadService {
     }
     
     public func uploadFile(_ file: ResumeUploadState.SelectedFile) async throws {
-        print("📤 Starting file upload: \(file.name)")
-        
         guard FileManager.default.fileExists(atPath: file.url.path) else {
-            print("❌ File not found at path: \(file.url.path)")
             throw FileUploadError.fileNotFound
         }
         
         let fileData = try Data(contentsOf: file.url)
-        print("📦 File data loaded: \(fileData.count) bytes")
-        
         let result = await networkService.uploadFile(
             fileContent: fileData,
             filename: file.name,
@@ -132,14 +127,11 @@ public final actor FileUploadServiceImpl: FileUploadService {
         
         switch result {
         case .success(let response):
-            print("✅ File uploaded successfully!")
-            print("   Material ID: \(response.materialID)")
-            print("   Name: \(response.name)")
-            print("   Size: \(response.size)")
+            if !response.materialID.isEmpty {
+                _ = await networkService.parseResume(materialId: response.materialID)
+            }
             return
         case .failure(let error):
-            print("❌ Upload failed: \(error)")
-            
             // Check for specific network errors
             if (error as? NetworkError)?.isConnectionError == true {
                 throw FileUploadError.networkUnavailable

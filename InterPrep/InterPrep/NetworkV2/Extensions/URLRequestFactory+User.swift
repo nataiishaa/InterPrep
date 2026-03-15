@@ -46,4 +46,14 @@ extension URLRequestFactory {
             message: message
         )
     }
+    
+    func uploadProfilePhoto(
+        _ message: User_UploadProfilePhotoRequest
+    ) -> ProtoRequest<User_UploadProfilePhotoResponse> {
+        assemble(
+            path: "/gateway.BackendGateway/UploadProfilePhoto",
+            message: message,
+            timeout: 60
+        )
+    }
 }

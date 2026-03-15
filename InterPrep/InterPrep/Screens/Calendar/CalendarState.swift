@@ -126,7 +126,6 @@ extension CalendarState: FeatureState {
         
         // Event management
         case deleteEvent(String)
-        case toggleEventCompletion(String)
         case editEvent(CalendarEvent)
         /// Результат CalDAV-синхронизации: подставляем объединённый список событий
         case syncCompleted([CalendarEvent])
@@ -245,6 +244,13 @@ extension CalendarState: FeatureState {
             }
             
             let eventId = state.editingEventId ?? UUID().uuidString
+            let isCompleted: Bool
+            if let editingId = state.editingEventId,
+               let existing = state.events.first(where: { $0.id == editingId }) {
+                isCompleted = existing.isCompleted
+            } else {
+                isCompleted = false
+            }
             let event = CalendarEvent(
                 id: eventId,
                 title: state.newEventTitle,
@@ -253,7 +259,8 @@ extension CalendarState: FeatureState {
                 endDate: state.newEventEndDate,
                 type: state.newEventType,
                 reminderEnabled: state.newEventReminderEnabled,
-                reminderMinutesBefore: state.newEventReminderMinutes
+                reminderMinutesBefore: state.newEventReminderMinutes,
+                isCompleted: isCompleted
             )
             
             state.isLoading = true
@@ -265,14 +272,6 @@ extension CalendarState: FeatureState {
             
         case let .input(.deleteEvent(id)):
             return .deleteEvent(id)
-            
-        case let .input(.toggleEventCompletion(id)):
-            if let index = state.events.firstIndex(where: { $0.id == id }) {
-                var event = state.events[index]
-                event.isCompleted.toggle()
-                state.events[index] = event
-                return .updateEvent(event)
-            }
             
         case let .input(.editEvent(event)):
             state.editingEventId = event.id

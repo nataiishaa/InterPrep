@@ -51,9 +51,6 @@ public struct CalendarContainer: View {
             onDeleteEvent: { id in
                 store.send(.deleteEvent(id))
             },
-            onToggleEventCompletion: { id in
-                store.send(.toggleEventCompletion(id))
-            },
             onEditEvent: { event in
                 store.send(.editEvent(event))
             },
@@ -79,6 +76,7 @@ public struct CalendarContainer: View {
         let startDateTime = calendar.date(from: combinedComponents) ?? Date()
         
         return .init(
+            isEditing: store.state.editingEventId != nil,
             title: store.state.newEventTitle,
             description: store.state.newEventDescription,
             startDateTime: startDateTime,

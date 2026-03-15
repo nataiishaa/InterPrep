@@ -20,11 +20,9 @@ public final class AuthServiceImpl: AuthService {
         let result = await networkService.login(email: email, password: password)
         
         switch result {
-        case .success(let response):
-            // Токены уже сохранены в TokenStorage внутри NetworkService
-            print("✅ Login successful: \(response)")
+        case .success:
+            break
         case .failure(let error):
-            print("❌ Login failed: \(error)")
             if (error as? NetworkError)?.isConnectionError == true {
                 throw AuthError.networkUnavailable
             }
@@ -41,10 +39,9 @@ public final class AuthServiceImpl: AuthService {
         )
         
         switch result {
-        case .success(let response):
-            print("✅ Registration successful: \(response)")
+        case .success:
+            break
         case .failure(let error):
-            print("❌ Registration failed: \(error)")
             
             if (error as? NetworkError)?.isConnectionError == true {
                 throw AuthError.networkUnavailable
@@ -78,9 +75,8 @@ public final class AuthServiceImpl: AuthService {
         
         switch result {
         case .success:
-            print("✅ Password reset code sent")
+            break
         case .failure(let error):
-            print("❌ Failed to send reset code: \(error)")
             throw error
         }
     }
@@ -88,12 +84,10 @@ public final class AuthServiceImpl: AuthService {
     public func verifyOTP(email: String, code: String) async throws {
         // В API нет отдельного метода для верификации OTP
         // Верификация происходит при смене пароля
-        print("✅ OTP will be verified on password change")
     }
     
     public func uploadResume() async throws {
         // TODO: Implement resume upload via NetworkService
-        print("⚠️ Resume upload not implemented yet")
     }
     
     public func changePassword(email: String, code: String, newPassword: String) async throws {
@@ -101,9 +95,8 @@ public final class AuthServiceImpl: AuthService {
         
         switch result {
         case .success:
-            print("✅ Password changed successfully")
+            break
         case .failure(let error):
-            print("❌ Password change failed: \(error)")
             throw error
         }
     }

@@ -7,7 +7,8 @@ extension URLRequestFactory {
     ) -> ProtoRequest<Materials_UploadFileResponse> {
         assemble(
             path: "/gateway.BackendGateway/UploadFile",
-            message: message
+            message: message,
+            retryPolicy: RetryPolicy(maxRetries: 2)
         )
     }
     
@@ -52,7 +53,8 @@ extension URLRequestFactory {
     ) -> ProtoRequest<Materials_RenameNodeResponse> {
         assemble(
             path: "/gateway.BackendGateway/RenameNode",
-            message: message
+            message: message,
+            retryPolicy: RetryPolicy(maxRetries: 3)
         )
     }
     
@@ -61,7 +63,8 @@ extension URLRequestFactory {
     ) -> ProtoRequest<Materials_DeleteNodeResponse> {
         assemble(
             path: "/gateway.BackendGateway/DeleteNode",
-            message: message
+            message: message,
+            retryPolicy: RetryPolicy(maxRetries: 3)
         )
     }
 }

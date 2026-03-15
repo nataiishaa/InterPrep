@@ -96,7 +96,7 @@ struct EventCreationView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Создать")
+            .navigationTitle(model.isEditing ? "Редактировать" : "Создать")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -106,7 +106,7 @@ struct EventCreationView: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Добавить") {
+                    Button(model.isEditing ? "Сохранить" : "Добавить") {
                         model.onSave()
                         dismiss()
                     }
@@ -122,6 +122,7 @@ struct EventCreationView: View {
 
 extension EventCreationView {
     struct Model {
+        let isEditing: Bool
         let title: String
         let description: String
         let startDateTime: Date
@@ -146,6 +147,7 @@ extension EventCreationView {
 
 #Preview {
     EventCreationView(model: .init(
+        isEditing: false,
         title: "",
         description: "",
         startDateTime: Date(),

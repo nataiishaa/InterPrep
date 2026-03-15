@@ -31,8 +31,7 @@ public final actor ResumeServiceImpl: ResumeService {
             let hasSalary = profile.hasSalaryMin
             
             return hasTargetRoles || hasAreas || hasSkills || hasExperience || hasSalary
-        case .failure(let error):
-            print("❌ Failed to check resume: \(error)")
+        case .failure:
             return false
         }
     }
