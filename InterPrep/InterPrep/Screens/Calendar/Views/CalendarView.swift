@@ -11,6 +11,9 @@ import DesignSystem
 struct CalendarView: View {
     let model: Model
     @State private var showCalDAVSettings = false
+    @State private var lastCalDAVOpenTime: Date = .distantPast
+    @State private var showMonthYearPicker = false
+    @State private var selectedEventForDetail: CalendarState.CalendarEvent?
     @State private var isSyncing = false
     @Environment(\.colorScheme) var colorScheme
     
@@ -30,7 +33,27 @@ struct CalendarView: View {
         )) {
             EventCreationView(model: model.eventCreationModel)
         }
-        .sheet(isPresented: $showCalDAVSettings) {
+        .sheet(isPresented: $showMonthYearPicker) {
+            MonthYearPickerView(
+                currentMonth: model.currentMonth,
+                onSelect: { date in
+                    model.onMonthChanged(date)
+                    showMonthYearPicker = false
+                },
+                onDismiss: { showMonthYearPicker = false }
+            )
+        }
+        .sheet(item: $selectedEventForDetail) { event in
+            EventDetailSheet(
+                event: event,
+                model: model,
+                onDismiss: { selectedEventForDetail = nil }
+            )
+        }
+        .sheet(isPresented: $showCalDAVSettings, onDismiss: {
+            // Reset so next open works; avoids double presentation when Menu fires twice
+            lastCalDAVOpenTime = .distantPast
+        }) {
             CalDAVSettingsView(
                 settings: CalDAVSettingsManager.shared.loadSettings(),
                 onSave: { settings in
@@ -61,37 +84,30 @@ struct CalendarView: View {
                 
                 Spacer()
                 
-                Text(monthYearString)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                Button {
+                    showMonthYearPicker = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(monthYearString)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Image(systemName: "chevron.down.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(.brandPrimary.opacity(0.8))
+                    }
+                }
+                .buttonStyle(.plain)
                 
                 Spacer()
                 
-                // CalDAV sync button
-                Menu {
-                    Button {
-                        performSync()
-                    } label: {
-                        Label("Синхронизировать", systemImage: "arrow.triangle.2.circlepath")
-                    }
-                    .disabled(isSyncing)
-                    
-                    Button {
-                        showCalDAVSettings = true
-                    } label: {
-                        Label("Настройки CalDAV", systemImage: "gearshape")
-                    }
+                // Синхронизация с календарём (CalDAV) — один пункт, открывает настройки
+                Button {
+                    openCalDAVSettingsOnce()
                 } label: {
-                    if isSyncing {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                            .frame(width: 44, height: 44)
-                    } else {
-                        Image(systemName: "ellipsis.circle")
-                            .font(.title3)
-                            .foregroundColor(.brandPrimary)
-                            .frame(width: 44, height: 44)
-                    }
+                    Image(systemName: "ellipsis.circle")
+                        .font(.title3)
+                        .foregroundColor(.brandPrimary)
+                        .frame(width: 44, height: 44)
                 }
                 
                 Button {
@@ -181,7 +197,9 @@ struct CalendarView: View {
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(eventsForSelectedDate) { event in
-                            EventCard(event: event, model: model)
+                            EventCard(event: event, model: model, onTap: {
+                                selectedEventForDetail = event
+                            })
                         }
                     }
                     .padding()
@@ -263,10 +281,17 @@ struct CalendarView: View {
             .sorted { $0.date < $1.date }
     }
     
+    private func openCalDAVSettingsOnce() {
+        let now = Date()
+        guard now.timeIntervalSince(lastCalDAVOpenTime) > 0.5 else { return }
+        lastCalDAVOpenTime = now
+        showCalDAVSettings = true
+    }
+    
     private func performSync() {
         let settings = CalDAVSettingsManager.shared.loadSettings()
         guard settings.isEnabled else {
-            showCalDAVSettings = true
+            openCalDAVSettingsOnce()
             return
         }
         
@@ -290,6 +315,124 @@ struct CalendarView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Month Year Picker
+
+private struct MonthYearPickerView: View {
+    let currentMonth: Date
+    let onSelect: (Date) -> Void
+    let onDismiss: () -> Void
+    
+    @State private var selectedYear: Int
+    private let calendar = Calendar.current
+    private let monthSymbols: [String]
+    
+    init(currentMonth: Date, onSelect: @escaping (Date) -> Void, onDismiss: @escaping () -> Void) {
+        self.currentMonth = currentMonth
+        self.onSelect = onSelect
+        self.onDismiss = onDismiss
+        _selectedYear = State(initialValue: Calendar.current.component(.year, from: currentMonth))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "LLL"
+        var symbols: [String] = []
+        for i in 1...12 {
+            var comp = DateComponents()
+            comp.month = i
+            comp.day = 1
+            if let date = Calendar.current.date(from: comp) {
+                symbols.append(formatter.string(from: date).capitalized)
+            }
+        }
+        self.monthSymbols = symbols
+    }
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                // Year
+                HStack {
+                    Text("Год")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    HStack(spacing: 16) {
+                        Button {
+                            selectedYear = max(selectedYear - 1, 1970)
+                        } label: {
+                            Image(systemName: "chevron.left.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.brandPrimary)
+                        }
+                        Text("\(selectedYear)")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .frame(minWidth: 60)
+                        Button {
+                            selectedYear = min(selectedYear + 1, 2100)
+                        } label: {
+                            Image(systemName: "chevron.right.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.brandPrimary)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                
+                // Months grid
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach(Array(monthSymbols.enumerated()), id: \.offset) { index, name in
+                        let month = index + 1
+                        let isSelected = isCurrentSelectedMonth(month: month)
+                        Button {
+                            if let date = dateFor(month: month, year: selectedYear) {
+                                onSelect(date)
+                            }
+                        } label: {
+                            Text(name)
+                                .font(.subheadline)
+                                .fontWeight(isSelected ? .semibold : .regular)
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(isSelected ? Color.brandPrimary : Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal)
+                
+                Spacer(minLength: 0)
+            }
+            .padding(.top, 20)
+            .navigationTitle("Месяц и год")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Закрыть") {
+                        onDismiss()
+                    }
+                    .foregroundColor(.brandPrimary)
+                }
+            }
+        }
+    }
+    
+    private func isCurrentSelectedMonth(month: Int) -> Bool {
+        calendar.component(.month, from: currentMonth) == month &&
+        calendar.component(.year, from: currentMonth) == selectedYear
+    }
+    
+    private func dateFor(month: Int, year: Int) -> Date? {
+        var comp = DateComponents()
+        comp.year = year
+        comp.month = month
+        comp.day = 1
+        return calendar.date(from: comp)
     }
 }
 
@@ -361,6 +504,7 @@ struct CalendarDayCell: View {
 struct EventCard: View {
     let event: CalendarState.CalendarEvent
     let model: CalendarView.Model
+    var onTap: (() -> Void)? = nil
     
     var body: some View {
         HStack(spacing: 12) {
@@ -376,7 +520,7 @@ struct EventCard: View {
                 Spacer()
             }
             
-            // Event info
+            // Event info — тап открывает детали
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.title)
                     .font(.headline)
@@ -402,8 +546,11 @@ struct EventCard: View {
                     }
                 }
             }
-            
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onTap?()
+            }
             
             // Actions
             Menu {
@@ -452,6 +599,217 @@ struct EventCard: View {
     }
 }
 
+// MARK: - Event Detail Sheet
+
+private struct EventDetailSheet: View {
+    let event: CalendarState.CalendarEvent
+    let model: CalendarView.Model
+    let onDismiss: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    
+    private static let timeGridRowHeight: CGFloat = 44
+    private static let timeGridHours = 12 // 8:00–20:00
+    
+    /// Начало и конец события в минутах от полуночи (для таймлайна)
+    private var eventStartMinutes: Int {
+        let cal = Calendar.current
+        return cal.component(.hour, from: event.date) * 60 + cal.component(.minute, from: event.date)
+    }
+    
+    private var eventEndMinutes: Int {
+        let end = event.endDate ?? event.date.addingTimeInterval(3600)
+        let cal = Calendar.current
+        return cal.component(.hour, from: end) * 60 + cal.component(.minute, from: end)
+    }
+    
+    /// Название текущего этапа по типу события (для «Удачи!»)
+    private var currentStageName: String { event.type.rawValue }
+    
+    private static var dateFormatter: DateFormatter {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ru_RU")
+        f.dateFormat = "EEEE, d MMMM yyyy 'г.'"
+        return f
+    }
+    
+    private static var timeFormatter: DateFormatter {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ru_RU")
+        f.timeStyle = .short
+        return f
+    }
+    
+    private var dateTimeText: String {
+        let startStr = Self.timeFormatter.string(from: event.date)
+        let endStr = Self.timeFormatter.string(from: event.endDate ?? event.date.addingTimeInterval(3600))
+        return "\(Self.dateFormatter.string(from: event.date)) с \(startStr) до \(endStr)"
+    }
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Заголовок и дата/время
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(event.title)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .strikethrough(event.isCompleted)
+                        
+                        Text(dateTimeText)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    
+                    // Таймлайн во времени события (сетка часов + полоска)
+                    eventTimeGridSection
+                        .padding(.horizontal)
+                    
+                    if !event.description.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(event.description)
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                    }
+                    
+                    // Тип, Удачи на текущем этапе, напоминание
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: event.type.icon)
+                                .font(.body)
+                                .foregroundColor(typeColor)
+                            Text(event.type.rawValue)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            if event.isCompleted {
+                                Text("Завершено")
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.green)
+                                    .cornerRadius(6)
+                            }
+                        }
+                        Text("Удачи на этапе «\(currentStageName)»!")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.brandPrimary)
+                        if event.reminderEnabled {
+                            Label("Напоминание за \(event.reminderMinutesBefore) мин", systemImage: "bell.fill")
+                                .font(.subheadline)
+                                .foregroundColor(.brandPrimary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                }
+            }
+            .navigationTitle("Подробнее")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Закрыть") {
+                        onDismiss()
+                        dismiss()
+                    }
+                    .foregroundColor(.brandPrimary)
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Редактировать") {
+                        model.onEditEvent(event)
+                        onDismiss()
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+    
+    /// Сетка часов дня и полоска события (как в референсе)
+    private var eventTimeGridSection: some View {
+        let gridStartHour = 8
+        let gridStartMinutes = gridStartHour * 60
+        let gridEndMinutes = gridStartMinutes + Self.timeGridHours * 60
+        let eventStart = eventStartMinutes
+        let eventEnd = eventEndMinutes
+        let visibleStart = max(eventStart, gridStartMinutes)
+        let visibleEnd = min(eventEnd, gridEndMinutes)
+        let barTopOffset = CGFloat(visibleStart - gridStartMinutes) / 60 * Self.timeGridRowHeight
+        let barHeight = visibleEnd > visibleStart
+            ? max(28, CGFloat(visibleEnd - visibleStart) / 60 * Self.timeGridRowHeight)
+            : 28
+        let gridHeight = CGFloat(Self.timeGridHours) * Self.timeGridRowHeight
+        
+        return ZStack(alignment: .topLeading) {
+            // Сетка: часы слева, пустая область справа
+            VStack(spacing: 0) {
+                ForEach(0..<Self.timeGridHours, id: \.self) { i in
+                    HStack(alignment: .center, spacing: 12) {
+                        Text(String(format: "%d:%02d", gridStartHour + i, 0))
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .frame(width: 40, alignment: .leading)
+                        Color.clear
+                    }
+                    .frame(height: Self.timeGridRowHeight)
+                }
+            }
+            .frame(height: gridHeight)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Полоска события (накладывается на правую часть)
+            HStack(alignment: .top, spacing: 0) {
+                Color.clear.frame(width: 40 + 12, height: 0) // метки времени + отступ
+                VStack(spacing: 0) {
+                    Color.clear.frame(height: barTopOffset)
+                    HStack(spacing: 6) {
+                        Text(event.title)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                        Image(systemName: "clock")
+                            .font(.caption)
+                        Text("\(Self.timeFormatter.string(from: event.date))–\(Self.timeFormatter.string(from: event.endDate ?? event.date.addingTimeInterval(3600)))")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .frame(height: max(28, barHeight))
+                    .background(typeColor)
+                    .cornerRadius(8)
+                }
+                .padding(.trailing, 12)
+            }
+            .padding(EdgeInsets(top: 12, leading: 12, bottom: 0, trailing: 0))
+            .frame(height: gridHeight + 24)
+        }
+        .frame(height: gridHeight + 24)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+    
+    private var typeColor: Color {
+        switch event.type {
+        case .interview: return .brandPrimary
+        case .test: return .blue
+        case .call: return .green
+        case .meeting: return .orange
+        case .deadline: return .red
+        case .other: return .purple
+        }
+    }
+}
+
 // MARK: - Model
 
 extension CalendarView {
@@ -466,6 +824,7 @@ extension CalendarView {
         let onCancelEventCreation: () -> Void
         let onDeleteEvent: (String) -> Void
         let onToggleEventCompletion: (String) -> Void
+        let onEditEvent: (CalendarState.CalendarEvent) -> Void
         let onSyncCompleted: ([CalendarState.CalendarEvent]) -> Void
         let eventCreationModel: EventCreationView.Model
     }
@@ -498,12 +857,14 @@ extension CalendarView {
         onCancelEventCreation: {},
         onDeleteEvent: { _ in },
         onToggleEventCompletion: { _ in },
+        onEditEvent: { _ in },
         onSyncCompleted: { _ in },
         eventCreationModel: .init(
             title: "",
             description: "",
             date: Date(),
             time: Date(),
+            endDate: Date().addingTimeInterval(3600),
             type: .interview,
             reminderEnabled: true,
             reminderMinutes: 30,
@@ -512,6 +873,7 @@ extension CalendarView {
             onDescriptionChanged: { _ in },
             onDateChanged: { _ in },
             onTimeChanged: { _ in },
+            onEndDateChanged: { _ in },
             onTypeChanged: { _ in },
             onReminderToggled: { _ in },
             onReminderMinutesChanged: { _ in },

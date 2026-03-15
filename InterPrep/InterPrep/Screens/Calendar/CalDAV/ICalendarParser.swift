@@ -143,15 +143,17 @@ struct ICalendarGenerator {
 // MARK: - Conversion Extensions
 
 extension CalDAVEvent {
-    /// Convert from local CalendarEvent
-    init(from event: CalendarState.CalendarEvent) {
-        self.uid = event.id
-        self.summary = event.title
-        self.description = event.description.isEmpty ? nil : event.description
-        self.startDate = event.date
-        self.endDate = Calendar.current.date(byAdding: .hour, value: 1, to: event.date)
-        self.location = nil
-        self.etag = nil
+    /// Create from local CalendarEvent (factory to avoid init-in-extension compile issues)
+    static func from(calendarEvent event: CalendarState.CalendarEvent) -> CalDAVEvent {
+        CalDAVEvent(
+            uid: event.id,
+            summary: event.title,
+            description: event.description.isEmpty ? nil : event.description,
+            startDate: event.date,
+            endDate: event.endDate ?? Calendar.current.date(byAdding: .hour, value: 1, to: event.date),
+            location: nil,
+            etag: nil
+        )
     }
     
     /// Convert to local CalendarEvent
@@ -161,6 +163,7 @@ extension CalDAVEvent {
             title: summary,
             description: description ?? "",
             date: startDate,
+            endDate: endDate ?? startDate.addingTimeInterval(3600),
             type: .interview, // Default type
             reminderEnabled: false,
             reminderMinutesBefore: 30,

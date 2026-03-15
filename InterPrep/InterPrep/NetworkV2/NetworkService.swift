@@ -418,12 +418,28 @@ public final class NetworkServiceV2: ObservableObject {
         
         var request = Calendar_CreateEventRequest()
         request.event = event
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.createEvent(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.createEvent(request))
     }
     
     public func getCalendar_Event(id: String) async -> Result<Calendar_GetEventResponse, NetworkError> {
         var request = Calendar_GetEventRequest()
         request.id = id
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.getEvent(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.getEvent(request))
     }
     
@@ -443,7 +459,8 @@ public final class NetworkServiceV2: ObservableObject {
         eventType: Calendar_EventType?,
         location: String?,
         reminderEnabled: Bool?,
-        reminderMinutes: Int32?
+        reminderMinutes: Int32?,
+        completed: Bool? = nil
     ) async -> Result<Calendar_UpdateEventResponse, NetworkError> {
         var patch = Calendar_EventPatch()
         if let title = title {
@@ -470,16 +487,35 @@ public final class NetworkServiceV2: ObservableObject {
         if let reminderMinutes = reminderMinutes {
             patch.reminderMinutes = reminderMinutes
         }
+        if let completed = completed {
+            patch.completed = completed
+        }
         
         var request = Calendar_UpdateEventRequest()
         request.id = id
         request.patch = patch
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.updateEvent(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.updateEvent(request))
     }
     
     public func deleteEvent(id: String) async -> Result<Calendar_DeleteEventResponse, NetworkError> {
         var request = Calendar_DeleteEventRequest()
         request.id = id
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.deleteEvent(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.deleteEvent(request))
     }
     
@@ -508,6 +544,14 @@ public final class NetworkServiceV2: ObservableObject {
             request.pageToken = pageToken
         }
         request.sort = sort
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.listEvents(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.listEvents(request))
     }
     
@@ -524,6 +568,14 @@ public final class NetworkServiceV2: ObservableObject {
         var request = Calendar_ListUpcomingRequest()
         request.limit = limit
         request.fromTime = fromTime.toProtoTimestamp()
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.listUpcoming(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.listUpcoming(request))
     }
     
@@ -621,6 +673,74 @@ public final class BackendGatewayGRPCClient: Sendable {
         let options = callOptions(with: accessToken)
         let call: UnaryCall<Materials_ListFolderRequest, Materials_ListFolderResponse> = connection.makeUnaryCall(
             path: "/gateway.BackendGateway/ListFolder",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    // MARK: - Calendar (gRPC HTTP/2, same as Materials)
+    
+    public func listEvents(request: Calendar_ListEventsRequest, accessToken: String?) async throws -> Calendar_ListEventsResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Calendar_ListEventsRequest, Calendar_ListEventsResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/ListEvents",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func listUpcoming(request: Calendar_ListUpcomingRequest, accessToken: String?) async throws -> Calendar_ListUpcomingResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Calendar_ListUpcomingRequest, Calendar_ListUpcomingResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/ListUpcoming",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func createEvent(request: Calendar_CreateEventRequest, accessToken: String?) async throws -> Calendar_CreateEventResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Calendar_CreateEventRequest, Calendar_CreateEventResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/CreateEvent",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func getEvent(request: Calendar_GetEventRequest, accessToken: String?) async throws -> Calendar_GetEventResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Calendar_GetEventRequest, Calendar_GetEventResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/GetEvent",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func updateEvent(request: Calendar_UpdateEventRequest, accessToken: String?) async throws -> Calendar_UpdateEventResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Calendar_UpdateEventRequest, Calendar_UpdateEventResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/UpdateEvent",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func deleteEvent(request: Calendar_DeleteEventRequest, accessToken: String?) async throws -> Calendar_DeleteEventResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Calendar_DeleteEventRequest, Calendar_DeleteEventResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/DeleteEvent",
             request: request,
             callOptions: options,
             interceptors: []

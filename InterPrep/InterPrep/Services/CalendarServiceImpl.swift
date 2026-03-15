@@ -87,7 +87,8 @@ public final actor CalendarServiceImpl: CalendarServiceProtocol {
         eventType: CalendarEventType?,
         location: String?,
         reminderEnabled: Bool?,
-        reminderMinutes: Int32?
+        reminderMinutes: Int32?,
+        completed: Bool?
     ) async throws -> CalendarEvent {
         let result = await networkService.updateEvent(
             id: id,
@@ -98,7 +99,8 @@ public final actor CalendarServiceImpl: CalendarServiceProtocol {
             eventType: eventType.map { mapToProtoEventType($0) },
             location: location,
             reminderEnabled: reminderEnabled,
-            reminderMinutes: reminderMinutes
+            reminderMinutes: reminderMinutes,
+            completed: completed
         )
         
         switch result {
@@ -135,6 +137,7 @@ public final actor CalendarServiceImpl: CalendarServiceProtocol {
             relatedVacancyId: proto.hasRelatedVacancyID ? proto.relatedVacancyID : nil,
             reminderEnabled: proto.reminderEnabled,
             reminderMinutes: proto.reminderMinutes,
+            completed: proto.completed,
             createdAt: Date(timeIntervalSince1970: TimeInterval(proto.createdAt.seconds)),
             updatedAt: Date(timeIntervalSince1970: TimeInterval(proto.updatedAt.seconds))
         )

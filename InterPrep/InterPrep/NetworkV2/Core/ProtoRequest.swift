@@ -119,7 +119,10 @@ public struct ProtoRequest<Response: Message>: Sendable {
     
     public func withReducedRetries() -> Self {
         var copy = self
-        copy.retryPolicy?.incrementRetry()
+        if var policy = copy.retryPolicy {
+            policy.incrementRetry()
+            copy.retryPolicy = policy
+        }
         return copy
     }
     
