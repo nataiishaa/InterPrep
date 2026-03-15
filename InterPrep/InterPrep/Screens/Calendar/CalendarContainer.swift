@@ -54,10 +54,11 @@ public struct CalendarContainer: View {
             onToggleEventCompletion: { id in
                 store.send(.toggleEventCompletion(id))
             },
+            onEditEvent: { event in
+                store.send(.editEvent(event))
+            },
             onSyncCompleted: { events in
-                // This is feedback, not input - we need a different approach
-                // For now, we'll handle this differently
-                // TODO: Fix this - feedback should come from effect handler
+                store.send(.syncCompleted(events))
             },
             eventCreationModel: makeEventCreationModel()
         )
@@ -69,6 +70,7 @@ public struct CalendarContainer: View {
             description: store.state.newEventDescription,
             date: store.state.newEventDate,
             time: store.state.newEventTime,
+            endDate: store.state.newEventEndDate,
             type: store.state.newEventType,
             reminderEnabled: store.state.newEventReminderEnabled,
             reminderMinutes: store.state.newEventReminderMinutes,
@@ -84,6 +86,9 @@ public struct CalendarContainer: View {
             },
             onTimeChanged: { time in
                 store.send(.eventTimeChanged(time))
+            },
+            onEndDateChanged: { date in
+                store.send(.eventEndDateChanged(date))
             },
             onTypeChanged: { type in
                 store.send(.eventTypeChanged(type))

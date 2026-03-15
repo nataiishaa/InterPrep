@@ -35,15 +35,23 @@ final class AppCoordinator: ObservableObject {
         case main
     }
     
+    private static let accessTokenKey = "com.interprep.access_token"
+    private static let refreshTokenKey = "com.interprep.refresh_token"
+    
     init() {
-        // Определяем начальное состояние
         if appGraph.shouldShowOnboarding() {
             self.appState = .onboarding
+        } else if Self.hasStoredSession() {
+            self.appState = .main
         } else {
-            // TODO: Проверить авторизацию
-            // Пока всегда показываем Auth после онбординга
             self.appState = .auth
         }
+    }
+    
+    /// Токены сохраняются в UserDefaults (TokenStorage) — при перезапуске приложения сессия восстанавливается.
+    private static func hasStoredSession() -> Bool {
+        let ud = UserDefaults.standard
+        return ud.string(forKey: accessTokenKey) != nil && ud.string(forKey: refreshTokenKey) != nil
     }
     
     @ViewBuilder

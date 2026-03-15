@@ -15,7 +15,7 @@ public protocol CalendarServiceProtocol: Actor {
     func createEvent(title: String, description: String, startTime: Date, endTime: Date, eventType: CalendarEventType, location: String?, reminderEnabled: Bool, reminderMinutes: Int32) async throws -> CalendarEvent
     func listEvents(fromTime: Date, toTime: Date) async throws -> [CalendarEvent]
     func listUpcoming(limit: Int32) async throws -> [CalendarEvent]
-    func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?) async throws -> CalendarEvent
+    func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?, completed: Bool?) async throws -> CalendarEvent
     func deleteEvent(id: String) async throws -> Bool
 }
 
@@ -42,6 +42,7 @@ public struct CalendarEvent: Sendable {
     public let relatedVacancyId: String?
     public let reminderEnabled: Bool
     public let reminderMinutes: Int32
+    public let completed: Bool
     public let createdAt: Date
     public let updatedAt: Date
     
@@ -57,6 +58,7 @@ public struct CalendarEvent: Sendable {
         relatedVacancyId: String? = nil,
         reminderEnabled: Bool,
         reminderMinutes: Int32,
+        completed: Bool = false,
         createdAt: Date,
         updatedAt: Date
     ) {
@@ -71,6 +73,7 @@ public struct CalendarEvent: Sendable {
         self.relatedVacancyId = relatedVacancyId
         self.reminderEnabled = reminderEnabled
         self.reminderMinutes = reminderMinutes
+        self.completed = completed
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -90,8 +93,8 @@ public actor CalendarEffectHandler: EffectHandler {
     
     public func handle(effect: CalendarState.Effect) async -> CalendarState.Feedback? {
         switch effect {
-        case .loadEvents:
-            return await loadEvents()
+        case let .loadEvents(for: month):
+            return await loadEvents(for: month)
             
         case let .saveEvent(event):
             return await saveEvent(event)
@@ -113,28 +116,37 @@ public actor CalendarEffectHandler: EffectHandler {
     
     // MARK: - Private Methods
     
-    private func loadEvents() async -> CalendarState.Feedback {
+    private func loadEvents(for month: Date) async -> CalendarState.Feedback {
         do {
-            let currentMonth = Date()
             let calendar = Calendar.current
-            let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth))!
+            let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
             let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
             
             let serviceEvents = try await calendarService.listEvents(fromTime: startOfMonth, toTime: endOfMonth)
             let events = serviceEvents.map { mapServiceToCalendarEvent($0) }
             return .eventsLoaded(events)
         } catch {
-            return .loadingFailed("Не удалось загрузить события: \(error.localizedDescription)")
+            let message = userFacingMessage(for: error)
+            return .loadingFailed(message)
         }
+    }
+    
+    private func userFacingMessage(for error: Error) -> String {
+        let text = error.localizedDescription.lowercased()
+        if text.contains("connection was lost") || text.contains("network") || text.contains("timed out") || text.contains("offline") {
+            return "Проверьте подключение к интернету и попробуйте снова."
+        }
+        return "Не удалось загрузить события: \(error.localizedDescription)"
     }
     
     private func saveEvent(_ event: CalendarState.CalendarEvent) async -> CalendarState.Feedback {
         do {
+            let endTime = event.endDate ?? event.date.addingTimeInterval(3600)
             let serviceEvent = try await calendarService.createEvent(
                 title: event.title,
                 description: event.description,
                 startTime: event.date,
-                endTime: event.date.addingTimeInterval(3600),
+                endTime: endTime,
                 eventType: mapEventTypeToService(event.type),
                 location: nil,
                 reminderEnabled: event.reminderEnabled,
@@ -144,28 +156,30 @@ public actor CalendarEffectHandler: EffectHandler {
             let createdEvent = mapServiceToCalendarEvent(serviceEvent)
             return .eventCreated(createdEvent)
         } catch {
-            return .loadingFailed("Не удалось сохранить событие: \(error.localizedDescription)")
+            return .loadingFailed(userFacingMessage(for: error).replacingOccurrences(of: "загрузить события", with: "сохранить событие"))
         }
     }
     
     private func updateEvent(_ event: CalendarState.CalendarEvent) async -> CalendarState.Feedback {
         do {
+            let endTime = event.endDate ?? event.date.addingTimeInterval(3600)
             let serviceEvent = try await calendarService.updateEvent(
                 id: event.id,
                 title: event.title,
                 description: event.description,
                 startTime: event.date,
-                endTime: event.date.addingTimeInterval(3600),
+                endTime: endTime,
                 eventType: mapEventTypeToService(event.type),
                 location: nil,
                 reminderEnabled: event.reminderEnabled,
-                reminderMinutes: Int32(event.reminderMinutesBefore)
+                reminderMinutes: Int32(event.reminderMinutesBefore),
+                completed: event.isCompleted
             )
             
             let updatedEvent = mapServiceToCalendarEvent(serviceEvent)
             return .eventUpdated(updatedEvent)
         } catch {
-            return .loadingFailed("Не удалось обновить событие: \(error.localizedDescription)")
+            return .loadingFailed(userFacingMessage(for: error).replacingOccurrences(of: "загрузить события", with: "обновить событие"))
         }
     }
     
@@ -178,7 +192,8 @@ public actor CalendarEffectHandler: EffectHandler {
                 return .loadingFailed("Не удалось удалить событие")
             }
         } catch {
-            return .loadingFailed("Не удалось удалить событие: \(error.localizedDescription)")
+            let msg = userFacingMessage(for: error)
+            return .loadingFailed(msg.contains("подключение") ? msg : "Не удалось удалить событие: \(error.localizedDescription)")
         }
     }
     
@@ -190,10 +205,11 @@ public actor CalendarEffectHandler: EffectHandler {
             title: serviceEvent.title,
             description: serviceEvent.description,
             date: serviceEvent.startTime,
+            endDate: serviceEvent.endTime,
             type: mapServiceToEventType(serviceEvent.eventType),
             reminderEnabled: serviceEvent.reminderEnabled,
             reminderMinutesBefore: Int(serviceEvent.reminderMinutes),
-            isCompleted: false
+            isCompleted: serviceEvent.completed
         )
     }
     
@@ -302,6 +318,7 @@ public final actor MockCalendarService: CalendarServiceProtocol {
             location: location,
             reminderEnabled: reminderEnabled,
             reminderMinutes: reminderMinutes,
+            completed: false,
             createdAt: Date(),
             updatedAt: Date()
         )
@@ -315,7 +332,7 @@ public final actor MockCalendarService: CalendarServiceProtocol {
         []
     }
     
-    public func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?) async throws -> CalendarEvent {
+    public func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?, completed: Bool?) async throws -> CalendarEvent {
         CalendarEvent(
             id: id,
             title: title ?? "Updated Event",
@@ -326,6 +343,7 @@ public final actor MockCalendarService: CalendarServiceProtocol {
             location: location,
             reminderEnabled: reminderEnabled ?? false,
             reminderMinutes: reminderMinutes ?? 30,
+            completed: completed ?? false,
             createdAt: Date(),
             updatedAt: Date()
         )

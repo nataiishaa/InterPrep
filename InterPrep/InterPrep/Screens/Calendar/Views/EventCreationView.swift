@@ -12,132 +12,83 @@ struct EventCreationView: View {
     let model: Model
     @Environment(\.dismiss) private var dismiss
     
+    private static let reminderOptions: [(Int, String)] = [
+        (5, "5 минут"),
+        (15, "15 минут"),
+        (30, "30 минут"),
+        (60, "1 час"),
+        (120, "2 часа"),
+        (1440, "1 день")
+    ]
+    
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Title
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Название")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-                        
-                        TextField("Например: Собеседование в Яндекс", text: Binding(
-                            get: { model.title },
-                            set: { model.onTitleChanged($0) }
-                        ))
-                        .textFieldStyle(.roundedBorder)
-                    }
+            Form {
+                Section {
+                    TextField("Название", text: Binding(
+                        get: { model.title },
+                        set: { model.onTitleChanged($0) }
+                    ), prompt: Text(""))
                     
-                    // Description
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Описание")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-                        
-                        TextEditor(text: Binding(
-                            get: { model.description },
-                            set: { model.onDescriptionChanged($0) }
-                        ))
-                        .frame(height: 100)
-                        .padding(8)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                    }
-                    
-                    // Type
-                    VStack(alignment: .leading, spacing: 8) {
+                    TextField("Адрес или ссылка на встречу", text: Binding(
+                        get: { model.description },
+                        set: { model.onDescriptionChanged($0) }
+                    ), axis: .vertical)
+                    .lineLimit(3...6)
+                }
+                
+                Section {
+                    Picker(selection: Binding(
+                        get: { model.type },
+                        set: { model.onTypeChanged($0) }
+                    )) {
+                        ForEach(CalendarState.EventType.allCases, id: \.self) { type in
+                            Label(type.rawValue, systemImage: type.icon)
+                                .tag(type)
+                        }
+                    } label: {
                         Text("Тип события")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.secondary)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(CalendarState.EventType.allCases, id: \.self) { type in
-                                    EventTypeButton(
-                                        type: type,
-                                        isSelected: model.type == type,
-                                        action: { model.onTypeChanged(type) }
-                                    )
-                                }
-                            }
-                        }
                     }
                     
-                    // Date and Time
-                    VStack(spacing: 16) {
-                        HStack(spacing: 16) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Дата")
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.secondary)
-                                
-                                DatePicker("", selection: Binding(
-                                    get: { model.date },
-                                    set: { model.onDateChanged($0) }
-                                ), displayedComponents: .date)
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
+                    DatePicker("Начало", selection: Binding(
+                        get: { model.date },
+                        set: { model.onDateChanged($0) }
+                    ), displayedComponents: .date)
+                    
+                    DatePicker("", selection: Binding(
+                        get: { model.time },
+                        set: { model.onTimeChanged($0) }
+                    ), displayedComponents: .hourAndMinute)
+                    
+                    DatePicker("Конец", selection: Binding(
+                        get: { model.endDate },
+                        set: { model.onEndDateChanged($0) }
+                    ), displayedComponents: [.date, .hourAndMinute])
+                }
+                
+                Section {
+                    Toggle("Напоминание", isOn: Binding(
+                        get: { model.reminderEnabled },
+                        set: { model.onReminderToggled($0) }
+                    ))
+                    .tint(.brandPrimary)
+                    
+                    if model.reminderEnabled {
+                        Picker(selection: Binding(
+                            get: { model.reminderMinutes },
+                            set: { model.onReminderMinutesChanged($0) }
+                        )) {
+                            ForEach(Self.reminderOptions, id: \.0) { value, title in
+                                Text(title).tag(value)
                             }
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Время")
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.secondary)
-                                
-                                DatePicker("", selection: Binding(
-                                    get: { model.time },
-                                    set: { model.onTimeChanged($0) }
-                                ), displayedComponents: .hourAndMinute)
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
-                            }
+                        } label: {
+                            Text("За сколько напомнить")
                         }
                     }
-                    
-                    // Reminder
-                    VStack(alignment: .leading, spacing: 12) {
-                        Toggle("Напоминание", isOn: Binding(
-                            get: { model.reminderEnabled },
-                            set: { model.onReminderToggled($0) }
-                        ))
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .tint(.brandPrimary)
-                        
-                        if model.reminderEnabled {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("За сколько минут напомнить")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Picker("", selection: Binding(
-                                    get: { model.reminderMinutes },
-                                    set: { model.onReminderMinutesChanged($0) }
-                                )) {
-                                    Text("5 минут").tag(5)
-                                    Text("15 минут").tag(15)
-                                    Text("30 минут").tag(30)
-                                    Text("1 час").tag(60)
-                                    Text("2 часа").tag(120)
-                                    Text("1 день").tag(1440)
-                                }
-                                .pickerStyle(.segmented)
-                            }
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    
-                    // Error message
-                    if let error = model.errorMessage {
+                }
+                
+                if let error = model.errorMessage {
+                    Section {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.red)
@@ -145,27 +96,22 @@ struct EventCreationView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.red)
                         }
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.red.opacity(0.1))
-                        .cornerRadius(8)
                     }
                 }
-                .padding()
             }
+            .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Новое событие")
+            .navigationTitle("Создать")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") {
+                    Button("Отменить") {
                         model.onCancel()
                         dismiss()
                     }
                 }
-                
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") {
+                    Button("Добавить") {
                         model.onSave()
                         dismiss()
                     }
@@ -173,43 +119,6 @@ struct EventCreationView: View {
                     .disabled(model.title.isEmpty)
                 }
             }
-        }
-    }
-}
-
-// MARK: - Event Type Button
-
-struct EventTypeButton: View {
-    let type: CalendarState.EventType
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                Image(systemName: type.icon)
-                    .font(.title3)
-                    .foregroundColor(isSelected ? .white : typeColor)
-                
-                Text(type.rawValue)
-                    .font(.caption2)
-                    .foregroundColor(isSelected ? .white : .primary)
-            }
-            .frame(width: 80, height: 80)
-            .background(isSelected ? typeColor : Color(.systemGray6))
-            .cornerRadius(12)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-    
-    private var typeColor: Color {
-        switch type {
-        case .interview: return .brandPrimary
-        case .test: return .blue
-        case .call: return .green
-        case .meeting: return .orange
-        case .deadline: return .red
-        case .other: return .purple
         }
     }
 }
@@ -222,6 +131,7 @@ extension EventCreationView {
         let description: String
         let date: Date
         let time: Date
+        let endDate: Date
         let type: CalendarState.EventType
         let reminderEnabled: Bool
         let reminderMinutes: Int
@@ -230,6 +140,7 @@ extension EventCreationView {
         let onDescriptionChanged: (String) -> Void
         let onDateChanged: (Date) -> Void
         let onTimeChanged: (Date) -> Void
+        let onEndDateChanged: (Date) -> Void
         let onTypeChanged: (CalendarState.EventType) -> Void
         let onReminderToggled: (Bool) -> Void
         let onReminderMinutesChanged: (Int) -> Void
@@ -246,6 +157,7 @@ extension EventCreationView {
         description: "",
         date: Date(),
         time: Date(),
+        endDate: Date().addingTimeInterval(3600),
         type: .interview,
         reminderEnabled: true,
         reminderMinutes: 30,
@@ -254,6 +166,7 @@ extension EventCreationView {
         onDescriptionChanged: { _ in },
         onDateChanged: { _ in },
         onTimeChanged: { _ in },
+        onEndDateChanged: { _ in },
         onTypeChanged: { _ in },
         onReminderToggled: { _ in },
         onReminderMinutesChanged: { _ in },

@@ -222,6 +222,11 @@ public struct Calendar_Event: @unchecked Sendable {
   /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
   public mutating func clearUpdatedAt() {_uniqueStorage()._updatedAt = nil}
 
+  public var completed: Bool {
+    get {return _storage._completed}
+    set {_uniqueStorage()._completed = newValue}
+  }
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -324,6 +329,15 @@ public struct Calendar_EventPatch: Sendable {
   /// Clears the value of `reminderMinutes`. Subsequent reads from it will return its default value.
   public mutating func clearReminderMinutes() {self._reminderMinutes = nil}
 
+  public var completed: Bool {
+    get {return _completed ?? false}
+    set {_completed = newValue}
+  }
+  /// Returns true if `completed` has been explicitly set.
+  public var hasCompleted: Bool {return self._completed != nil}
+  /// Clears the value of `completed`. Subsequent reads from it will return its default value.
+  public mutating func clearCompleted() {self._completed = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -338,6 +352,7 @@ public struct Calendar_EventPatch: Sendable {
   fileprivate var _relatedVacancyID: String? = nil
   fileprivate var _reminderEnabled: Bool? = nil
   fileprivate var _reminderMinutes: Int32? = nil
+  fileprivate var _completed: Bool? = nil
 }
 
 public struct Calendar_CreateEventRequest: Sendable {
@@ -633,6 +648,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     11: .standard(proto: "reminder_minutes"),
     12: .standard(proto: "created_at"),
     13: .standard(proto: "updated_at"),
+    14: .same(proto: "completed"),
   ]
 
   fileprivate class _StorageClass {
@@ -649,6 +665,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
     var _reminderMinutes: Int32 = 0
     var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _completed: Bool = false
 
     #if swift(>=5.10)
       // This property is used as the initial default value for new instances of the type.
@@ -676,6 +693,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
       _reminderMinutes = source._reminderMinutes
       _createdAt = source._createdAt
       _updatedAt = source._updatedAt
+      _completed = source._completed
     }
   }
 
@@ -707,6 +725,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
         case 11: try { try decoder.decodeSingularInt32Field(value: &_storage._reminderMinutes) }()
         case 12: try { try decoder.decodeSingularMessageField(value: &_storage._createdAt) }()
         case 13: try { try decoder.decodeSingularMessageField(value: &_storage._updatedAt) }()
+        case 14: try { try decoder.decodeSingularBoolField(value: &_storage._completed) }()
         default: break
         }
       }
@@ -758,6 +777,9 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
       try { if let v = _storage._updatedAt {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 13)
       } }()
+      if _storage._completed != false {
+        try visitor.visitSingularBoolField(value: _storage._completed, fieldNumber: 14)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -780,6 +802,7 @@ extension Calendar_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplement
         if _storage._reminderMinutes != rhs_storage._reminderMinutes {return false}
         if _storage._createdAt != rhs_storage._createdAt {return false}
         if _storage._updatedAt != rhs_storage._updatedAt {return false}
+        if _storage._completed != rhs_storage._completed {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -802,6 +825,7 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     8: .standard(proto: "related_vacancy_id"),
     9: .standard(proto: "reminder_enabled"),
     10: .standard(proto: "reminder_minutes"),
+    11: .same(proto: "completed"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -820,6 +844,7 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       case 8: try { try decoder.decodeSingularStringField(value: &self._relatedVacancyID) }()
       case 9: try { try decoder.decodeSingularBoolField(value: &self._reminderEnabled) }()
       case 10: try { try decoder.decodeSingularInt32Field(value: &self._reminderMinutes) }()
+      case 11: try { try decoder.decodeSingularBoolField(value: &self._completed) }()
       default: break
       }
     }
@@ -860,6 +885,9 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     try { if let v = self._reminderMinutes {
       try visitor.visitSingularInt32Field(value: v, fieldNumber: 10)
     } }()
+    try { if let v = self._completed {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 11)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -874,6 +902,7 @@ extension Calendar_EventPatch: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if lhs._relatedVacancyID != rhs._relatedVacancyID {return false}
     if lhs._reminderEnabled != rhs._reminderEnabled {return false}
     if lhs._reminderMinutes != rhs._reminderMinutes {return false}
+    if lhs._completed != rhs._completed {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

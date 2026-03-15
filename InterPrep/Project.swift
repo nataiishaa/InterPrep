@@ -258,12 +258,8 @@ let project = Project(
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
                 .target(name: "CalendarFeature"),
-                .target(name: "NetworkService"),
-                .package(product: "SwiftProtobuf"),
-                .package(product: "GRPC"),
-                .package(product: "Logging"),
-                .package(product: "NIOCore"),
-                .package(product: "NIOHTTP2")
+                .target(name: "NetworkService")
+                // SwiftProtobuf, GRPC, Logging, NIOCore, NIOHTTP2 приходят транзитивно через NetworkService
             ]
         ),
         

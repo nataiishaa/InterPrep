@@ -7,18 +7,31 @@
 
 import SwiftUI
 
+/// Этапы поиска работы для таймлайна
+private let jobSearchStages = [
+    "Отклик",
+    "Резюме на рассмотрении",
+    "Собеседование",
+    "Тестовое задание",
+    "Оффер"
+]
+
 public struct VacancyDetailView: View {
     let vacancy: Vacancy
+    /// Индекс текущего этапа (0 — отклик, 1 — резюме, 2 — собеседование, 3 — тестовое, 4 — оффер)
+    let currentStageIndex: Int
     let onApply: () -> Void
     let onSave: () -> Void
     @Environment(\.dismiss) private var dismiss
     
     public init(
         vacancy: Vacancy,
+        currentStageIndex: Int = 0,
         onApply: @escaping () -> Void = {},
         onSave: @escaping () -> Void = {}
     ) {
         self.vacancy = vacancy
+        self.currentStageIndex = min(max(currentStageIndex, 0), jobSearchStages.count - 1)
         self.onApply = onApply
         self.onSave = onSave
     }
@@ -28,6 +41,11 @@ public struct VacancyDetailView: View {
             VStack(alignment: .leading, spacing: 24) {
                 // Header
                 headerSection
+                
+                Divider()
+                
+                // Timeline + Удачи на текущем этапе
+                timelineSection
                 
                 Divider()
                 
@@ -110,6 +128,51 @@ public struct VacancyDetailView: View {
             Text("Опубликовано \(formatFullDate(vacancy.postedDate))")
                 .font(.caption)
                 .foregroundColor(.secondary)
+        }
+    }
+    
+    private var timelineSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Этапы поиска")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(jobSearchStages.enumerated()), id: \.offset) { index, stageName in
+                    HStack(alignment: .top, spacing: 12) {
+                        // Вертикальная линия + точка
+                        VStack(spacing: 0) {
+                            Circle()
+                                .fill(index <= currentStageIndex ? Color.blue : Color.gray.opacity(0.3))
+                                .frame(width: 12, height: 12)
+                            
+                            if index < jobSearchStages.count - 1 {
+                                Rectangle()
+                                    .fill(index < currentStageIndex ? Color.blue.opacity(0.5) : Color.gray.opacity(0.2))
+                                    .frame(width: 2)
+                                    .frame(minHeight: 28)
+                            }
+                        }
+                        .frame(width: 12)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(stageName)
+                                .font(index == currentStageIndex ? .subheadline.weight(.semibold) : .subheadline)
+                                .foregroundColor(index == currentStageIndex ? .primary : .secondary)
+                            
+                            if index == currentStageIndex {
+                                Text("Удачи!")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.bottom, index < jobSearchStages.count - 1 ? 8 : 0)
+                        
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
         }
     }
     

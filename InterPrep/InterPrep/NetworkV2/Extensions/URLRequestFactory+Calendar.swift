@@ -43,7 +43,8 @@ extension URLRequestFactory {
     ) -> ProtoRequest<Calendar_ListEventsResponse> {
         assemble(
             path: "/gateway.BackendGateway/ListEvents",
-            message: message
+            message: message,
+            retryPolicy: RetryPolicy(maxRetries: 3)
         )
     }
     
@@ -52,7 +53,8 @@ extension URLRequestFactory {
     ) -> ProtoRequest<Calendar_ListUpcomingResponse> {
         assemble(
             path: "/gateway.BackendGateway/ListUpcoming",
-            message: message
+            message: message,
+            retryPolicy: RetryPolicy(maxRetries: 3)
         )
     }
 }

@@ -97,7 +97,7 @@ final class CalDAVSyncManager {
         for localEvent in localEvents {
             let existsOnServer = serverEvents.contains { $0.uid == localEvent.id }
             if !existsOnServer {
-                let caldavEvent = CalDAVEvent(from: localEvent)
+                let caldavEvent = CalDAVEvent.from(calendarEvent: localEvent)
                 try await client.saveEvent(caldavEvent, to: calendar)
                 mergedEvents.append(localEvent)
             }
@@ -118,7 +118,7 @@ final class CalDAVSyncManager {
             throw CalDAVError.requestFailed
         }
         
-        let caldavEvent = CalDAVEvent(from: event)
+        let caldavEvent = CalDAVEvent.from(calendarEvent: event)
         try await client.saveEvent(caldavEvent, to: calendar)
     }
     
@@ -129,7 +129,7 @@ final class CalDAVSyncManager {
             throw CalDAVError.requestFailed
         }
         
-        let caldavEvent = CalDAVEvent(from: event)
+        let caldavEvent = CalDAVEvent.from(calendarEvent: event)
         try await client.deleteEvent(caldavEvent, from: calendar)
     }
     

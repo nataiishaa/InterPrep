@@ -34,7 +34,7 @@ struct MainTabView: View {
             Group {
                 switch selectedTab {
                 case .calendar:
-                    CalendarContainer()
+                    appGraph.makeCalendarContainer()
                 case .documents:
                     appGraph.makeDocumentsContainer()
                 case .search:

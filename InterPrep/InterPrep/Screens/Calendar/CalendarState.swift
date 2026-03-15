@@ -16,11 +16,13 @@ public struct CalendarState {
     public var isLoading: Bool = false
     public var errorMessage: String?
     
-    // Event creation
+    // Event creation / edit
+    public var editingEventId: String?
     public var newEventTitle: String = ""
     public var newEventDescription: String = ""
     public var newEventDate: Date = Date()
     public var newEventTime: Date = Date()
+    public var newEventEndDate: Date = Date().addingTimeInterval(3600)
     public var newEventType: EventType = .interview
     public var newEventReminderEnabled: Bool = true
     public var newEventReminderMinutes: Int = 30
@@ -36,6 +38,7 @@ extension CalendarState {
         public let title: String
         public let description: String
         public let date: Date
+        public let endDate: Date?
         public let type: EventType
         public let reminderEnabled: Bool
         public let reminderMinutesBefore: Int
@@ -46,6 +49,7 @@ extension CalendarState {
             title: String,
             description: String,
             date: Date,
+            endDate: Date? = nil,
             type: EventType,
             reminderEnabled: Bool = true,
             reminderMinutesBefore: Int = 30,
@@ -55,6 +59,7 @@ extension CalendarState {
             self.title = title
             self.description = description
             self.date = date
+            self.endDate = endDate
             self.type = type
             self.reminderEnabled = reminderEnabled
             self.reminderMinutesBefore = reminderMinutesBefore
@@ -113,6 +118,7 @@ extension CalendarState: FeatureState {
         case eventDescriptionChanged(String)
         case eventDateChanged(Date)
         case eventTimeChanged(Date)
+        case eventEndDateChanged(Date)
         case eventTypeChanged(EventType)
         case eventReminderToggled(Bool)
         case eventReminderMinutesChanged(Int)
@@ -122,6 +128,8 @@ extension CalendarState: FeatureState {
         case deleteEvent(String)
         case toggleEventCompletion(String)
         case editEvent(CalendarEvent)
+        /// Результат CalDAV-синхронизации: подставляем объединённый список событий
+        case syncCompleted([CalendarEvent])
     }
     
     public enum Feedback: Sendable {
@@ -134,7 +142,7 @@ extension CalendarState: FeatureState {
     }
     
     public enum Effect: Sendable {
-        case loadEvents
+        case loadEvents(for: Date)
         case saveEvent(CalendarEvent)
         case updateEvent(CalendarEvent)
         case deleteEvent(String)
@@ -150,18 +158,32 @@ extension CalendarState: FeatureState {
         switch message {
         case .input(.onAppear):
             state.isLoading = true
-            return .loadEvents
+            return .loadEvents(for: state.currentMonth)
             
         case let .input(.dateSelected(date)):
             state.selectedDate = date
             
         case let .input(.monthChanged(date)):
             state.currentMonth = date
+            state.isLoading = true
+            return .loadEvents(for: date)
             
         case .input(.createEventTapped):
+            state.editingEventId = nil
             state.isCreatingEvent = true
             state.newEventDate = state.selectedDate
             state.newEventTime = Date()
+            let cal = Calendar.current
+            let startComps = cal.dateComponents([.year, .month, .day], from: state.newEventDate)
+            let timeComps = cal.dateComponents([.hour, .minute], from: state.newEventTime)
+            var combined = DateComponents()
+            combined.year = startComps.year
+            combined.month = startComps.month
+            combined.day = startComps.day
+            combined.hour = timeComps.hour
+            combined.minute = timeComps.minute
+            let startDate = cal.date(from: combined) ?? Date()
+            state.newEventEndDate = startDate.addingTimeInterval(3600)
             state.newEventTitle = ""
             state.newEventDescription = ""
             state.newEventType = .interview
@@ -169,6 +191,7 @@ extension CalendarState: FeatureState {
             state.newEventReminderMinutes = 30
             
         case .input(.cancelEventCreation):
+            state.editingEventId = nil
             state.isCreatingEvent = false
             state.errorMessage = nil
             
@@ -185,6 +208,9 @@ extension CalendarState: FeatureState {
             
         case let .input(.eventTimeChanged(time)):
             state.newEventTime = time
+            
+        case let .input(.eventEndDateChanged(date)):
+            state.newEventEndDate = date
             
         case let .input(.eventTypeChanged(type)):
             state.newEventType = type
@@ -218,16 +244,23 @@ extension CalendarState: FeatureState {
                 return nil
             }
             
+            let eventId = state.editingEventId ?? UUID().uuidString
             let event = CalendarEvent(
+                id: eventId,
                 title: state.newEventTitle,
                 description: state.newEventDescription,
                 date: eventDate,
+                endDate: state.newEventEndDate,
                 type: state.newEventType,
                 reminderEnabled: state.newEventReminderEnabled,
                 reminderMinutesBefore: state.newEventReminderMinutes
             )
             
             state.isLoading = true
+            if state.editingEventId != nil {
+                state.editingEventId = nil
+                return .updateEvent(event)
+            }
             return .saveEvent(event)
             
         case let .input(.deleteEvent(id)):
@@ -237,18 +270,24 @@ extension CalendarState: FeatureState {
             if let index = state.events.firstIndex(where: { $0.id == id }) {
                 var event = state.events[index]
                 event.isCompleted.toggle()
+                state.events[index] = event
                 return .updateEvent(event)
             }
             
         case let .input(.editEvent(event)):
+            state.editingEventId = event.id
             state.isCreatingEvent = true
             state.newEventTitle = event.title
             state.newEventDescription = event.description
             state.newEventDate = event.date
             state.newEventTime = event.date
+            state.newEventEndDate = event.endDate ?? event.date.addingTimeInterval(3600)
             state.newEventType = event.type
             state.newEventReminderEnabled = event.reminderEnabled
             state.newEventReminderMinutes = event.reminderMinutesBefore
+            
+        case let .input(.syncCompleted(events)):
+            state.events = events
             
         // Feedback
         case let .feedback(.eventsLoaded(events)):
@@ -256,6 +295,7 @@ extension CalendarState: FeatureState {
             state.events = events
             
         case let .feedback(.eventCreated(event)):
+            state.editingEventId = nil
             state.isLoading = false
             state.isCreatingEvent = false
             state.events.append(event)
@@ -264,6 +304,7 @@ extension CalendarState: FeatureState {
             }
             
         case let .feedback(.eventUpdated(event)):
+            state.editingEventId = nil
             if let index = state.events.firstIndex(where: { $0.id == event.id }) {
                 state.events[index] = event
             }
