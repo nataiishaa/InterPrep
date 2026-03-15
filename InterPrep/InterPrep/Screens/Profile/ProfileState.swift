@@ -32,6 +32,12 @@ public struct ProfileState {
     public var resumePDFURL: URL?
     public var isDownloadingResume: Bool = false
     
+    // Interviews
+    public var selectedInterviewTab: InterviewTab = .upcoming
+    public var upcomingInterviews: [Interview] = []
+    public var completedInterviews: [Interview] = []
+    public var isLoadingInterviews: Bool = false
+    
     /// После выхода или удаления аккаунта — показать экран авторизации
     public var authRequired: Bool = false
     /// Ошибка при удалении аккаунта (например, неверный пароль)
@@ -100,6 +106,29 @@ extension ProfileState {
         }
     }
     
+    public enum InterviewTab: String, CaseIterable, Sendable {
+        case upcoming = "Запланировано"
+        case completed = "Прошло"
+    }
+    
+    public struct Interview: Identifiable, Codable, Equatable, Sendable {
+        public let id: String
+        public let title: String
+        public let company: String
+        public let date: Date
+        public let type: String
+        public let isCompleted: Bool
+        
+        public init(id: String, title: String, company: String, date: Date, type: String, isCompleted: Bool) {
+            self.id = id
+            self.title = title
+            self.company = company
+            self.date = date
+            self.type = type
+            self.isCompleted = isCompleted
+        }
+    }
+    
     public struct AppSettings: Codable, Equatable, Sendable {
         // Notifications
         public var notificationsEnabled: Bool = true
@@ -155,6 +184,11 @@ extension ProfileState: FeatureState {
         case lastNameChanged(String)
         case saveProfile
         
+        // Interviews
+        case interviewTabChanged(InterviewTab)
+        case loadInterviews
+        case interviewTapped(Interview)
+        
         // Settings
         case notificationsToggled(Bool)
         case reminderTimeChanged(Int)
@@ -185,6 +219,8 @@ extension ProfileState: FeatureState {
         case deleteAccountFailed(String)
         case resumeDownloaded(URL)
         case resumeDownloadFailed(String)
+        case interviewsLoaded(upcoming: [Interview], completed: [Interview])
+        case interviewsLoadFailed(String)
     }
     
     public enum Effect: Sendable {
@@ -196,6 +232,8 @@ extension ProfileState: FeatureState {
         case navigateToResumeUpload
         case performLogout
         case performDeleteAccount(password: String)
+        case loadInterviews
+        case navigateToInterview(Interview)
     }
     
     @MainActor
@@ -206,6 +244,7 @@ extension ProfileState: FeatureState {
         switch message {
         case .input(.onAppear), .input(.refresh):
             state.isLoading = true
+            state.isLoadingInterviews = true
             return .loadUser
             
         // Profile editing
@@ -309,14 +348,28 @@ extension ProfileState: FeatureState {
             // Handled in UI
             break
             
+        // Interviews
+        case let .input(.interviewTabChanged(tab)):
+            state.selectedInterviewTab = tab
+            
+        case .input(.loadInterviews):
+            state.isLoadingInterviews = true
+            return .loadInterviews
+            
+        case let .input(.interviewTapped(interview)):
+            return .navigateToInterview(interview)
+            
         // Feedback
         case let .feedback(.userLoaded(user)):
             state.isLoading = false
             state.user = user
+            // Load both statistics and interviews
+            state.isLoadingInterviews = true
             return .loadStatistics
             
         case let .feedback(.statisticsLoaded(statistics)):
             state.statistics = statistics
+            return .loadInterviews
             
         case let .feedback(.profileUpdated(user)):
             state.isLoading = false
@@ -351,6 +404,15 @@ extension ProfileState: FeatureState {
             
         case let .feedback(.resumeDownloadFailed(error)):
             state.isDownloadingResume = false
+            state.errorMessage = error
+            
+        case let .feedback(.interviewsLoaded(upcoming, completed)):
+            state.isLoadingInterviews = false
+            state.upcomingInterviews = upcoming
+            state.completedInterviews = completed
+            
+        case let .feedback(.interviewsLoadFailed(error)):
+            state.isLoadingInterviews = false
             state.errorMessage = error
         }
         

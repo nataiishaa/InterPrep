@@ -68,6 +68,14 @@ struct DocumentsView: View {
                                             model.onDocumentTap(document)
                                         }
                                         .contextMenu {
+                                            if document.isNote {
+                                                Button {
+                                                    model.onEditNoteTap(document)
+                                                } label: {
+                                                    Label("Редактировать", systemImage: "pencil")
+                                                }
+                                            }
+                                            
                                             Button(role: .destructive) {
                                                 model.onDocumentDelete(document)
                                             } label: {
@@ -123,6 +131,21 @@ struct DocumentsView: View {
                     onDismiss: model.onDismissSheet,
                     onFileSelected: model.onFileUpload
                 )
+            }
+            .sheet(isPresented: .constant(model.showingCreateNoteSheet)) {
+                CreateNoteSheet(
+                    onDismiss: model.onDismissSheet,
+                    onCreate: model.onNoteCreate
+                )
+            }
+            .sheet(isPresented: .constant(model.showingEditNoteSheet)) {
+                if let note = model.editingNote {
+                    EditNoteSheet(
+                        document: note,
+                        onDismiss: model.onDismissSheet,
+                        onSave: model.onNoteUpdate
+                    )
+                }
             }
             .sheet(isPresented: Binding(
                 get: { model.documentURLToOpen != nil },
@@ -192,6 +215,9 @@ extension DocumentsView {
         let isLoading: Bool
         let showingCreateFolderSheet: Bool
         let showingUploadSheet: Bool
+        let showingCreateNoteSheet: Bool
+        let showingEditNoteSheet: Bool
+        let editingNote: Document?
         let documentURLToOpen: URL?
         let onFolderTap: (Folder) -> Void
         let onDocumentTap: (Document) -> Void
@@ -201,6 +227,9 @@ extension DocumentsView {
         let onDismissSheet: () -> Void
         let onFolderCreate: (String) -> Void
         let onFileUpload: (URL) -> Void
+        let onNoteCreate: (String, String) -> Void
+        let onNoteUpdate: (Document, String) -> Void
+        let onEditNoteTap: (Document) -> Void
         let onDocumentDelete: (Document) -> Void
         let onClearDocumentToOpen: () -> Void
     }
@@ -231,6 +260,9 @@ extension DocumentsView {
             isLoading: false,
             showingCreateFolderSheet: false,
             showingUploadSheet: false,
+            showingCreateNoteSheet: false,
+            showingEditNoteSheet: false,
+            editingNote: nil,
             documentURLToOpen: nil,
             onFolderTap: { _ in },
             onDocumentTap: { _ in },
@@ -240,6 +272,9 @@ extension DocumentsView {
             onDismissSheet: {},
             onFolderCreate: { _ in },
             onFileUpload: { _ in },
+            onNoteCreate: { _, _ in },
+            onNoteUpdate: { _, _ in },
+            onEditNoteTap: { _ in },
             onDocumentDelete: { _ in },
             onClearDocumentToOpen: {}
         )

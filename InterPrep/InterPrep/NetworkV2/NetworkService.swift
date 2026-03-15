@@ -222,27 +222,69 @@ public final class NetworkServiceV2: ObservableObject {
     }
     
     public func addFavorite(vacancyId: String) async -> Result<Jobs_AddFavoriteResponse, NetworkError> {
+        print("📡 NetworkService.addFavorite(vacancyId: \(vacancyId))")
+        print("   - Vacancy ID length: \(vacancyId.count)")
+        print("   - Vacancy ID value: '\(vacancyId)'")
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                print("   - Using gRPC client with token: \(token?.prefix(20) ?? "nil")...")
+                print("   - Token length: \(token?.count ?? 0)")
+                let response = try await client.addFavorite(vacancyId: vacancyId, accessToken: token)
+                print("   ✅ AddFavorite gRPC response: success=\(response.success)")
+                if !response.success {
+                    print("   ⚠️ Backend returned success=false! Favorite was NOT saved!")
+                }
+                return .success(response)
+            } catch {
+                print("   ❌ AddFavorite gRPC error: \(error)")
+                return .failure(.transportError(error))
+            }
+        }
+        print("   - Using HTTP fallback")
         var request = Jobs_AddFavoriteRequest()
         request.vacancyID = vacancyId
         return await networkService.perform(factory.addFavorite(request))
     }
     
     public func removeFavorite(vacancyId: String) async -> Result<Jobs_RemoveFavoriteResponse, NetworkError> {
+        print("📡 NetworkService.removeFavorite(vacancyId: \(vacancyId))")
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                print("   - Using gRPC client with token: \(token?.prefix(20) ?? "nil")...")
+                let response = try await client.removeFavorite(vacancyId: vacancyId, accessToken: token)
+                print("   ✅ RemoveFavorite gRPC response: success=\(response.success)")
+                return .success(response)
+            } catch {
+                print("   ❌ RemoveFavorite gRPC error: \(error)")
+                return .failure(.transportError(error))
+            }
+        }
+        print("   - Using HTTP fallback")
         var request = Jobs_RemoveFavoriteRequest()
         request.vacancyID = vacancyId
         return await networkService.perform(factory.removeFavorite(request))
     }
     
     public func listFavorites() async -> Result<Jobs_ListFavoritesResponse, NetworkError> {
+        print("📡 NetworkService.listFavorites()")
         if let client = grpcAuthClient {
             do {
                 let token = await tokenStorage.getAccessToken()
+                print("   - Using gRPC client with token: \(token?.prefix(20) ?? "nil")...")
                 let response = try await client.listFavorites(accessToken: token)
+                print("   ✅ ListFavorites gRPC response: \(response.vacancies.count) vacancies")
+                if !response.vacancies.isEmpty {
+                    print("   - Vacancy IDs: \(response.vacancies.map { $0.id })")
+                }
                 return .success(response)
             } catch {
+                print("   ❌ ListFavorites gRPC error: \(error)")
                 return .failure(.transportError(error))
             }
         }
+        print("   - Using HTTP fallback")
         let request = Jobs_ListFavoritesRequest()
         return await networkService.perform(factory.listFavorites(request))
     }
@@ -642,6 +684,32 @@ public final class BackendGatewayGRPCClient: Sendable {
         let request = Jobs_ListFavoritesRequest()
         let options = callOptions(with: accessToken)
         let call = client.listFavorites(request, callOptions: options)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func addFavorite(vacancyId: String, accessToken: String?) async throws -> Jobs_AddFavoriteResponse {
+        var request = Jobs_AddFavoriteRequest()
+        request.vacancyID = vacancyId
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Jobs_AddFavoriteRequest, Jobs_AddFavoriteResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/AddFavorite",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func removeFavorite(vacancyId: String, accessToken: String?) async throws -> Jobs_RemoveFavoriteResponse {
+        var request = Jobs_RemoveFavoriteRequest()
+        request.vacancyID = vacancyId
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Jobs_RemoveFavoriteRequest, Jobs_RemoveFavoriteResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/RemoveFavorite",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
         return try await eventLoopFutureToAsync(call.response)
     }
     

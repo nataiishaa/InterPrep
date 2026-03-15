@@ -31,12 +31,19 @@ public struct DocumentsContainer: View {
             isLoading: store.state.isLoading,
             showingCreateFolderSheet: store.state.showingCreateFolderSheet,
             showingUploadSheet: store.state.showingUploadSheet,
+            showingCreateNoteSheet: store.state.showingCreateNoteSheet,
+            showingEditNoteSheet: store.state.showingEditNoteSheet,
+            editingNote: store.state.editingNote,
             documentURLToOpen: store.state.documentURLToOpen,
             onFolderTap: { folder in
                 store.send(.folderTapped(folder))
             },
             onDocumentTap: { document in
-                store.send(.documentTapped(document))
+                if document.isNote {
+                    store.send(.editNoteTapped(document))
+                } else {
+                    store.send(.documentTapped(document))
+                }
             },
             onCreateFolderTap: {
                 store.send(.createFolderTapped)
@@ -54,7 +61,16 @@ public struct DocumentsContainer: View {
                 store.send(.folderCreated(name))
             },
             onFileUpload: { url in
-                store.send(.fileUploaded(url))
+                store.send(.fileUploaded(url, folderId: nil))
+            },
+            onNoteCreate: { title, content in
+                store.send(.noteCreated(title, content))
+            },
+            onNoteUpdate: { document, content in
+                store.send(.noteUpdated(document, content))
+            },
+            onEditNoteTap: { document in
+                store.send(.editNoteTapped(document))
             },
             onDocumentDelete: { document in
                 store.send(.documentDeleted(document))

@@ -19,9 +19,18 @@ public final actor VacancyServiceImpl: VacancyService {
     public func fetchVacancies(filter: DiscoveryState.FilterType, searchQuery: String) async throws -> [DiscoveryState.Vacancy] {
         switch filter {
         case .favorites:
+            print("🔍 Fetching favorites list...")
             let result = await networkService.listFavorites()
             switch result {
             case .success(let response):
+                print("✅ ListFavorites response received:")
+                print("   - Total vacancies: \(response.vacancies.count)")
+                if response.vacancies.isEmpty {
+                    print("   ⚠️ Response is empty! No favorites found on backend.")
+                } else {
+                    print("   - Vacancy IDs: \(response.vacancies.map { $0.id })")
+                    print("   - Vacancy titles: \(response.vacancies.map { $0.name })")
+                }
                 var list = response.vacancies.map { mapVacancy($0, isFavorite: true) }
                 if !searchQuery.isEmpty {
                     let q = searchQuery.lowercased()
@@ -31,6 +40,7 @@ public final actor VacancyServiceImpl: VacancyService {
                         $0.description.lowercased().contains(q)
                     }
                 }
+                print("   - Returning \(list.count) vacancies after filtering")
                 return list
             case .failure(let error):
                 print("❌ Failed to fetch favorites: \(error)")
@@ -78,32 +88,43 @@ public final actor VacancyServiceImpl: VacancyService {
     }
     
     public func toggleFavorite(id: String) async throws -> Bool {
+        print("🔄 Toggle favorite for vacancy: \(id)")
+        
         // Сначала получаем текущий список избранного
         let favoritesResult = await networkService.listFavorites()
         
         switch favoritesResult {
         case .success(let response):
             let isFavorite = response.vacancies.contains { $0.id == id }
+            print("   - Current favorites count: \(response.vacancies.count)")
+            print("   - Is currently favorite: \(isFavorite)")
             
             // Если в избранном - удаляем, иначе - добавляем
             if isFavorite {
+                print("   - Removing from favorites...")
                 let result = await networkService.removeFavorite(vacancyId: id)
                 switch result {
-                case .success:
+                case .success(let removeResponse):
+                    print("   ✅ Successfully removed from favorites. Success: \(removeResponse.success)")
                     return false
                 case .failure(let error):
+                    print("   ❌ Failed to remove from favorites: \(error)")
                     throw error
                 }
             } else {
+                print("   - Adding to favorites...")
                 let result = await networkService.addFavorite(vacancyId: id)
                 switch result {
-                case .success:
+                case .success(let addResponse):
+                    print("   ✅ Successfully added to favorites. Success: \(addResponse.success)")
                     return true
                 case .failure(let error):
+                    print("   ❌ Failed to add to favorites: \(error)")
                     throw error
                 }
             }
         case .failure(let error):
+            print("   ❌ Failed to get favorites list: \(error)")
             throw error
         }
     }

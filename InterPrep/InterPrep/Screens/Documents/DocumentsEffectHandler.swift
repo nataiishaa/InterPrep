@@ -49,11 +49,12 @@ public actor DocumentsEffectHandler: EffectHandler {
                 return .loadingFailed(error.localizedDescription)
             }
             
-        case .uploadFile(let url):
+        case .uploadFile(let url, let folderId):
             do {
-                try await documentService.uploadFile(url: url)
+                try await documentService.uploadFile(url: url, folderId: folderId)
+                let folders = try await documentService.fetchFolders()
                 let documents = try await documentService.fetchRecentDocuments()
-                return .recentDocumentsLoaded(documents)
+                return .foldersAndDocumentsLoaded(folders, documents)
             } catch {
                 return .loadingFailed(error.localizedDescription)
             }
@@ -61,10 +62,29 @@ public actor DocumentsEffectHandler: EffectHandler {
         case .createNote(let title, let content):
             do {
                 try await documentService.createNote(title: title, content: content)
+                let folders = try await documentService.fetchFolders()
                 let documents = try await documentService.fetchRecentDocuments()
-                return .recentDocumentsLoaded(documents)
+                return .foldersAndDocumentsLoaded(folders, documents)
             } catch {
                 return .loadingFailed(error.localizedDescription)
+            }
+            
+        case .updateNote(let document, let content):
+            do {
+                try await documentService.updateNote(id: document.id, content: content)
+                let folders = try await documentService.fetchFolders()
+                let documents = try await documentService.fetchRecentDocuments()
+                return .foldersAndDocumentsLoaded(folders, documents)
+            } catch {
+                return .loadingFailed(error.localizedDescription)
+            }
+            
+        case .loadNoteContent(let document):
+            do {
+                let content = try await documentService.loadNoteContent(id: document.id)
+                return .noteContentLoaded(document, content)
+            } catch {
+                return .documentOpenFailed(error.localizedDescription)
             }
             
         case .deleteDocument(let id):
@@ -96,8 +116,10 @@ public protocol DocumentServiceProtocol: Actor {
     func fetchFolders() async throws -> [Folder]
     func fetchRecentDocuments() async throws -> [Document]
     func createFolder(name: String) async throws
-    func uploadFile(url: URL) async throws
+    func uploadFile(url: URL, folderId: UUID?) async throws
     func createNote(title: String, content: String) async throws
+    func updateNote(id: UUID, content: String) async throws
+    func loadNoteContent(id: UUID) async throws -> String
     func deleteDocument(id: UUID) async throws
     /// Скачивает файл по id документа. Возвращает (данные, имя файла).
     func downloadDocument(id: UUID) async throws -> (Data, String)
@@ -109,6 +131,7 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
     private let networkService: NetworkServiceV2
     private var nodeIdByDocumentId: [UUID: UInt32] = [:]
     private var documentIdToMaterialId: [UUID: String] = [:]
+    private var folderIdToNodeId: [UUID: UInt32] = [:]
     
     public init(networkService: NetworkServiceV2 = .shared) {
         self.networkService = networkService
@@ -119,16 +142,28 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
         
         switch result {
         case .success(let response):
-            return response.nodes
-                .filter { $0.type == "folder" }
-                .map { node in
-                    Folder(
-                        name: node.name,
-                        documentsCount: 0,
-                        createdAt: Date(timeIntervalSince1970: TimeInterval(node.createdAt)),
-                        color: .blue
-                    )
+            folderIdToNodeId.removeAll()
+            
+            let allNodes = response.nodes
+            let folderNodes = allNodes.filter { $0.type == "folder" }
+            
+            return folderNodes.map { node in
+                let folderId = UUID()
+                folderIdToNodeId[folderId] = node.id
+                
+                let filesInFolder = allNodes.filter { 
+                    $0.type == "file" && $0.hasParentID && $0.parentID == node.id 
                 }
+                
+                return Folder(
+                    id: folderId,
+                    nodeId: node.id,
+                    name: node.name,
+                    documentsCount: filesInFolder.count,
+                    createdAt: Date(timeIntervalSince1970: TimeInterval(node.createdAt)),
+                    color: .blue
+                )
+            }
         case .failure(let error):
             throw error
         }
@@ -155,19 +190,44 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
                     let createdAt = Date(timeIntervalSince1970: TimeInterval(node.createdAt))
                     let updatedAt = Date(timeIntervalSince1970: TimeInterval(node.updatedAt))
                     
+                    let docType = self.detectDocumentType(from: node.name)
+                    
+                    var folderId: UUID?
+                    if node.hasParentID {
+                        folderId = folderIdToNodeId.first(where: { $0.value == node.parentID })?.key
+                    }
+                    
                     return Document(
                         id: documentId,
                         name: node.name,
-                        type: .pdf,
+                        type: docType,
                         size: size,
                         createdAt: createdAt,
                         modifiedAt: updatedAt,
-                        folderId: nil,
+                        folderId: folderId,
                         url: nil
                     )
                 }
+                .sorted { $0.modifiedAt > $1.modifiedAt }
         case .failure(let error):
             throw error
+        }
+    }
+    
+    private func detectDocumentType(from filename: String) -> DocumentType {
+        let lowercased = filename.lowercased()
+        if lowercased.hasSuffix(".pdf") {
+            return .pdf
+        } else if lowercased.hasSuffix(".doc") {
+            return .doc
+        } else if lowercased.hasSuffix(".docx") {
+            return .docx
+        } else if lowercased.hasSuffix(".txt") {
+            return .txt
+        } else if lowercased.hasSuffix(".png") || lowercased.hasSuffix(".jpg") || lowercased.hasSuffix(".jpeg") {
+            return .image
+        } else {
+            return .other
         }
     }
     
@@ -182,15 +242,20 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
         }
     }
     
-    public func uploadFile(url: URL) async throws {
+    public func uploadFile(url: URL, folderId: UUID?) async throws {
         let resources = try url.resourceValues(forKeys: [.nameKey])
         let fileName = resources.name ?? url.lastPathComponent
         let data = try Data(contentsOf: url)
         
+        var parentNodeId: UInt32?
+        if let folderId = folderId {
+            parentNodeId = folderIdToNodeId[folderId]
+        }
+        
         let result = await networkService.uploadFile(
             fileContent: data,
             filename: fileName,
-            parentId: nil,
+            parentId: parentNodeId,
             name: fileName
         )
         
@@ -248,6 +313,50 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
                 ? (Data(base64Encoded: response.contentBase64) ?? Data())
                 : response.content
             return (data, response.filename.isEmpty ? "document" : response.filename)
+        case .failure(let error):
+            throw error
+        }
+    }
+    
+    public func loadNoteContent(id: UUID) async throws -> String {
+        let (data, _) = try await downloadDocument(id: id)
+        guard let content = String(data: data, encoding: .utf8) else {
+            throw NSError(domain: "DocumentService", code: -2, userInfo: [NSLocalizedDescriptionKey: "Не удалось прочитать содержимое заметки"])
+        }
+        return content
+    }
+    
+    public func updateNote(id: UUID, content: String) async throws {
+        guard let nodeId = nodeIdByDocumentId[id] else {
+            throw NSError(domain: "DocumentService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Заметка не найдена"])
+        }
+        
+        try await deleteDocument(id: id)
+        
+        let data = Data(content.utf8)
+        guard let materialId = documentIdToMaterialId[id] else {
+            throw NSError(domain: "DocumentService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Не удалось получить ID материала"])
+        }
+        
+        let result = await networkService.listFolder(parentId: nil)
+        guard case .success(let response) = result else {
+            throw NSError(domain: "DocumentService", code: -3, userInfo: [NSLocalizedDescriptionKey: "Не удалось получить информацию о файле"])
+        }
+        
+        guard let node = response.nodes.first(where: { $0.id == nodeId }) else {
+            throw NSError(domain: "DocumentService", code: -4, userInfo: [NSLocalizedDescriptionKey: "Файл не найден"])
+        }
+        
+        let uploadResult = await networkService.uploadFile(
+            fileContent: data,
+            filename: node.name,
+            parentId: node.hasParentID ? node.parentID : nil,
+            name: node.name
+        )
+        
+        switch uploadResult {
+        case .success:
+            return
         case .failure(let error):
             throw error
         }

@@ -65,11 +65,23 @@ public struct CalendarContainer: View {
     }
     
     private func makeEventCreationModel() -> EventCreationView.Model {
-        .init(
+        let calendar = Calendar.current
+        let dateComponents = calendar.dateComponents([.year, .month, .day], from: store.state.newEventDate)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: store.state.newEventTime)
+        
+        var combinedComponents = DateComponents()
+        combinedComponents.year = dateComponents.year
+        combinedComponents.month = dateComponents.month
+        combinedComponents.day = dateComponents.day
+        combinedComponents.hour = timeComponents.hour
+        combinedComponents.minute = timeComponents.minute
+        
+        let startDateTime = calendar.date(from: combinedComponents) ?? Date()
+        
+        return .init(
             title: store.state.newEventTitle,
             description: store.state.newEventDescription,
-            date: store.state.newEventDate,
-            time: store.state.newEventTime,
+            startDateTime: startDateTime,
             endDate: store.state.newEventEndDate,
             type: store.state.newEventType,
             reminderEnabled: store.state.newEventReminderEnabled,
@@ -81,11 +93,9 @@ public struct CalendarContainer: View {
             onDescriptionChanged: { description in
                 store.send(.eventDescriptionChanged(description))
             },
-            onDateChanged: { date in
-                store.send(.eventDateChanged(date))
-            },
-            onTimeChanged: { time in
-                store.send(.eventTimeChanged(time))
+            onStartDateTimeChanged: { dateTime in
+                store.send(.eventDateChanged(dateTime))
+                store.send(.eventTimeChanged(dateTime))
             },
             onEndDateChanged: { date in
                 store.send(.eventEndDateChanged(date))
