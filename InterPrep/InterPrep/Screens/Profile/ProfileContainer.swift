@@ -39,13 +39,14 @@ public struct ProfileContainer: View {
                 }
             }
             .sheet(isPresented: $showResumeDetailSheet) {
-                ResumeProfileDetailView()
+                ResumeProfileDetailView(userId: store.state.user?.id)
             }
     }
     
     private func makeModel() -> ProfileView.Model {
         .init(
             user: store.state.user,
+            cachedProfilePhotoURL: store.state.cachedProfilePhotoURL,
             statistics: store.state.statistics,
             settings: store.state.settings,
             deleteAccountError: store.state.deleteAccountError,
@@ -93,6 +94,9 @@ public struct ProfileContainer: View {
             lastName: store.state.user?.lastName ?? store.state.editedLastName,
             email: store.state.user?.email ?? "",
             errorMessage: store.state.errorMessage,
+            onPhotoSelected: { data in
+                store.send(.uploadProfilePhoto(data))
+            },
             onFirstNameChanged: { name in
                 store.send(.firstNameChanged(name))
             },

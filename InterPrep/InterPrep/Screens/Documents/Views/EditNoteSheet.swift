@@ -9,53 +9,58 @@ import SwiftUI
 
 struct EditNoteSheet: View {
     let document: Document
+    @State private var noteName: String
     @State private var noteContent: String
     let onDismiss: () -> Void
-    let onSave: (Document, String) -> Void
-    
-    init(document: Document, onDismiss: @escaping () -> Void, onSave: @escaping (Document, String) -> Void) {
+    let onSave: (Document, String, String) -> Void
+    var onDelete: (() -> Void)? = nil
+
+    init(document: Document, onDismiss: @escaping () -> Void, onSave: @escaping (Document, String, String) -> Void, onDelete: (() -> Void)? = nil) {
         self.document = document
         self.onDismiss = onDismiss
         self.onSave = onSave
+        self.onDelete = onDelete
+        _noteName = State(initialValue: document.name)
         _noteContent = State(initialValue: document.content ?? "")
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Title (read-only)
-                HStack {
-                    Text(document.name)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    Spacer()
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                
+                TextField("Название заметки", text: $noteName)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding()
+                    .background(Color(.systemBackground))
+
                 Divider()
-                
-                // Content editor
+
                 TextEditor(text: $noteContent)
                     .font(.body)
                     .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity)
             }
             .navigationTitle("Редактировать")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Отмена") {
-                        onDismiss()
-                    }
+                    Button("Отмена") { onDismiss() }
                 }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Сохранить") {
-                        onSave(document, noteContent)
+                        onSave(document, noteName.trimmingCharacters(in: .whitespacesAndNewlines), noteContent)
                     }
                     .fontWeight(.semibold)
+                    .disabled(noteName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                if onDelete != nil {
+                    ToolbarItem(placement: .bottomBar) {
+                        Button(role: .destructive) {
+                            onDelete?()
+                        } label: {
+                            Label("Удалить заметку", systemImage: "trash")
+                        }
+                    }
                 }
             }
         }
@@ -72,6 +77,6 @@ struct EditNoteSheet: View {
             content: "Содержимое заметки"
         ),
         onDismiss: {},
-        onSave: { _, _ in }
+        onSave: { _, _, _ in }
     )
 }

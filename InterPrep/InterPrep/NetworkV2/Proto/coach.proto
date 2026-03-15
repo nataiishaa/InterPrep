@@ -30,6 +30,18 @@ message ParseResumeRequest {
   string material_id = 1;
 }
 
+message UploadAndParseResumeRequest {
+  bytes file_content = 1;
+  string filename = 2;
+}
+
+message UploadAndParseResumeResponse {
+  string session_id = 1;
+  ResumeProfileDraft draft = 2;
+  repeated Question questions = 3;
+  string status = 4;
+}
+
 message ResumeProfileDraft {
   repeated string target_roles = 1;
   repeated ProfessionalRoleCandidate professional_role_candidates = 2;
@@ -63,7 +75,7 @@ message Question {
 }
 
 message ParseResumeResponse {
-  string session_id = 1; // UUID, generated when session is created
+  string session_id = 1;
   ResumeProfileDraft draft = 2;
   repeated Question questions = 3;
   string status = 4;
@@ -87,7 +99,7 @@ message AnswerResumeResponse {
 }
 
 message GetResumeSessionRequest {
-  string session_id = 1; // UUID of the resume parse session
+  string session_id = 1;
 }
 
 message GetResumeSessionResponse {
@@ -95,6 +107,21 @@ message GetResumeSessionResponse {
   ResumeProfileDraft draft = 2;
   repeated Question questions = 3;
   string status = 4;
+}
+
+message PrepareForVacancyRequest {
+  string vacancy_id = 1;
+}
+
+message PrepareForVacancyResponse {
+  string recommendations = 1;
+}
+
+message ReviewResumeRequest {}
+
+message ReviewResumeResponse {
+  double score = 1;
+  string recommendations = 2;
 }
 
 message DeleteUserDataRequest {
@@ -108,7 +135,10 @@ message DeleteUserDataResponse {
 service CoachService {
   rpc Ask(AskRequest) returns (AskResponse);
   rpc ParseResume(ParseResumeRequest) returns (ParseResumeResponse);
+  rpc UploadAndParseResume(UploadAndParseResumeRequest) returns (UploadAndParseResumeResponse);
   rpc AnswerResume(AnswerResumeRequest) returns (AnswerResumeResponse);
   rpc GetResumeSession(GetResumeSessionRequest) returns (GetResumeSessionResponse);
+  rpc PrepareForVacancy(PrepareForVacancyRequest) returns (PrepareForVacancyResponse);
+  rpc ReviewResume(ReviewResumeRequest) returns (ReviewResumeResponse);
   rpc DeleteUserData(DeleteUserDataRequest) returns (DeleteUserDataResponse);
 }

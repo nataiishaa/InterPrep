@@ -11,25 +11,25 @@ import DesignSystem
 struct FolderCardView: View {
     let folder: Folder
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "folder.fill")
                 .font(.system(size: 50))
                 .foregroundColor(folderColor)
-            
+
             Text(folder.name)
                 .font(.caption)
                 .fontWeight(.medium)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .foregroundColor(.textOnBackground)
-            
+
             Text("\(folder.documentsCount)")
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
-        .frame(maxWidth: .infinity)
+        .frame(minWidth: 1, maxWidth: .infinity)
         .padding()
         .background(Color.cardBackground)
         .cornerRadius(12)

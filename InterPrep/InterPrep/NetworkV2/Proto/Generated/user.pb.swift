@@ -8,6 +8,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
+import Foundation
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -660,6 +661,33 @@ public struct User_UpdateUserProfileResponse: Sendable {
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
+  public init() {}
+}
+
+public struct User_UploadProfilePhotoRequest: Sendable {
+  public var fileContent: Data = Data()
+  public var filename: String = String()
+  public var mimeType: String = String()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+  public init() {}
+}
+
+public struct User_UploadProfilePhotoResponse: Sendable {
+  public var ok: Bool = false
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+  public init() {}
+}
+
+public struct User_GetProfilePhotoRequest: Sendable {
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+  public init() {}
+}
+
+public struct User_GetProfilePhotoResponse: Sendable {
+  public var content: Data = Data()
+  public var filename: String = String()
+  public var mimeType: String = String()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
   public init() {}
 }
 
@@ -1824,6 +1852,132 @@ extension User_UpdateUserProfileResponse: SwiftProtobuf.Message, SwiftProtobuf._
 
   public static func ==(lhs: User_UpdateUserProfileResponse, rhs: User_UpdateUserProfileResponse) -> Bool {
     if lhs.success != rhs.success {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension User_UploadProfilePhotoRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UploadProfilePhotoRequest"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "file_content"),
+    2: .same(proto: "filename"),
+    3: .standard(proto: "mime_type"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.fileContent) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.filename) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.mimeType) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.fileContent.isEmpty {
+      try visitor.visitSingularBytesField(value: self.fileContent, fieldNumber: 1)
+    }
+    if !self.filename.isEmpty {
+      try visitor.visitSingularStringField(value: self.filename, fieldNumber: 2)
+    }
+    if !self.mimeType.isEmpty {
+      try visitor.visitSingularStringField(value: self.mimeType, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: User_UploadProfilePhotoRequest, rhs: User_UploadProfilePhotoRequest) -> Bool {
+    if lhs.fileContent != rhs.fileContent {return false}
+    if lhs.filename != rhs.filename {return false}
+    if lhs.mimeType != rhs.mimeType {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension User_UploadProfilePhotoResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".UploadProfilePhotoResponse"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [1: .same(proto: "ok")]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.ok) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.ok != false {
+      try visitor.visitSingularBoolField(value: self.ok, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: User_UploadProfilePhotoResponse, rhs: User_UploadProfilePhotoResponse) -> Bool {
+    if lhs.ok != rhs.ok {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension User_GetProfilePhotoRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetProfilePhotoRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: User_GetProfilePhotoRequest, rhs: User_GetProfilePhotoRequest) -> Bool {
+    lhs.unknownFields == rhs.unknownFields
+  }
+}
+
+extension User_GetProfilePhotoResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetProfilePhotoResponse"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "content"),
+    2: .same(proto: "filename"),
+    3: .standard(proto: "mime_type"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.content) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.filename) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.mimeType) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.content.isEmpty {
+      try visitor.visitSingularBytesField(value: self.content, fieldNumber: 1)
+    }
+    if !self.filename.isEmpty {
+      try visitor.visitSingularStringField(value: self.filename, fieldNumber: 2)
+    }
+    if !self.mimeType.isEmpty {
+      try visitor.visitSingularStringField(value: self.mimeType, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: User_GetProfilePhotoResponse, rhs: User_GetProfilePhotoResponse) -> Bool {
+    if lhs.content != rhs.content {return false}
+    if lhs.filename != rhs.filename {return false}
+    if lhs.mimeType != rhs.mimeType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

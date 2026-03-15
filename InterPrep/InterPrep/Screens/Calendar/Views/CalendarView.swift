@@ -555,15 +555,6 @@ struct EventCard: View {
             
             // Actions
             Menu {
-                Button {
-                    model.onToggleEventCompletion(event.id)
-                } label: {
-                    Label(
-                        event.isCompleted ? "Отметить как незавершенное" : "Отметить как завершенное",
-                        systemImage: event.isCompleted ? "circle" : "checkmark.circle"
-                    )
-                }
-                
                 Button(role: .destructive) {
                     model.onDeleteEvent(event.id)
                 } label: {
@@ -608,24 +599,6 @@ private struct EventDetailSheet: View {
     let onDismiss: () -> Void
     @Environment(\.dismiss) private var dismiss
     
-    private static let timeGridRowHeight: CGFloat = 44
-    private static let timeGridHours = 12 // 8:00–20:00
-    
-    /// Начало и конец события в минутах от полуночи (для таймлайна)
-    private var eventStartMinutes: Int {
-        let cal = Calendar.current
-        return cal.component(.hour, from: event.date) * 60 + cal.component(.minute, from: event.date)
-    }
-    
-    private var eventEndMinutes: Int {
-        let end = event.endDate ?? event.date.addingTimeInterval(3600)
-        let cal = Calendar.current
-        return cal.component(.hour, from: end) * 60 + cal.component(.minute, from: end)
-    }
-    
-    /// Название текущего этапа по типу события (для «Удачи!»)
-    private var currentStageName: String { event.type.rawValue }
-    
     private static var dateFormatter: DateFormatter {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ru_RU")
@@ -641,76 +614,140 @@ private struct EventDetailSheet: View {
     }
     
     private var dateTimeText: String {
-        let startStr = Self.timeFormatter.string(from: event.date)
-        let endStr = Self.timeFormatter.string(from: event.endDate ?? event.date.addingTimeInterval(3600))
-        return "\(Self.dateFormatter.string(from: event.date)) с \(startStr) до \(endStr)"
+        let startDate = event.date
+        let endDate = event.endDate ?? event.date.addingTimeInterval(3600)
+        let startDateStr = Self.dateFormatter.string(from: startDate)
+        let startTimeStr = Self.timeFormatter.string(from: startDate)
+        let endTimeStr = Self.timeFormatter.string(from: endDate)
+        let isSameDay = Calendar.current.isDate(startDate, inSameDayAs: endDate)
+        if isSameDay {
+            return "\(startDateStr) с \(startTimeStr) до \(endTimeStr)"
+        } else {
+            let endDateStr = Self.dateFormatter.string(from: endDate)
+            return "\(startDateStr) с \(startTimeStr) до \(endDateStr) \(endTimeStr)"
+        }
     }
     
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Заголовок и дата/время
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(event.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .strikethrough(event.isCompleted)
-                        
-                        Text(dateTimeText)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 24) {
+                    // Карточка заголовка с акцентом типа
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(alignment: .top) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(typeColor.opacity(0.85))
+                                .frame(width: 4)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(event.title)
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primary)
+                                    .strikethrough(event.isCompleted)
+                                HStack(spacing: 6) {
+                                    Image(systemName: "calendar")
+                                        .font(.subheadline)
+                                        .foregroundColor(typeColor)
+                                    Text(dateTimeText)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .padding(16)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    
-                    // Таймлайн во времени события (сетка часов + полоска)
-                    eventTimeGridSection
-                        .padding(.horizontal)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(12)
                     
                     if !event.description.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "note.text")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Text("Описание")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                            }
                             Text(event.description)
                                 .font(.body)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.primary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
+                        .padding(16)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .cornerRadius(12)
                     }
                     
-                    // Тип, Удачи на текущем этапе, напоминание
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
+                    // Тип, напоминание, пожелание — в одной карточке
+                    VStack(spacing: 0) {
+                        HStack(spacing: 12) {
                             Image(systemName: event.type.icon)
                                 .font(.body)
                                 .foregroundColor(typeColor)
+                                .frame(width: 24, alignment: .center)
                             Text(event.type.rawValue)
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.primary)
+                            Spacer()
                             if event.isCompleted {
                                 Text("Завершено")
                                     .font(.caption)
+                                    .fontWeight(.medium)
                                     .foregroundColor(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
                                     .background(Color.green)
-                                    .cornerRadius(6)
+                                    .cornerRadius(8)
                             }
                         }
-                        Text("Удачи на этапе «\(currentStageName)»!")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.brandPrimary)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
+                        
                         if event.reminderEnabled {
-                            Label("Напоминание за \(event.reminderMinutesBefore) мин", systemImage: "bell.fill")
+                            Divider()
+                                .padding(.leading, 52)
+                            HStack(spacing: 12) {
+                                Image(systemName: "bell.fill")
+                                    .font(.subheadline)
+                                    .foregroundColor(.brandPrimary)
+                                    .frame(width: 24, alignment: .center)
+                                Text("Напоминание за \(event.reminderMinutesBefore) мин")
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 16)
+                        }
+                        
+                        Divider()
+                            .padding(.leading, 52)
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "sparkles")
                                 .font(.subheadline)
                                 .foregroundColor(.brandPrimary)
+                                .frame(width: 24, alignment: .center)
+                            Text("Удачи на этапе «\(event.type.rawValue)»!")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.brandPrimary)
+                            Spacer()
                         }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 16)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(12)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Подробнее")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -731,72 +768,6 @@ private struct EventDetailSheet: View {
                 }
             }
         }
-    }
-    
-    /// Сетка часов дня и полоска события (как в референсе)
-    private var eventTimeGridSection: some View {
-        let gridStartHour = 8
-        let gridStartMinutes = gridStartHour * 60
-        let gridEndMinutes = gridStartMinutes + Self.timeGridHours * 60
-        let eventStart = eventStartMinutes
-        let eventEnd = eventEndMinutes
-        let visibleStart = max(eventStart, gridStartMinutes)
-        let visibleEnd = min(eventEnd, gridEndMinutes)
-        let barTopOffset = CGFloat(visibleStart - gridStartMinutes) / 60 * Self.timeGridRowHeight
-        let barHeight = visibleEnd > visibleStart
-            ? max(28, CGFloat(visibleEnd - visibleStart) / 60 * Self.timeGridRowHeight)
-            : 28
-        let gridHeight = CGFloat(Self.timeGridHours) * Self.timeGridRowHeight
-        
-        return ZStack(alignment: .topLeading) {
-            // Сетка: часы слева, пустая область справа
-            VStack(spacing: 0) {
-                ForEach(0..<Self.timeGridHours, id: \.self) { i in
-                    HStack(alignment: .center, spacing: 12) {
-                        Text(String(format: "%d:%02d", gridStartHour + i, 0))
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .frame(width: 40, alignment: .leading)
-                        Color.clear
-                    }
-                    .frame(height: Self.timeGridRowHeight)
-                }
-            }
-            .frame(height: gridHeight)
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            // Полоска события (накладывается на правую часть)
-            HStack(alignment: .top, spacing: 0) {
-                Color.clear.frame(width: 40 + 12, height: 0) // метки времени + отступ
-                VStack(spacing: 0) {
-                    Color.clear.frame(height: barTopOffset)
-                    HStack(spacing: 6) {
-                        Text(event.title)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .lineLimit(1)
-                        Image(systemName: "clock")
-                            .font(.caption)
-                        Text("\(Self.timeFormatter.string(from: event.date))–\(Self.timeFormatter.string(from: event.endDate ?? event.date.addingTimeInterval(3600)))")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .frame(height: max(28, barHeight))
-                    .background(typeColor)
-                    .cornerRadius(8)
-                }
-                .padding(.trailing, 12)
-            }
-            .padding(EdgeInsets(top: 12, leading: 12, bottom: 0, trailing: 0))
-            .frame(height: gridHeight + 24)
-        }
-        .frame(height: gridHeight + 24)
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(12)
     }
     
     private var typeColor: Color {
@@ -824,7 +795,6 @@ extension CalendarView {
         let onCreateEventTapped: () -> Void
         let onCancelEventCreation: () -> Void
         let onDeleteEvent: (String) -> Void
-        let onToggleEventCompletion: (String) -> Void
         let onEditEvent: (CalendarState.CalendarEvent) -> Void
         let onSyncCompleted: ([CalendarState.CalendarEvent]) -> Void
         let eventCreationModel: EventCreationView.Model
@@ -857,10 +827,10 @@ extension CalendarView {
         onCreateEventTapped: {},
         onCancelEventCreation: {},
         onDeleteEvent: { _ in },
-        onToggleEventCompletion: { _ in },
         onEditEvent: { _ in },
         onSyncCompleted: { _ in },
         eventCreationModel: .init(
+            isEditing: false,
             title: "",
             description: "",
             startDateTime: Date(),

@@ -149,6 +149,15 @@ public final class NetworkServiceV2: ObservableObject {
     // MARK: - User
     
     public func getMe() async -> Result<User_GetMeResponse, NetworkError> {
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.getMe(accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         let request = User_GetMeRequest()
         return await networkService.perform(factory.getMe(request))
     }
@@ -171,6 +180,15 @@ public final class NetworkServiceV2: ObservableObject {
         var request = User_UpdateResumeProfileRequest()
         request.userID = userId
         request.profile = profile
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.updateResumeProfile(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.updateResumeProfile(request))
     }
     
@@ -188,19 +206,68 @@ public final class NetworkServiceV2: ObservableObject {
         if let notificationsEnabled = notificationsEnabled {
             request.notificationsEnabled = notificationsEnabled
         }
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.updateUserProfile(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.updateUserProfile(request))
     }
     
     public func deleteAccount(password: String) async -> Result<User_DeleteAccountResponse, NetworkError> {
         var request = User_DeleteAccountRequest()
         request.password = password
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.deleteAccount(request: request, accessToken: token)
+                if response.deleted {
+                    await tokenStorage.clearTokens()
+                }
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         let result = await networkService.perform(factory.deleteAccount(request))
-        
         if case .success(let response) = result, response.deleted {
             await tokenStorage.clearTokens()
         }
-        
         return result
+    }
+    
+    public func getProfilePhoto() async -> Result<User_GetProfilePhotoResponse, NetworkError> {
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.getProfilePhoto(accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
+        return .failure(.unknown)
+    }
+    
+    public func uploadProfilePhoto(imageData: Data, filename: String = "photo.jpg", mimeType: String = "image/jpeg") async -> Result<User_UploadProfilePhotoResponse, NetworkError> {
+        guard let client = grpcAuthClient else {
+            return .failure(.unknown)
+        }
+        var request = User_UploadProfilePhotoRequest()
+        request.fileContent = imageData
+        request.filename = filename
+        request.mimeType = mimeType
+        do {
+            let token = await tokenStorage.getAccessToken()
+            let response = try await client.uploadProfilePhoto(request: request, accessToken: token)
+            return .success(response)
+        } catch {
+            return .failure(.transportError(error))
+        }
     }
     
     // MARK: - Jobs
@@ -222,69 +289,45 @@ public final class NetworkServiceV2: ObservableObject {
     }
     
     public func addFavorite(vacancyId: String) async -> Result<Jobs_AddFavoriteResponse, NetworkError> {
-        print("📡 NetworkService.addFavorite(vacancyId: \(vacancyId))")
-        print("   - Vacancy ID length: \(vacancyId.count)")
-        print("   - Vacancy ID value: '\(vacancyId)'")
         if let client = grpcAuthClient {
             do {
                 let token = await tokenStorage.getAccessToken()
-                print("   - Using gRPC client with token: \(token?.prefix(20) ?? "nil")...")
-                print("   - Token length: \(token?.count ?? 0)")
                 let response = try await client.addFavorite(vacancyId: vacancyId, accessToken: token)
-                print("   ✅ AddFavorite gRPC response: success=\(response.success)")
-                if !response.success {
-                    print("   ⚠️ Backend returned success=false! Favorite was NOT saved!")
-                }
                 return .success(response)
             } catch {
-                print("   ❌ AddFavorite gRPC error: \(error)")
                 return .failure(.transportError(error))
             }
         }
-        print("   - Using HTTP fallback")
         var request = Jobs_AddFavoriteRequest()
         request.vacancyID = vacancyId
         return await networkService.perform(factory.addFavorite(request))
     }
     
     public func removeFavorite(vacancyId: String) async -> Result<Jobs_RemoveFavoriteResponse, NetworkError> {
-        print("📡 NetworkService.removeFavorite(vacancyId: \(vacancyId))")
         if let client = grpcAuthClient {
             do {
                 let token = await tokenStorage.getAccessToken()
-                print("   - Using gRPC client with token: \(token?.prefix(20) ?? "nil")...")
                 let response = try await client.removeFavorite(vacancyId: vacancyId, accessToken: token)
-                print("   ✅ RemoveFavorite gRPC response: success=\(response.success)")
                 return .success(response)
             } catch {
-                print("   ❌ RemoveFavorite gRPC error: \(error)")
                 return .failure(.transportError(error))
             }
         }
-        print("   - Using HTTP fallback")
         var request = Jobs_RemoveFavoriteRequest()
         request.vacancyID = vacancyId
         return await networkService.perform(factory.removeFavorite(request))
     }
     
     public func listFavorites() async -> Result<Jobs_ListFavoritesResponse, NetworkError> {
-        print("📡 NetworkService.listFavorites()")
         if let client = grpcAuthClient {
             do {
                 let token = await tokenStorage.getAccessToken()
-                print("   - Using gRPC client with token: \(token?.prefix(20) ?? "nil")...")
                 let response = try await client.listFavorites(accessToken: token)
-                print("   ✅ ListFavorites gRPC response: \(response.vacancies.count) vacancies")
-                if !response.vacancies.isEmpty {
-                    print("   - Vacancy IDs: \(response.vacancies.map { $0.id })")
-                }
                 return .success(response)
             } catch {
-                print("   ❌ ListFavorites gRPC error: \(error)")
                 return .failure(.transportError(error))
             }
         }
-        print("   - Using HTTP fallback")
         let request = Jobs_ListFavoritesRequest()
         return await networkService.perform(factory.listFavorites(request))
     }
@@ -309,7 +352,6 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.uploadFile(request: request, accessToken: token)
                 return .success(response)
             } catch {
-                print("❌ gRPC upload failed: \(error)")
                 return .failure(.transportError(error))
             }
         }
@@ -394,12 +436,30 @@ public final class NetworkServiceV2: ObservableObject {
         var request = Materials_RenameNodeRequest()
         request.nodeID = nodeId
         request.newName = newName
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.renameNode(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.renameNode(request))
     }
     
     public func deleteNode(nodeId: UInt32) async -> Result<Materials_DeleteNodeResponse, NetworkError> {
         var request = Materials_DeleteNodeRequest()
         request.nodeID = nodeId
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.deleteNode(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.deleteNode(request))
     }
     
@@ -673,10 +733,78 @@ public final class BackendGatewayGRPCClient: Sendable {
         return try await eventLoopFutureToAsync(call.response)
     }
 
+    public func getMe(accessToken: String?) async throws -> User_GetMeResponse {
+        let request = User_GetMeRequest()
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<User_GetMeRequest, User_GetMeResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/GetMe",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
     public func getResumeProfile(accessToken: String?) async throws -> User_GetResumeProfileResponse {
         let request = User_GetResumeProfileRequest()
         let options = callOptions(with: accessToken)
         let call = client.getResumeProfile(request, callOptions: options)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func updateResumeProfile(request: User_UpdateResumeProfileRequest, accessToken: String?) async throws -> User_UpdateResumeProfileResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<User_UpdateResumeProfileRequest, User_UpdateResumeProfileResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/UpdateResumeProfile",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func updateUserProfile(request: User_UpdateUserProfileRequest, accessToken: String?) async throws -> User_UpdateUserProfileResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<User_UpdateUserProfileRequest, User_UpdateUserProfileResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/UpdateUserProfile",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func deleteAccount(request: User_DeleteAccountRequest, accessToken: String?) async throws -> User_DeleteAccountResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<User_DeleteAccountRequest, User_DeleteAccountResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/DeleteAccount",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func getProfilePhoto(accessToken: String?) async throws -> User_GetProfilePhotoResponse {
+        let request = User_GetProfilePhotoRequest()
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<User_GetProfilePhotoRequest, User_GetProfilePhotoResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/GetProfilePhoto",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func uploadProfilePhoto(request: User_UploadProfilePhotoRequest, accessToken: String?) async throws -> User_UploadProfilePhotoResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<User_UploadProfilePhotoRequest, User_UploadProfilePhotoResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/UploadProfilePhoto",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
         return try await eventLoopFutureToAsync(call.response)
     }
 
@@ -761,6 +889,28 @@ public final class BackendGatewayGRPCClient: Sendable {
         let options = callOptions(with: accessToken)
         let call: UnaryCall<Materials_CreateFolderRequest, Materials_CreateFolderResponse> = connection.makeUnaryCall(
             path: "/gateway.BackendGateway/CreateFolder",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func renameNode(request: Materials_RenameNodeRequest, accessToken: String?) async throws -> Materials_RenameNodeResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Materials_RenameNodeRequest, Materials_RenameNodeResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/RenameNode",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func deleteNode(request: Materials_DeleteNodeRequest, accessToken: String?) async throws -> Materials_DeleteNodeResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Materials_DeleteNodeRequest, Materials_DeleteNodeResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/DeleteNode",
             request: request,
             callOptions: options,
             interceptors: []

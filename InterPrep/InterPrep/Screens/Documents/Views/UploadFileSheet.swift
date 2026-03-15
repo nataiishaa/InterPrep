@@ -69,8 +69,8 @@ struct UploadFileSheet: View {
                         onFileSelected?(url)
                         onDismiss()
                     }
-                case .failure(let error):
-                    print("File picker error: \(error.localizedDescription)")
+                case .failure:
+                    break
                 }
             }
         }

@@ -14,9 +14,14 @@ public struct DocumentsState {
     public var folders: [Folder] = []
     public var recentDocuments: [Document] = []
     public var selectedFolder: Folder?
+    /// Содержимое текущей открытой папки (подпапки и файлы)
+    public var folderContentsFolders: [Folder] = []
+    public var folderContentsDocuments: [Document] = []
     public var isLoading: Bool = false
     public var error: String?
     public var showingCreateFolderSheet: Bool = false
+    public var folderToRename: Folder?
+    public var folderToDelete: Folder?
     public var showingUploadSheet: Bool = false
     public var showingCreateNoteSheet: Bool = false
     public var showingEditNoteSheet: Bool = false
@@ -127,6 +132,18 @@ public enum DocumentType: String, CaseIterable, Sendable {
         case .other: return "doc"
         }
     }
+
+    /// Расширение файла для корректного превью в QuickLook (по типу контента).
+    public var fileExtension: String {
+        switch self {
+        case .pdf: return "pdf"
+        case .doc: return "doc"
+        case .docx: return "docx"
+        case .txt, .note: return "txt"
+        case .image: return "jpg"
+        case .other: return ""
+        }
+    }
 }
 
 // MARK: - FeatureState
@@ -135,6 +152,7 @@ extension DocumentsState: FeatureState {
     public enum Input: Sendable {
         case onAppear
         case folderTapped(Folder)
+        case backFromFolder
         case documentTapped(Document)
         case createFolderTapped
         case uploadFileTapped
@@ -143,16 +161,27 @@ extension DocumentsState: FeatureState {
         case folderCreated(String)
         case fileUploaded(URL, folderId: UUID?)
         case noteCreated(String, String)
-        case noteUpdated(Document, String)
+        case noteUpdated(Document, String, String)
         case documentDeleted(Document)
         case clearDocumentToOpen
         case editNoteTapped(Document)
+        case clearError
+        case renameFolderTapped(Folder)
+        case commitFolderRename(String)
+        case cancelFolderRename
+        case deleteFolderTapped(Folder)
+        case confirmDeleteFolder(Folder)
+        case dismissDeleteFolderConfirmation
     }
     
     public enum Feedback: Sendable {
         case foldersLoaded([Folder])
         case recentDocumentsLoaded([Document])
         case foldersAndDocumentsLoaded([Folder], [Document])
+        case folderContentsLoaded([Folder], [Document])
+        case folderDeletedAndRefreshed(deletedFolderId: UUID, [Folder], [Document])
+        case folderRenamedAndRefreshed(folderId: UUID, newName: String, [Folder], [Document])
+        case noteUpdatedAndRefreshed([Folder], [Document])
         case loadingFailed(String)
         case documentDownloaded(URL)
         case documentOpenFailed(String)
@@ -162,11 +191,14 @@ extension DocumentsState: FeatureState {
     public enum Effect: Sendable {
         case loadFolders
         case loadRecentDocuments
-        case createFolder(String)
+        case createFolder(String, parentFolder: Folder?)
+        case loadFolderContents(Folder)
         case uploadFile(URL, folderId: UUID?)
-        case createNote(String, String)
-        case updateNote(Document, String)
+        case createNote(String, String, parentFolder: Folder?)
+        case updateNote(Document, String, String)
         case deleteDocument(UUID)
+        case renameFolder(Folder, String)
+        case deleteFolder(Folder)
         case openDocument(Document)
         case loadNoteContent(Document)
     }
@@ -185,6 +217,13 @@ extension DocumentsState: FeatureState {
             
         case .input(.folderTapped(let folder)):
             state.selectedFolder = folder
+            state.isLoading = true
+            return .loadFolderContents(folder)
+
+        case .input(.backFromFolder):
+            state.selectedFolder = nil
+            state.folderContentsFolders = []
+            state.folderContentsDocuments = []
             return nil
             
         case .input(.documentTapped(let document)):
@@ -192,27 +231,56 @@ extension DocumentsState: FeatureState {
             
         case .input(.createFolderTapped):
             state.showingCreateFolderSheet = true
+            state.error = nil
             return nil
             
         case .input(.uploadFileTapped):
             state.showingUploadSheet = true
+            state.error = nil
             return nil
             
         case .input(.createNoteTapped):
             state.showingCreateNoteSheet = true
+            state.error = nil
             return nil
             
         case .input(.dismissSheet):
             state.showingCreateFolderSheet = false
+            state.folderToRename = nil
             state.showingUploadSheet = false
             state.showingCreateNoteSheet = false
             state.showingEditNoteSheet = false
             state.editingNote = nil
             return nil
+
+        case .input(.renameFolderTapped(let folder)):
+            state.folderToRename = folder
+            return nil
+
+        case .input(.commitFolderRename(let newName)):
+            guard let folder = state.folderToRename else { return nil }
+            state.folderToRename = nil
+            return .renameFolder(folder, newName.trimmingCharacters(in: .whitespacesAndNewlines))
+
+        case .input(.deleteFolderTapped(let folder)):
+            state.folderToDelete = folder
+            return nil
+
+        case .input(.confirmDeleteFolder(let folder)):
+            state.folderToDelete = nil
+            return .deleteFolder(folder)
+
+        case .input(.cancelFolderRename):
+            state.folderToRename = nil
+            return nil
+
+        case .input(.dismissDeleteFolderConfirmation):
+            state.folderToDelete = nil
+            return nil
             
         case .input(.folderCreated(let name)):
             state.showingCreateFolderSheet = false
-            return .createFolder(name)
+            return .createFolder(name, parentFolder: state.selectedFolder)
             
         case .input(.fileUploaded(let url, let folderId)):
             state.showingUploadSheet = false
@@ -220,38 +288,97 @@ extension DocumentsState: FeatureState {
             
         case .input(.noteCreated(let title, let content)):
             state.showingCreateNoteSheet = false
-            return .createNote(title, content)
+            return .createNote(title, content, parentFolder: state.selectedFolder)
             
-        case .input(.noteUpdated(let document, let content)):
-            state.showingEditNoteSheet = false
-            state.editingNote = nil
-            return .updateNote(document, content)
+        case .input(.noteUpdated(let document, let newName, let content)):
+            return .updateNote(document, newName, content)
             
         case .input(.editNoteTapped(let document)):
             state.editingNote = document
             return .loadNoteContent(document)
             
         case .input(.documentDeleted(let document)):
-            state.recentDocuments.removeAll { $0.id == document.id }
             return .deleteDocument(document.id)
             
         case .input(.clearDocumentToOpen):
             state.documentURLToOpen = nil
             return nil
             
+        case .input(.clearError):
+            state.error = nil
+            return nil
+            
         case .feedback(.foldersLoaded(let folders)):
             state.folders = folders
             state.isLoading = false
+            state.error = nil
             return nil
             
         case .feedback(.recentDocumentsLoaded(let documents)):
             state.recentDocuments = documents
+            state.error = nil
             return nil
             
         case .feedback(.foldersAndDocumentsLoaded(let folders, let documents)):
             state.folders = folders
             state.recentDocuments = documents
             state.isLoading = false
+            state.error = nil
+            if state.selectedFolder != nil {
+                return .loadFolderContents(state.selectedFolder!)
+            }
+            return nil
+
+        case .feedback(.folderContentsLoaded(let folders, let documents)):
+            state.folderContentsFolders = folders
+            state.folderContentsDocuments = documents
+            state.isLoading = false
+            state.error = nil
+            return nil
+
+        case .feedback(.noteUpdatedAndRefreshed(let folders, let documents)):
+            state.folders = folders
+            state.recentDocuments = documents
+            state.showingEditNoteSheet = false
+            state.editingNote = nil
+            state.isLoading = false
+            state.error = nil
+            if state.selectedFolder != nil {
+                return .loadFolderContents(state.selectedFolder!)
+            }
+            return nil
+
+        case .feedback(.folderDeletedAndRefreshed(let deletedFolderId, let folders, let documents)):
+            state.folders = folders
+            state.recentDocuments = documents
+            state.isLoading = false
+            state.error = nil
+            if state.selectedFolder?.id == deletedFolderId {
+                state.selectedFolder = nil
+                state.folderContentsFolders = []
+                state.folderContentsDocuments = []
+            }
+            if state.folderToRename?.id == deletedFolderId {
+                state.folderToRename = nil
+            }
+            return nil
+
+        case .feedback(.folderRenamedAndRefreshed(let folderId, let newName, let folders, let documents)):
+            state.folders = folders
+            state.recentDocuments = documents
+            state.isLoading = false
+            state.error = nil
+            if state.selectedFolder?.id == folderId {
+                var updated = state.selectedFolder!
+                updated.name = newName
+                state.selectedFolder = updated
+            }
+            if state.folderToRename?.id == folderId {
+                state.folderToRename = nil
+            }
+            if state.selectedFolder != nil {
+                return .loadFolderContents(state.selectedFolder!)
+            }
             return nil
             
         case .feedback(.loadingFailed(let error)):

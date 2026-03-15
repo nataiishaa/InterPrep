@@ -28,8 +28,14 @@ public struct DocumentsContainer: View {
         .init(
             folders: store.state.folders,
             recentDocuments: store.state.recentDocuments,
+            selectedFolder: store.state.selectedFolder,
+            folderContentsFolders: store.state.folderContentsFolders,
+            folderContentsDocuments: store.state.folderContentsDocuments,
             isLoading: store.state.isLoading,
+            error: store.state.error,
             showingCreateFolderSheet: store.state.showingCreateFolderSheet,
+            folderToRename: store.state.folderToRename,
+            folderToDelete: store.state.folderToDelete,
             showingUploadSheet: store.state.showingUploadSheet,
             showingCreateNoteSheet: store.state.showingCreateNoteSheet,
             showingEditNoteSheet: store.state.showingEditNoteSheet,
@@ -38,8 +44,11 @@ public struct DocumentsContainer: View {
             onFolderTap: { folder in
                 store.send(.folderTapped(folder))
             },
+            onBackFromFolder: {
+                store.send(.backFromFolder)
+            },
             onDocumentTap: { document in
-                if document.isNote {
+                if document.isNote || document.type == .other {
                     store.send(.editNoteTapped(document))
                 } else {
                     store.send(.documentTapped(document))
@@ -60,14 +69,32 @@ public struct DocumentsContainer: View {
             onFolderCreate: { name in
                 store.send(.folderCreated(name))
             },
+            onRenameFolderTap: { folder in
+                store.send(.renameFolderTapped(folder))
+            },
+            onCommitFolderRename: { name in
+                store.send(.commitFolderRename(name))
+            },
+            onCancelFolderRename: {
+                store.send(.cancelFolderRename)
+            },
+            onDeleteFolderTap: { folder in
+                store.send(.deleteFolderTapped(folder))
+            },
+            onConfirmDeleteFolder: { folder in
+                store.send(.confirmDeleteFolder(folder))
+            },
+            onDismissDeleteFolderConfirmation: {
+                store.send(.dismissDeleteFolderConfirmation)
+            },
             onFileUpload: { url in
-                store.send(.fileUploaded(url, folderId: nil))
+                store.send(.fileUploaded(url, folderId: store.state.selectedFolder?.id))
             },
             onNoteCreate: { title, content in
                 store.send(.noteCreated(title, content))
             },
-            onNoteUpdate: { document, content in
-                store.send(.noteUpdated(document, content))
+            onNoteUpdate: { document, newName, content in
+                store.send(.noteUpdated(document, newName, content))
             },
             onEditNoteTap: { document in
                 store.send(.editNoteTapped(document))
@@ -77,6 +104,9 @@ public struct DocumentsContainer: View {
             },
             onClearDocumentToOpen: {
                 store.send(.clearDocumentToOpen)
+            },
+            onClearError: {
+                store.send(.clearError)
             }
         )
     }

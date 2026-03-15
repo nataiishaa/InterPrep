@@ -8,8 +8,8 @@ option swift_prefix = "Jobs_";
 import "common.proto";
 
 message SearchJobsRequest {
-  int32 page = 1;     // default 0, min 0
-  int32 per_page = 2; // default 10, min 1, max 100
+  int32 page = 1;
+  int32 per_page = 2;
 }
 
 message Vacancy {
@@ -70,6 +70,14 @@ message ListFavoritesResponse {
   repeated Vacancy vacancies = 1;
 }
 
+message GetVacancyRequest {
+  string vacancy_id = 1;
+}
+
+message GetVacancyResponse {
+  Vacancy vacancy = 1;
+}
+
 message DeleteUserDataRequest {
   uint32 user_id = 1;
 }
@@ -80,6 +88,7 @@ message DeleteUserDataResponse {
 
 service JobsService {
   rpc SearchJobs(SearchJobsRequest) returns (SearchJobsResponse);
+  rpc GetVacancy(GetVacancyRequest) returns (GetVacancyResponse);
   rpc AddFavorite(AddFavoriteRequest) returns (AddFavoriteResponse);
   rpc RemoveFavorite(RemoveFavoriteRequest) returns (RemoveFavoriteResponse);
   rpc ListFavorites(ListFavoritesRequest) returns (ListFavoritesResponse);

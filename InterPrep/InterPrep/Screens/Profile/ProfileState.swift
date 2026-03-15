@@ -43,6 +43,9 @@ public struct ProfileState {
     /// Ошибка при удалении аккаунта (например, неверный пароль)
     public var deleteAccountError: String?
     
+    /// URL закешированного фото профиля (локальный файл). Если есть — не дергаем GetProfilePhoto.
+    public var cachedProfilePhotoURL: URL?
+    
     public init() {}
 }
 
@@ -208,13 +211,15 @@ extension ProfileState: FeatureState {
         case clearAuthRequired
         case clearDeleteAccountError
         case openCalDAVSettings
+        case uploadProfilePhoto(Data)
     }
     
     public enum Feedback: Sendable {
         case userLoaded(User)
         case statisticsLoaded(Statistics)
-        /// Профиль и статистика загружены с бэкенда (getMe)
-        case profileLoaded(user: User, statistics: Statistics)
+        /// Профиль и статистика загружены с бэкенда (getMe). profilePhotoURL — локальный URL кеша, если фото загружено.
+        case profileLoaded(user: User, statistics: Statistics, profilePhotoURL: URL?)
+        case profilePhotoUpdated(URL)
         case profileUpdated(User)
         case settingsSaved
         case loadingFailed(String)
@@ -238,6 +243,7 @@ extension ProfileState: FeatureState {
         case performDeleteAccount(password: String)
         case loadInterviews
         case navigateToInterview(Interview)
+        case uploadProfilePhoto(userId: String, data: Data)
     }
     
     @MainActor
@@ -352,6 +358,10 @@ extension ProfileState: FeatureState {
             // Handled in UI
             break
             
+        case let .input(.uploadProfilePhoto(data)):
+            guard let userId = state.user?.id else { return nil }
+            return .uploadProfilePhoto(userId: userId, data: data)
+            
         // Interviews
         case let .input(.interviewTabChanged(tab)):
             state.selectedInterviewTab = tab
@@ -374,10 +384,15 @@ extension ProfileState: FeatureState {
             state.statistics = statistics
             return .loadInterviews
             
-        case let .feedback(.profileLoaded(user, statistics)):
+        case let .feedback(.profileLoaded(user, statistics, profilePhotoURL)):
             state.isLoading = false
             state.user = user
             state.statistics = statistics
+            state.cachedProfilePhotoURL = profilePhotoURL
+            return nil
+            
+        case let .feedback(.profilePhotoUpdated(url)):
+            state.cachedProfilePhotoURL = url
             return nil
             
         case let .feedback(.profileUpdated(user)):

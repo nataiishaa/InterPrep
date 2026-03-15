@@ -78,9 +78,11 @@ struct ProfileView: View {
     @ViewBuilder
     private var profileHeader: some View {
         VStack(spacing: 16) {
-            // Avatar (фото с бэкенда или инициалы)
+            // Avatar (кеш с диска или с сервера, иначе инициалы)
             ZStack(alignment: .bottomTrailing) {
-                if let urlString = model.user?.avatarURL, !urlString.isEmpty, let url = URL(string: urlString) {
+                if let localURL = model.cachedProfilePhotoURL {
+                    avatarImageFromURL(localURL)
+                } else if let urlString = model.user?.avatarURL, !urlString.isEmpty, let url = URL(string: urlString) {
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
@@ -138,6 +140,25 @@ struct ProfileView: View {
         .background(Color.cardBackground)
         .cornerRadius(16)
         .shadow(color: shadowColor, radius: 8, x: 0, y: 2)
+    }
+    
+    @ViewBuilder
+    private func avatarImageFromURL(_ url: URL) -> some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+            case .failure, .empty:
+                avatarPlaceholder
+            @unknown default:
+                avatarPlaceholder
+            }
+        }
+        .frame(width: 100, height: 100)
+        .clipped()
+        .clipShape(Circle())
     }
     
     private var avatarPlaceholder: some View {
@@ -694,6 +715,7 @@ private struct ProfileContactDevelopersView: View {
 extension ProfileView {
     struct Model {
         let user: ProfileState.User?
+        let cachedProfilePhotoURL: URL?
         let statistics: ProfileState.Statistics
         let settings: ProfileState.AppSettings
         let deleteAccountError: String?
@@ -731,6 +753,7 @@ extension ProfileView {
             experience: "3 года",
             registeredDate: nil
         ),
+        cachedProfilePhotoURL: nil,
         statistics: .init(
             totalInterviews: 15,
             completedInterviews: 12,
@@ -764,6 +787,7 @@ extension ProfileView {
             lastName: "Иванов",
             email: "ivan@example.com",
             errorMessage: nil,
+            onPhotoSelected: { _ in },
             onFirstNameChanged: { _ in },
             onLastNameChanged: { _ in },
             onSave: {},

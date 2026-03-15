@@ -11,7 +11,7 @@ import DesignSystem
 struct DocumentRowView: View {
     let document: Document
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         HStack(spacing: 12) {
             // Icon
@@ -21,7 +21,7 @@ struct DocumentRowView: View {
                 .frame(width: 40, height: 40)
                 .background(Color.brandPrimary.opacity(0.1))
                 .cornerRadius(8)
-            
+
             // Info
             VStack(alignment: .leading, spacing: 4) {
                 Text(document.name)
@@ -29,7 +29,7 @@ struct DocumentRowView: View {
                     .fontWeight(.medium)
                     .lineLimit(1)
                     .foregroundColor(.textOnBackground)
-                
+
                 HStack(spacing: 8) {
                     Text(document.formattedSize)
                         .font(.caption)
@@ -51,6 +51,7 @@ struct DocumentRowView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
+        .frame(minWidth: 1)
         .padding()
         .background(Color.cardBackground)
         .cornerRadius(12)
