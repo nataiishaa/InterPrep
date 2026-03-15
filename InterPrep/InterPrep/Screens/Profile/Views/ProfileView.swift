@@ -24,7 +24,6 @@ struct ProfileView: View {
             VStack(spacing: 24) {
                 profileHeader
                 resumeSection
-                interviewsSection
                 statisticsSection
                 settingsSection
                 actionsSection
@@ -79,24 +78,29 @@ struct ProfileView: View {
     @ViewBuilder
     private var profileHeader: some View {
         VStack(spacing: 16) {
-            // Avatar
+            // Avatar (фото с бэкенда или инициалы)
             ZStack(alignment: .bottomTrailing) {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [.brandPrimary, .brandSecondary],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                if let urlString = model.user?.avatarURL, !urlString.isEmpty, let url = URL(string: urlString) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                        case .failure, .empty:
+                            avatarPlaceholder
+                        @unknown default:
+                            avatarPlaceholder
+                        }
+                    }
                     .frame(width: 100, height: 100)
-                    .overlay(
-                        Text(model.user?.initials ?? "??")
-                            .font(.system(size: 40, weight: .bold))
-                            .foregroundColor(.white)
-                    )
+                    .clipShape(Circle())
+                } else {
+                    avatarPlaceholder
+                }
                 
                 Button {
+                    model.onEditProfileTapped?()
                     showEditProfile = true
                 } label: {
                     Image(systemName: "pencil.circle.fill")
@@ -110,30 +114,23 @@ struct ProfileView: View {
                 }
             }
             
-            // Name and info
+            // Имя и почта (почта только просмотр)
             VStack(spacing: 4) {
                 Text(model.user?.fullName ?? "Пользователь")
                     .font(.title2)
                     .fontWeight(.bold)
                 
-                if let position = model.user?.position {
+                if let position = model.user?.position, !position.isEmpty {
                     Text(position)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
                 
-                if let email = model.user?.email {
+                if let email = model.user?.email, !email.isEmpty {
                     Text(email)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-            }
-            
-            // Member since
-            if let registeredDate = model.user?.registeredDate {
-                Text("С нами с \(registeredDate, style: .date)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
             }
         }
         .padding()
@@ -141,6 +138,23 @@ struct ProfileView: View {
         .background(Color.cardBackground)
         .cornerRadius(16)
         .shadow(color: shadowColor, radius: 8, x: 0, y: 2)
+    }
+    
+    private var avatarPlaceholder: some View {
+        Circle()
+            .fill(
+                LinearGradient(
+                    colors: [.brandPrimary, .brandSecondary],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .frame(width: 100, height: 100)
+            .overlay(
+                Text(model.user?.initials ?? "?")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundColor(.white)
+            )
     }
     
     // MARK: - Resume Section
@@ -172,7 +186,7 @@ struct ProfileView: View {
                             .font(.body)
                             .fontWeight(.medium)
                         
-                        Text("Посмотрите данные или загрузите новое резюме")
+                        Text("Посмотрите данные на основе которых мы предлагаем вам вакансии.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .lineLimit(2)
@@ -228,77 +242,7 @@ struct ProfileView: View {
         }
     }
     
-    // MARK: - Interviews Section
-    
-    @ViewBuilder
-    private var interviewsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Собеседования")
-                .font(.headline)
-                .padding(.horizontal, 4)
-            
-            VStack(spacing: 0) {
-                // Tab Picker
-                Picker("", selection: Binding(
-                    get: { model.selectedInterviewTab },
-                    set: { model.onInterviewTabChanged($0) }
-                )) {
-                    ForEach(ProfileState.InterviewTab.allCases, id: \.self) { tab in
-                        Text(tab.rawValue).tag(tab)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding()
-                
-                Divider()
-                
-                // Interviews List
-                if model.isLoadingInterviews {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .padding(40)
-                } else {
-                    let interviews = model.selectedInterviewTab == .upcoming 
-                        ? model.upcomingInterviews 
-                        : model.completedInterviews
-                    
-                    if interviews.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: model.selectedInterviewTab == .upcoming 
-                                ? "calendar.badge.clock" 
-                                : "checkmark.circle")
-                                .font(.largeTitle)
-                                .foregroundColor(.secondary)
-                            
-                            Text(model.selectedInterviewTab == .upcoming 
-                                ? "Нет запланированных собеседований" 
-                                : "Нет завершенных собеседований")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(40)
-                    } else {
-                        ForEach(interviews) { interview in
-                            InterviewRow(interview: interview) {
-                                model.onInterviewTapped(interview)
-                            }
-                            
-                            if interview.id != interviews.last?.id {
-                                Divider()
-                                    .padding(.leading, 52)
-                            }
-                        }
-                    }
-                }
-            }
-            .background(Color.cardBackground)
-            .cornerRadius(12)
-            .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
-        }
-    }
-    
-    // MARK: - Statistics Section
+    // MARK: - Statistics Section (с бэкенда: запланировано / предстоит)
     
     @ViewBuilder
     private var statisticsSection: some View {
@@ -307,12 +251,20 @@ struct ProfileView: View {
                 .font(.headline)
                 .padding(.horizontal, 4)
             
-            StatCard(
-                title: "Собеседований прошло",
-                value: "\(model.statistics.completedInterviews)",
-                icon: "checkmark.circle.fill",
-                color: .green
-            )
+            HStack(spacing: 12) {
+                StatCard(
+                    title: "Собеседований запланировано",
+                    value: "\(model.statistics.totalInterviews)",
+                    icon: "calendar.badge.clock",
+                    color: .blue
+                )
+                StatCard(
+                    title: "Собеседований предстоит",
+                    value: "\(model.statistics.upcomingInterviews)",
+                    icon: "clock.arrow.circlepath",
+                    color: .orange
+                )
+            }
         }
     }
     
@@ -377,13 +329,6 @@ struct ProfileView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                
-                Text("Подключите Google, iCloud или другой календарь — собеседования появятся в приложении.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
             }
             .background(Color(.systemBackground))
             .cornerRadius(12)
@@ -444,36 +389,11 @@ struct ProfileView: View {
             Text("Версия 1.0.0")
                 .font(.caption)
                 .foregroundColor(.secondary)
-            
-            // Dev tools
-            VStack(spacing: 12) {
-                Divider()
-                    .padding(.horizontal)
-                
-                Text("Для разработки:")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Button("Сбросить онбординг") {
-                    resetApp()
-                }
-                .buttonStyle(.bordered)
-                .tint(.brandPrimary)
-            }
-            .padding(.top, 8)
         }
         .padding()
         .frame(maxWidth: .infinity)
         .background(Color.cardBackground)
         .cornerRadius(12)
-    }
-    
-    private func resetApp() {
-        // Reset onboarding flag
-        UserDefaults.standard.set(false, forKey: "isOnboardingCompleted")
-        
-        // Note: To see the onboarding screen, restart the app manually
-        // App-level navigation should be handled by the app coordinator, not by feature modules
     }
     
     private var shadowColor: Color {
@@ -790,6 +710,8 @@ extension ProfileView {
         let onClearDeleteAccountError: () -> Void
         let onInterviewTabChanged: (ProfileState.InterviewTab) -> Void
         let onInterviewTapped: (ProfileState.Interview) -> Void
+        /// Вызывается при нажатии на кнопку редактирования профиля (подставляет имя/фамилию в форму)
+        let onEditProfileTapped: (() -> Void)?
         let editModel: ProfileEditView.Model
     }
 }
@@ -807,7 +729,7 @@ extension ProfileView {
             avatarURL: nil,
             position: "iOS Developer",
             experience: "3 года",
-            registeredDate: Date()
+            registeredDate: nil
         ),
         statistics: .init(
             totalInterviews: 15,
@@ -836,9 +758,11 @@ extension ProfileView {
         onClearDeleteAccountError: {},
         onInterviewTabChanged: { _ in },
         onInterviewTapped: { _ in },
+        onEditProfileTapped: nil,
         editModel: .init(
             firstName: "Иван",
             lastName: "Иванов",
+            email: "ivan@example.com",
             errorMessage: nil,
             onFirstNameChanged: { _ in },
             onLastNameChanged: { _ in },

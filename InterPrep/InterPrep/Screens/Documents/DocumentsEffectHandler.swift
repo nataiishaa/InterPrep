@@ -133,6 +133,17 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
     private var documentIdToMaterialId: [UUID: String] = [:]
     private var folderIdToNodeId: [UUID: UInt32] = [:]
     
+    /// Стабильный UUID из node.id: один и тот же node всегда даёт один и тот же UUID.
+    private static func uuidFromNodeId(_ nodeId: UInt32, folder: Bool) -> UUID {
+        var bytes = [UInt8](repeating: 0, count: 16)
+        bytes[0] = folder ? 0 : 1
+        bytes[1] = UInt8((nodeId >> 24) & 0xFF)
+        bytes[2] = UInt8((nodeId >> 16) & 0xFF)
+        bytes[3] = UInt8((nodeId >> 8) & 0xFF)
+        bytes[4] = UInt8(nodeId & 0xFF)
+        return UUID(uuid: (bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7], bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]))
+    }
+    
     public init(networkService: NetworkServiceV2 = .shared) {
         self.networkService = networkService
     }
@@ -148,7 +159,7 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
             let folderNodes = allNodes.filter { $0.type == "folder" }
             
             return folderNodes.map { node in
-                let folderId = UUID()
+                let folderId = Self.uuidFromNodeId(node.id, folder: true)
                 folderIdToNodeId[folderId] = node.id
                 
                 let filesInFolder = allNodes.filter { 
@@ -177,10 +188,17 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
             nodeIdByDocumentId.removeAll()
             documentIdToMaterialId.removeAll()
             
-            return response.nodes
+            let allNodes = response.nodes
+            let folderNodes = allNodes.filter { $0.type == "folder" }
+            for node in folderNodes {
+                let folderId = Self.uuidFromNodeId(node.id, folder: true)
+                folderIdToNodeId[folderId] = node.id
+            }
+            
+            return allNodes
                 .filter { $0.type == "file" }
                 .map { node in
-                    let documentId = UUID()
+                    let documentId = Self.uuidFromNodeId(node.id, folder: false)
                     nodeIdByDocumentId[documentId] = node.id
                     if node.hasMaterialID {
                         documentIdToMaterialId[documentId] = node.materialID
@@ -194,7 +212,7 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
                     
                     var folderId: UUID?
                     if node.hasParentID {
-                        folderId = folderIdToNodeId.first(where: { $0.value == node.parentID })?.key
+                        folderId = Self.uuidFromNodeId(node.parentID, folder: true)
                     }
                     
                     return Document(
@@ -330,28 +348,24 @@ public final actor DocumentServiceImpl: DocumentServiceProtocol {
         guard let nodeId = nodeIdByDocumentId[id] else {
             throw NSError(domain: "DocumentService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Заметка не найдена"])
         }
-        
-        try await deleteDocument(id: id)
-        
-        let data = Data(content.utf8)
-        guard let materialId = documentIdToMaterialId[id] else {
-            throw NSError(domain: "DocumentService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Не удалось получить ID материала"])
-        }
-        
         let result = await networkService.listFolder(parentId: nil)
         guard case .success(let response) = result else {
             throw NSError(domain: "DocumentService", code: -3, userInfo: [NSLocalizedDescriptionKey: "Не удалось получить информацию о файле"])
         }
-        
         guard let node = response.nodes.first(where: { $0.id == nodeId }) else {
             throw NSError(domain: "DocumentService", code: -4, userInfo: [NSLocalizedDescriptionKey: "Файл не найден"])
         }
+        let parentId: UInt32? = node.hasParentID ? node.parentID : nil
+        let fileName = node.name
         
+        try await deleteDocument(id: id)
+        
+        let data = Data(content.utf8)
         let uploadResult = await networkService.uploadFile(
             fileContent: data,
-            filename: node.name,
-            parentId: node.hasParentID ? node.parentID : nil,
-            name: node.name
+            filename: fileName,
+            parentId: parentId,
+            name: fileName
         )
         
         switch uploadResult {

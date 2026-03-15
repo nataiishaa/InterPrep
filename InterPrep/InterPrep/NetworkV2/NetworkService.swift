@@ -362,6 +362,15 @@ public final class NetworkServiceV2: ObservableObject {
         if let parentId = parentId {
             request.parentID = parentId
         }
+        if let client = grpcAuthClient {
+            do {
+                let token = await tokenStorage.getAccessToken()
+                let response = try await client.createFolder(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.createFolder(request))
     }
     
@@ -741,6 +750,17 @@ public final class BackendGatewayGRPCClient: Sendable {
         let options = callOptions(with: accessToken)
         let call: UnaryCall<Materials_ListFolderRequest, Materials_ListFolderResponse> = connection.makeUnaryCall(
             path: "/gateway.BackendGateway/ListFolder",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func createFolder(request: Materials_CreateFolderRequest, accessToken: String?) async throws -> Materials_CreateFolderResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Materials_CreateFolderRequest, Materials_CreateFolderResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/CreateFolder",
             request: request,
             callOptions: options,
             interceptors: []

@@ -14,6 +14,12 @@ struct ProfileEditView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("Фото профиля") {
+                    Text("Фото приходит с сервера. Изменить фото можно будет после поддержки на бэкенде.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
                 Section("Имя и фамилия") {
                     TextField("Имя", text: Binding(
                         get: { model.firstName },
@@ -24,6 +30,11 @@ struct ProfileEditView: View {
                         get: { model.lastName },
                         set: { model.onLastNameChanged($0) }
                     ))
+                }
+                
+                Section("Почта") {
+                    Text(model.email.isEmpty ? "—" : model.email)
+                        .foregroundColor(.secondary)
                 }
                 
                 if let error = model.errorMessage {
@@ -63,6 +74,7 @@ extension ProfileEditView {
     struct Model {
         let firstName: String
         let lastName: String
+        let email: String
         let errorMessage: String?
         let onFirstNameChanged: (String) -> Void
         let onLastNameChanged: (String) -> Void
@@ -77,6 +89,7 @@ extension ProfileEditView {
     ProfileEditView(model: .init(
         firstName: "Иван",
         lastName: "Иванов",
+        email: "ivan@example.com",
         errorMessage: nil,
         onFirstNameChanged: { _ in },
         onLastNameChanged: { _ in },

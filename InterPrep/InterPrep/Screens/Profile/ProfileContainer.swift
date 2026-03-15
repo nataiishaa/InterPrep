@@ -80,14 +80,18 @@ public struct ProfileContainer: View {
             onInterviewTapped: { interview in
                 store.send(.interviewTapped(interview))
             },
+            onEditProfileTapped: {
+                store.send(.startEditingProfile)
+            },
             editModel: makeEditModel()
         )
     }
     
     private func makeEditModel() -> ProfileEditView.Model {
         .init(
-            firstName: store.state.editedFirstName,
-            lastName: store.state.editedLastName,
+            firstName: store.state.user?.firstName ?? store.state.editedFirstName,
+            lastName: store.state.user?.lastName ?? store.state.editedLastName,
+            email: store.state.user?.email ?? "",
             errorMessage: store.state.errorMessage,
             onFirstNameChanged: { name in
                 store.send(.firstNameChanged(name))
