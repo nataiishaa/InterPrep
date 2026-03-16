@@ -305,16 +305,20 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.app.tests",
             sources: [
-                .glob("InterPrepTests/**", excluding: ["InterPrepTests/ChatFeatureTests/ChatStateTests.swift"])
+                "InterPrepTests/**"
             ],
             dependencies: [
                 .target(name: "InterPrep"),
                 .target(name: "AuthFeature"),
                 .target(name: "OnboardingFeature"),
+                .target(name: "ChatFeature"),
+                .target(name: "CalendarFeature"),
+                .target(name: "DocumentsFeature"),
+                .target(name: "ProfileFeature"),
                 .package(product: "SnapshotTesting")
             ]
         ),
-        
+
         .target(
             name: "InterPrepUITests",
             destinations: .iOS,
@@ -404,7 +408,7 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.features.chat.tests",
             sources: [
-                .glob("InterPrepTests/ChatFeatureTests/**", excluding: ["InterPrepTests/ChatFeatureTests/ChatStateTests.swift"]),
+                "InterPrepTests/ChatFeatureTests/**",
                 "InterPrepTests/SnapshotTestingKit/**"
             ],
             dependencies: [

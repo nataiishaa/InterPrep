@@ -53,7 +53,6 @@ public struct OnboardingContainer: View {
                 store.send(.getStartedTapped)
             },
             onRegister: {
-                // TODO: Navigate to registration
                 store.send(.getStartedTapped)
             }
         )

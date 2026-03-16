@@ -7,5 +7,4 @@
 
 import ArchitectureCore
 
-/// Typealias for ResumeUpload feature Store
 public typealias ResumeUploadStore = Store<ResumeUploadState, ResumeUploadEffectHandler>

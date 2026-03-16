@@ -38,12 +38,9 @@ public struct DiscoveryView: View {
         }
     }
     
-    // MARK: - Subviews
-    
     @ViewBuilder
     private var header: some View {
         VStack(spacing: 12) {
-            // Search bar
             HStack(spacing: 12) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
@@ -83,7 +80,6 @@ public struct DiscoveryView: View {
             .padding(.horizontal, Layout.horizontalPadding)
             .padding(.top, 12)
             
-            // Filter tabs
             HStack(spacing: Layout.tabSpacing) {
                 filterTab(
                     title: "Вакансии",
@@ -189,7 +185,6 @@ public struct DiscoveryView: View {
     @ViewBuilder
     private var uploadResumeEmptyState: some View {
         ZStack {
-            // Gradient background
             LinearGradient(
                 colors: [
                     Color.backgroundPrimary,
@@ -204,16 +199,13 @@ public struct DiscoveryView: View {
                 Spacer()
                     .frame(minHeight: 30)
                 
-                // Illustration
                 Image("upload_cloud")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
                     .frame(height: 300)
                     .padding(.horizontal, 20)
-                   // .padding(.bottom, 10)
                 
-                // Text
                 VStack(spacing: 12) {
                     Text("Загрузите свое резюме,\nчтобы получить\nперсональные рекомендации")
                         .font(.title3)
@@ -233,7 +225,6 @@ public struct DiscoveryView: View {
                 Spacer()
                     .frame(minHeight: 40)
                 
-                // Upload button
                 Button {
                     model.onUploadResume()
                 } label: {
@@ -267,12 +258,6 @@ public struct DiscoveryView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(model.vacancies) { vacancy in
-                    // TODO: После генерации Tuist заменить на:
-                    // VacancyCardView(vacancy: convertToVacancy(vacancy)) {
-                    //     model.onVacancyTap(vacancy)
-                    // }
-                    
-
                     VStack(alignment: .leading, spacing: 0) {
 
                         HStack(alignment: .top, spacing: 12) {
@@ -318,7 +303,6 @@ public struct DiscoveryView: View {
                                 model.onVacancyTap(vacancy)
                             }
                             
-                            // Кнопка избранного — отдельная зона тапа, не открывает вакансию
                             Button {
                                 model.onToggleFavorite(vacancy.id)
                             } label: {
@@ -415,8 +399,6 @@ public struct DiscoveryView: View {
     }
 
 }
-
-// MARK: - Model
 
 extension DiscoveryView {
     public struct Model {

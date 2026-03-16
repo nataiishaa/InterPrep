@@ -27,9 +27,9 @@ final class AppGraph {
     private lazy var resumeService: ResumeService = ResumeServiceImpl()
     private lazy var vacancyService: VacancyService = VacancyServiceImpl()
     private lazy var fileUploadService: FileUploadService = FileUploadServiceImpl()
-    private lazy var documentService: DocumentServiceProtocol = DocumentServiceImpl()
-    private lazy var chatService: ChatServiceProtocol = ChatServiceImpl()
-    private lazy var calendarService: CalendarServiceProtocol = CalendarServiceImpl()
+    private lazy var documentService: DocumentServicing = DocumentServiceImpl()
+    private lazy var chatService: ChatServicing = ChatServiceImpl()
+    private lazy var calendarService: CalendarServicing = CalendarServiceImpl()
     
     // MARK: - State
     

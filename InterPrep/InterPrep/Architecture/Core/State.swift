@@ -12,7 +12,6 @@ public enum Message<Input, Feedback> {
     case feedback(Feedback)
 }
 
-/// Protocol for State management
 public protocol FeatureState {
     associatedtype Input
     associatedtype Feedback

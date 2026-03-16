@@ -1,8 +1,6 @@
 import Foundation
 import SwiftProtobuf
 
-// MARK: - Token Provider
-
 public protocol TokenProvider: Sendable {
     func provideToken() async -> String?
     func authenticateIfNeeded() async
@@ -20,11 +18,8 @@ public actor DefaultTokenProvider: TokenProvider {
     }
     
     public func authenticateIfNeeded() async {
-        // TODO: Implement re-authentication logic
     }
 }
-
-// MARK: - Network Response Observer
 
 public protocol NetworkResponseObserver: Sendable {
     func observe(request: URLRequest, response: HTTPURLResponse?, data: Data?, error: Error?) async

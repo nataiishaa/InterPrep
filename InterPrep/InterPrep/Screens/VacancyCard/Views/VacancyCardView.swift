@@ -19,9 +19,7 @@ public struct VacancyCardView: View {
     public var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
-                // Header: Company & Location
                 HStack(alignment: .top, spacing: 12) {
-                    // Company Logo Placeholder
                     Circle()
                         .fill(Color.gray.opacity(0.2))
                         .frame(width: 48, height: 48)
@@ -49,20 +47,17 @@ public struct VacancyCardView: View {
                     
                     Spacer()
                     
-                    // Posted Date
                     Text(timeAgo(from: vacancy.postedDate))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
                 
-                // Job Title
                 Text(vacancy.title)
                     .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                     .lineLimit(2)
                 
-                // Salary & Experience
                 HStack(spacing: 16) {
                     if let salary = vacancy.salary {
                         Label(salary.formatted, systemImage: "rublesign.circle.fill")
@@ -76,7 +71,6 @@ public struct VacancyCardView: View {
                         .foregroundColor(.orange)
                 }
                 
-                // Tags
                 if !vacancy.tags.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
@@ -92,8 +86,7 @@ public struct VacancyCardView: View {
                         }
                     }
                 }
-                
-                // Employment Type
+
                 HStack {
                     Image(systemName: employmentTypeIcon)
                         .font(.caption)
@@ -102,7 +95,6 @@ public struct VacancyCardView: View {
                     
                     Spacer()
                     
-                    // Deadline if exists
                     if let deadline = vacancy.applicationDeadline {
                         HStack(spacing: 4) {
                             Image(systemName: "clock.fill")

@@ -13,9 +13,9 @@ import ArchitectureCore
 public actor ChatEffectHandler: EffectHandler {
     public typealias S = ChatState
     
-    private let chatService: ChatServiceProtocol
+    private let chatService: ChatServicing
     
-    public init(chatService: ChatServiceProtocol) {
+    public init(chatService: ChatServicing) {
         self.chatService = chatService
     }
     
@@ -78,23 +78,9 @@ public actor ChatEffectHandler: EffectHandler {
     }
 }
 
-// MARK: - Service Protocol
-
-public protocol ChatServiceProtocol: Actor {
-    func fetchMessages() async throws -> [ChatMessage]
-    func fetchConsultant() async throws -> Consultant
-    func connect() async throws
-    func disconnect() async
-    /// Отправляет сообщение; возвращает опциональный ответ консультанта (длинный ответ приходит одним сообщением).
-    func sendMessage(_ message: ChatMessage) async throws -> ChatMessage?
-    func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage
-    /// Сбросить контекст диалога (conversation_id); следующий запрос начнёт новый чат.
-    func clearHistory() async
-}
-
 // MARK: - Mock Service
 
-public final actor ChatServiceMock: ChatServiceProtocol {
+public final actor ChatServiceMock: ChatServicing {
     public init() {}
     
     public func fetchMessages() async throws -> [ChatMessage] {

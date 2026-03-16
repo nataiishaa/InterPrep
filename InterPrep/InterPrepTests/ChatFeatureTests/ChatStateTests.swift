@@ -2,147 +2,150 @@
 //  ChatStateTests.swift
 //  ChatFeatureTests
 //
-//  Unit tests for ChatState reducer
+//  Unit tests for ChatState reducer (Store state logic)
 //
 
 import XCTest
 import ArchitectureCore
 @testable import ChatFeature
 
+@MainActor
 final class ChatStateTests: XCTestCase {
-    
-    // MARK: - Tests
-    
-    func testOnAppear_sendsWelcomeEffect() {
+
+    // MARK: - Input tests
+
+    func testOnAppear_returnsLoadMessagesEffect() {
         var state = ChatState()
-        
-        let effect = state.reduce(.onAppear)
-        
-        XCTAssertEqual(effect, .sendWelcomeMessage)
+
+        let effect = ChatState.reduce(state: &state, with: .input(.onAppear))
+
+        XCTAssertTrue(state.isLoading)
+        guard case .loadMessages = effect else {
+            XCTFail("Expected loadMessages effect, got \(String(describing: effect))")
+            return
+        }
     }
-    
+
     func testInputTextChanged_updatesText() {
         var state = ChatState()
         let newText = "Привет!"
-        
-        _ = state.reduce(.inputTextChanged(newText))
-        
+
+        _ = ChatState.reduce(state: &state, with: .input(.inputTextChanged(newText)))
+
         XCTAssertEqual(state.inputText, newText)
     }
-    
+
     func testSendMessage_whenTextEmpty_doesNothing() {
         var state = ChatState()
         state.inputText = "   "
-        
-        let effect = state.reduce(.sendMessage)
-        
-        XCTAssertEqual(effect, .none)
+
+        let effect = ChatState.reduce(state: &state, with: .input(.sendMessage))
+
+        XCTAssertNil(effect)
         XCTAssertEqual(state.inputText, "   ")
     }
-    
+
     func testSendMessage_whenTextNotEmpty_addsMessageAndClearsInput() {
         var state = ChatState()
         state.inputText = "Привет!"
         let initialMessageCount = state.messages.count
-        
-        let effect = state.reduce(.sendMessage)
-        
+
+        let effect = ChatState.reduce(state: &state, with: .input(.sendMessage))
+
         XCTAssertEqual(state.messages.count, initialMessageCount + 1)
         XCTAssertEqual(state.messages.last?.text, "Привет!")
         XCTAssertEqual(state.messages.last?.sender, .user)
         XCTAssertEqual(state.inputText, "")
         XCTAssertTrue(state.isSending)
-        
-        if case .sendToConsultant(let message) = effect {
-            XCTAssertEqual(message.text, "Привет!")
-        } else {
-            XCTFail("Expected sendToConsultant effect")
+        guard case .sendMessage(let message) = effect else {
+            XCTFail("Expected sendMessage effect, got \(String(describing: effect))")
+            return
         }
+        XCTAssertEqual(message.text, "Привет!")
     }
-    
-    func testButtonTapped_addsUserMessageAndSendsEffect() {
+
+    func testButtonTapped_returnsHandleButtonActionEffect() {
         var state = ChatState()
         let button = MessageButton(
             text: "Помощь в подготовке к собеседованию",
             action: .selectScenario(.interviewPrep)
         )
-        let initialMessageCount = state.messages.count
-        
-        let effect = state.reduce(.buttonTapped(button))
-        
-        XCTAssertEqual(state.messages.count, initialMessageCount + 1)
-        XCTAssertEqual(state.messages.last?.text, button.text)
-        XCTAssertEqual(state.messages.last?.sender, .user)
-        XCTAssertTrue(state.isSending)
-        
+
+        let effect = ChatState.reduce(state: &state, with: .input(.buttonTapped(button)))
+
         if case .handleButtonAction(let action) = effect {
             XCTAssertEqual(action, button.action)
         } else {
             XCTFail("Expected handleButtonAction effect")
         }
     }
-    
-    func testConsultantResponded_addsMessageAndStopsSending() {
+
+    func testDismissError_clearsError() {
+        var state = ChatState()
+        state.error = "Something went wrong"
+
+        _ = ChatState.reduce(state: &state, with: .input(.dismissError))
+
+        XCTAssertNil(state.error)
+    }
+
+    // MARK: - Feedback tests
+
+    func testConsultantResponded_appendsMessage() {
         var state = ChatState()
         state.isSending = true
         let consultantMessage = ChatMessage(
             text: "Отлично! Чем могу помочь?",
             sender: .consultant,
             buttons: [
-                MessageButton(text: "Да", action: .confirm),
-                MessageButton(text: "Нет", action: .cancel)
+                MessageButton(text: "Да", action: .confirmYes),
+                MessageButton(text: "Нет", action: .confirmNo)
             ]
         )
-        let initialMessageCount = state.messages.count
-        
-        _ = state.reduce(.consultantResponded(consultantMessage))
-        
-        XCTAssertEqual(state.messages.count, initialMessageCount + 1)
+        let initialCount = state.messages.count
+
+        _ = ChatState.reduce(state: &state, with: .feedback(.consultantResponded(consultantMessage)))
+
+        XCTAssertEqual(state.messages.count, initialCount + 1)
         XCTAssertEqual(state.messages.last?.text, consultantMessage.text)
         XCTAssertEqual(state.messages.last?.sender, .consultant)
-        XCTAssertEqual(state.messages.last?.buttons.count, 2)
-        XCTAssertFalse(state.isSending)
     }
-    
-    func testMessageSent_updatesStatus() {
+
+    func testMessageSent_updatesStatusAndStopsSending() {
         var state = ChatState()
         let userMessage = ChatMessage(text: "Привет!", sender: .user, status: .sending)
         state.messages = [userMessage]
-        
-        _ = state.reduce(.messageSent(userMessage.id))
-        
+        state.isSending = true
+
+        _ = ChatState.reduce(state: &state, with: .feedback(.messageSent(userMessage, consultantReply: nil)))
+
         XCTAssertEqual(state.messages.first?.status, .sent)
         XCTAssertFalse(state.isSending)
     }
-    
-    func testMessageDelivered_updatesStatus() {
-        var state = ChatState()
-        let userMessage = ChatMessage(text: "Привет!", sender: .user, status: .sent)
-        state.messages = [userMessage]
-        
-        _ = state.reduce(.messageDelivered(userMessage.id))
-        
-        XCTAssertEqual(state.messages.first?.status, .delivered)
-    }
-    
-    func testMessageRead_updatesStatus() {
-        var state = ChatState()
-        let userMessage = ChatMessage(text: "Привет!", sender: .user, status: .delivered)
-        state.messages = [userMessage]
-        
-        _ = state.reduce(.messageRead(userMessage.id))
-        
-        XCTAssertEqual(state.messages.first?.status, .read)
-    }
-    
-    func testErrorOccurred_stopsLoadingAndSending() {
+
+    func testLoadingFailed_setsErrorAndStopsLoading() {
         var state = ChatState()
         state.isLoading = true
         state.isSending = true
-        
-        _ = state.reduce(.errorOccurred("Network error"))
-        
+
+        _ = ChatState.reduce(state: &state, with: .feedback(.loadingFailed("Network error")))
+
         XCTAssertFalse(state.isLoading)
         XCTAssertFalse(state.isSending)
+        XCTAssertEqual(state.error, "Network error")
+    }
+
+    func testMessagesLoaded_replacesMessagesAndStopsLoading() {
+        var state = ChatState()
+        state.isLoading = true
+        let messages = [
+            ChatMessage(text: "Hi", sender: .user),
+            ChatMessage(text: "Hello", sender: .consultant)
+        ]
+
+        _ = ChatState.reduce(state: &state, with: .feedback(.messagesLoaded(messages)))
+
+        XCTAssertEqual(state.messages.count, 2)
+        XCTAssertFalse(state.isLoading)
     }
 }

@@ -105,7 +105,6 @@ struct OnboardingPageView: View {
         VStack(spacing: 32) {
             Spacer()
             
-            // Image with animation
             Image(systemName: page.imageName)
                 .resizable()
                 .scaledToFit()
@@ -124,7 +123,6 @@ struct OnboardingPageView: View {
             Spacer()
                 .frame(height: 40)
             
-            // Text content with animation
             VStack(spacing: 16) {
                 Text(page.title)
                     .font(.title2)

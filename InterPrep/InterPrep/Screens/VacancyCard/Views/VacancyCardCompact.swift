@@ -19,7 +19,6 @@ public struct VacancyCardCompact: View {
     public var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
-                // Company Logo
                 Circle()
                     .fill(Color.gray.opacity(0.2))
                     .frame(width: 40, height: 40)
@@ -30,14 +29,12 @@ public struct VacancyCardCompact: View {
                             .foregroundColor(.gray)
                     )
                 
-                // Title
                 Text(vacancy.title)
                     .font(.headline)
                     .fontWeight(.semibold)
                     .lineLimit(2)
                     .foregroundColor(.primary)
                 
-                // Company
                 Text(vacancy.company)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -45,7 +42,6 @@ public struct VacancyCardCompact: View {
                 
                 Spacer()
                 
-                // Salary
                 if let salary = vacancy.salary {
                     Text(salary.formatted)
                         .font(.subheadline)
@@ -53,7 +49,6 @@ public struct VacancyCardCompact: View {
                         .foregroundColor(.green)
                 }
                 
-                // Location
                 HStack(spacing: 4) {
                     Image(systemName: vacancy.isRemote ? "network" : "mappin.circle.fill")
                         .font(.caption)

@@ -10,16 +10,6 @@ import UserNotifications
 import ArchitectureCore
 import NetworkService
 
-// MARK: - Service Protocol
-
-public protocol CalendarServiceProtocol: Actor {
-    func createEvent(title: String, description: String, startTime: Date, endTime: Date, eventType: CalendarEventType, location: String?, reminderEnabled: Bool, reminderMinutes: Int32) async throws -> CalendarEvent
-    func listEvents(fromTime: Date, toTime: Date) async throws -> [CalendarEvent]
-    func listUpcoming(limit: Int32) async throws -> [CalendarEvent]
-    func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?, completed: Bool?) async throws -> CalendarEvent
-    func deleteEvent(id: String) async throws -> Bool
-}
-
 public enum CalendarEventType: Sendable {
     case unspecified
     case interview
@@ -86,9 +76,9 @@ public actor CalendarEffectHandler: EffectHandler {
     public typealias S = CalendarState
     
     private let notificationCenter = UNUserNotificationCenter.current()
-    private let calendarService: CalendarServiceProtocol
+    private let calendarService: CalendarServicing
     
-    public init(calendarService: CalendarServiceProtocol) {
+    public init(calendarService: CalendarServicing) {
         self.calendarService = calendarService
     }
     
@@ -310,7 +300,7 @@ public actor CalendarEffectHandler: EffectHandler {
 
 // MARK: - Mock Service for Preview
 
-public final actor MockCalendarService: CalendarServiceProtocol {
+public final actor MockCalendarService: CalendarServicing {
     public init() {}
     
     public func createEvent(title: String, description: String, startTime: Date, endTime: Date, eventType: CalendarEventType, location: String?, reminderEnabled: Bool, reminderMinutes: Int32) async throws -> CalendarEvent {

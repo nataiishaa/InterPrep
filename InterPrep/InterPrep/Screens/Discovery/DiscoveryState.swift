@@ -33,14 +33,10 @@ extension DiscoveryState {
         public let company: String
         public let description: String
         public let isFavorite: Bool
-        public let url: String? // URL вакансии на hh.ru
-        /// Локация (город/регион)
+        public let url: String?
         public let location: String
-        /// Зарплата в виде строки, например "100 000 - 150 000 ₽"
         public let salaryText: String?
-        /// Опыт, например "От 1 года до 3 лет"
         public let experienceText: String?
-        /// URL логотипа работодателя
         public let companyLogoURL: String?
         
         public init(
@@ -77,7 +73,7 @@ extension DiscoveryState: FeatureState {
         case filterChanged(FilterType)
         case uploadResumeTapped
         case vacancyTapped(Vacancy)
-        case toggleFavorite(String) // vacancy ID
+        case toggleFavorite(String)
         case searchQueryChanged(String)
         case searchSubmitted
     }
@@ -85,7 +81,7 @@ extension DiscoveryState: FeatureState {
     public enum Feedback: Sendable {
         case vacanciesLoaded([Vacancy])
         case loadingFailed(String)
-        case favoriteToggled(String, Bool) // ID, isFavorite
+        case favoriteToggled(String, Bool)
         case resumeCheckCompleted(hasResume: Bool)
     }
     
@@ -140,7 +136,6 @@ extension DiscoveryState: FeatureState {
             
         case let .feedback(.loadingFailed(error)):
             state.isLoading = false
-            // TODO: Handle error
             
         case let .feedback(.favoriteToggled(id, isFavorite)):
             if let index = state.vacancies.firstIndex(where: { $0.id == id }) {
@@ -159,7 +154,6 @@ extension DiscoveryState: FeatureState {
                 )
             }
             
-            // Если мы в фильтре "Избранное", перезагружаем список
             if state.selectedFilter == .favorites {
                 state.isLoading = true
                 return .loadVacancies(.favorites, searchQuery: state.searchQuery)

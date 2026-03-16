@@ -79,12 +79,10 @@ public final class AuthServiceImpl: AuthService {
     }
     
     public func verifyOTP(email: String, code: String) async throws {
-        // В API нет отдельного метода для верификации OTP
-        // Верификация происходит при смене пароля
+
     }
     
     public func uploadResume() async throws {
-        // TODO: Implement resume upload via NetworkService
     }
     
     public func changePassword(email: String, code: String, newPassword: String) async throws {

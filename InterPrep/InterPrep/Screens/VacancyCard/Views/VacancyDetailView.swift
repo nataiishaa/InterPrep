@@ -18,7 +18,6 @@ private let jobSearchStages = [
 
 public struct VacancyDetailView: View {
     let vacancy: Vacancy
-    /// Индекс текущего этапа (0 — отклик, 1 — резюме, 2 — собеседование, 3 — тестовое, 4 — оффер)
     let currentStageIndex: Int
     let onApply: () -> Void
     let onSave: () -> Void
@@ -39,35 +38,28 @@ public struct VacancyDetailView: View {
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // Header
                 headerSection
                 
                 Divider()
                 
-                // Timeline + Удачи на текущем этапе
                 timelineSection
                 
                 Divider()
                 
-                // Salary & Info
                 infoSection
                 
                 Divider()
-                
-                // Description
+
                 descriptionSection
                 
-                // Requirements
                 if !vacancy.requirements.isEmpty {
                     requirementsSection
                 }
                 
-                // Benefits
                 if !vacancy.benefits.isEmpty {
                     benefitsSection
                 }
                 
-                // Tags
                 if !vacancy.tags.isEmpty {
                     tagsSection
                 }
@@ -92,7 +84,6 @@ public struct VacancyDetailView: View {
     
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Company
             HStack(spacing: 12) {
                 Circle()
                     .fill(Color.gray.opacity(0.2))
@@ -178,7 +169,6 @@ public struct VacancyDetailView: View {
     
     private var infoSection: some View {
         VStack(spacing: 16) {
-            // Salary
             if let salary = vacancy.salary {
                 InfoRow(
                     icon: "rublesign.circle.fill",
@@ -188,7 +178,6 @@ public struct VacancyDetailView: View {
                 )
             }
             
-            // Experience
             InfoRow(
                 icon: "star.fill",
                 iconColor: .orange,
@@ -196,7 +185,6 @@ public struct VacancyDetailView: View {
                 value: vacancy.experienceLevel.displayName
             )
             
-            // Employment Type
             InfoRow(
                 icon: "briefcase.fill",
                 iconColor: .blue,
@@ -204,7 +192,6 @@ public struct VacancyDetailView: View {
                 value: vacancy.employmentType.displayName
             )
             
-            // Remote
             if vacancy.isRemote {
                 InfoRow(
                     icon: "network",
@@ -214,7 +201,6 @@ public struct VacancyDetailView: View {
                 )
             }
             
-            // Deadline
             if let deadline = vacancy.applicationDeadline {
                 InfoRow(
                     icon: "clock.fill",

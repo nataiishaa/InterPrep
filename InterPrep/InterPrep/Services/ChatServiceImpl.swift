@@ -10,7 +10,7 @@ import Foundation
 import ChatFeature
 import NetworkService
 
-public final actor ChatServiceImpl: ChatServiceProtocol {
+public final actor ChatServiceImpl: ChatServicing {
     private let networkService: NetworkServiceV2
     private var conversationId: String?
 

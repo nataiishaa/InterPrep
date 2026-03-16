@@ -18,4 +18,5 @@ xcodebuild test \
   -only-testing:DiscoveryModuleTests \
   -only-testing:ResumeUploadFeatureTests \
   -only-testing:ChatFeatureTests \
+  -only-testing:InterPrepTests \
   "$@"

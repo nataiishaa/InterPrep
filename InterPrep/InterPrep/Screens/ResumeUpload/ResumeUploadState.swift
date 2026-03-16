@@ -95,7 +95,6 @@ public struct ResumeUploadState: FeatureState {
     ) -> Effect? {
         switch message {
         case .input(.selectFileTapped):
-            // Document picker будет показан через UI
             return nil
             
         case let .input(.fileSelected(url)):

@@ -142,7 +142,6 @@ struct ResumeUploadView: View {
     @ViewBuilder
     private func fileCard(file: ResumeUploadState.SelectedFile) -> some View {
         HStack(spacing: 16) {
-            // Icon
             Image(systemName: file.type.icon)
                 .font(.largeTitle)
                 .foregroundColor(.brandPrimary)
@@ -150,7 +149,6 @@ struct ResumeUploadView: View {
                 .background(Color.white.opacity(0.2))
                 .cornerRadius(10)
             
-            // Info
             VStack(alignment: .leading, spacing: 4) {
                 Text(file.name)
                     .font(.headline)
@@ -362,7 +360,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
             guard let url = urls.first else { return }
             guard url.startAccessingSecurityScopedResource() else { return }
             defer { url.stopAccessingSecurityScopedResource() }
-            // Копируем во временную папку, т.к. после возврата доступ к url теряется
+
             let tempDir = FileManager.default.temporaryDirectory
             let tempURL = tempDir.appendingPathComponent(url.lastPathComponent)
             do {

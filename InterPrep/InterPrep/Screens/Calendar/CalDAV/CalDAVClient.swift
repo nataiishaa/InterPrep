@@ -72,7 +72,6 @@ public final class CalDAVClient {
         return principal
     }
     
-    /// Step 2: Discover calendar home
     func discoverCalendarHome() async throws -> URL {
         guard let principalURL = principalURL else {
             throw CalDAVError.principalNotFound

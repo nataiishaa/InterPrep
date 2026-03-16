@@ -12,14 +12,10 @@ public struct ProfileState {
     public var user: User?
     public var isLoading: Bool = false
     public var errorMessage: String?
-    
-    // Statistics
     public var statistics: Statistics = Statistics()
     
-    // Settings
     public var settings: AppSettings = AppSettings()
     
-    // Edit mode
     public var isEditingProfile: Bool = false
     public var editedFirstName: String = ""
     public var editedLastName: String = ""
@@ -28,11 +24,9 @@ public struct ProfileState {
     public var editedPosition: String = ""
     public var editedExperience: String = ""
     
-    // Resume
     public var resumePDFURL: URL?
     public var isDownloadingResume: Bool = false
     
-    // Interviews
     public var selectedInterviewTab: InterviewTab = .upcoming
     public var upcomingInterviews: [Interview] = []
     public var completedInterviews: [Interview] = []
@@ -59,7 +53,6 @@ extension ProfileState {
         public var position: String?
         public var experience: String?
         public var resumeUploaded: Bool = false
-        /// Не отдаётся бэкендом — только для локального кэша при необходимости
         public var registeredDate: Date?
         
         public var fullName: String {
@@ -152,20 +145,16 @@ extension ProfileState {
     }
     
     public struct AppSettings: Codable, Equatable, Sendable {
-        // Notifications
         public var notificationsEnabled: Bool = true
-        public var reminderTime: Int = 30 // minutes before
+        public var reminderTime: Int = 30 
         public var emailNotifications: Bool = true
         
-        // Appearance
         public var theme: Theme = .system
         public var language: Language = .russian
         
-        // Privacy
         public var analyticsEnabled: Bool = true
         public var crashReportsEnabled: Bool = true
         
-        // CalDAV
         public var calDAVEnabled: Bool = false
         
         public init(notificationsEnabled: Bool = true, reminderTime: Int = 30, emailNotifications: Bool = true, theme: Theme = .system, language: Language = .russian, analyticsEnabled: Bool = true, crashReportsEnabled: Bool = true, calDAVEnabled: Bool = false) {
