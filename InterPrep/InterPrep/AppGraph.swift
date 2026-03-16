@@ -20,7 +20,7 @@ import CalendarFeature
 @MainActor
 final class AppGraph {
     
-    // MARK: - Shared Services
+
     
     private lazy var onboardingStorageService: OnboardingStorageService = OnboardingStorageServiceImpl()
     private lazy var authService: AuthService = AuthServiceImpl()
@@ -31,13 +31,13 @@ final class AppGraph {
     private lazy var chatService: ChatServicing = ChatServiceImpl()
     private lazy var calendarService: CalendarServicing = CalendarServiceImpl()
     
-    // MARK: - State
+
     
     func shouldShowOnboarding() -> Bool {
         return !onboardingStorageService.isOnboardingCompleted()
     }
     
-    // MARK: - Screen Factories
+
     
     func makeOnboardingContainer(onComplete: @escaping () -> Void) -> some View {
         let effectHandler = OnboardingEffectHandler(
@@ -125,7 +125,6 @@ final class AppGraph {
         makeChatContainer(store: makeChatStore())
     }
     
-    /// Store чата — создаётся один раз и передаётся в sheet, чтобы состояние не сбрасывалось при перерисовке родителя.
     func makeChatStore() -> ChatStore {
         let effectHandler = ChatEffectHandler(
             chatService: self.chatService
@@ -140,8 +139,6 @@ final class AppGraph {
         ChatContainer(store: store)
     }
 }
-
-// MARK: - Profile session service (адаптер к NetworkServiceV2)
 
 private struct AppProfileSessionService: ProfileSessionService {
     func clearTokens() async {

@@ -46,13 +46,10 @@ public actor DiscoveryEffectHandler: EffectHandler {
             
         case .navigateToResumeUpload,
              .navigateToVacancyDetail:
-            // Navigation handled by coordinator/navigation store
             return nil
         }
     }
 }
-
-// MARK: - Services
 
 public protocol ResumeService: Actor {
     func hasResume() async -> Bool
@@ -63,15 +60,12 @@ public protocol VacancyService: Actor {
     func toggleFavorite(id: String) async throws -> Bool
 }
 
-// MARK: - Mock Services
-
 public final actor ResumeServiceMock: ResumeService {
     public init() {}
     
     public func hasResume() async -> Bool {
-        // Имитируем задержку
-        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
-        return true  // Резюме есть - покажем вакансии
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        return true
     }
 }
 
@@ -79,10 +73,7 @@ public final actor VacancyServiceMock: VacancyService {
     public init() {}
     
     public func fetchVacancies(filter: DiscoveryState.FilterType, searchQuery: String) async throws -> [DiscoveryState.Vacancy] {
-        // Имитируем задержку
-        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1s
-        
-        // Моковые вакансии с реальными URL
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
         let allVacancies: [DiscoveryState.Vacancy] = [
             .init(
                 id: "1",
@@ -141,8 +132,6 @@ public final actor VacancyServiceMock: VacancyService {
                 url: "https://hh.ru/search/vacancy?text=Lead+iOS+Developer+Тинькофф&area=1"
             )
         ]
-        
-        // Фильтруем по поисковому запросу
         var filteredVacancies = allVacancies
         if !searchQuery.isEmpty {
             let lowercasedQuery = searchQuery.lowercased()
@@ -152,8 +141,6 @@ public final actor VacancyServiceMock: VacancyService {
                 vacancy.description.lowercased().contains(lowercasedQuery)
             }
         }
-        
-        // Фильтруем по избранному если нужно
         switch filter {
         case .all:
             return filteredVacancies
@@ -163,7 +150,6 @@ public final actor VacancyServiceMock: VacancyService {
     }
     
     public func toggleFavorite(id: String) async throws -> Bool {
-        // Mock: просто переключаем
         return true
     }
 }

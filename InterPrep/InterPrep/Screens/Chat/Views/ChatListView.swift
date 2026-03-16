@@ -27,7 +27,7 @@ struct ChatListView: View {
     }
 }
 
-// MARK: - Chat Preview Model
+
 
 struct ChatPreview: Identifiable {
     let id: UUID
@@ -51,14 +51,13 @@ struct ChatPreview: Identifiable {
     }
 }
 
-// MARK: - Chat Preview Row
+
 
 struct ChatPreviewRow: View {
     let chat: ChatPreview
     
     var body: some View {
         HStack(spacing: 12) {
-            // Avatar
             Circle()
                 .fill(Color.blue.opacity(0.2))
                 .frame(width: 50, height: 50)
@@ -75,7 +74,6 @@ struct ChatPreviewRow: View {
                         .offset(x: 18, y: 18)
                 )
             
-            // Content
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(chat.consultant.name)
@@ -113,7 +111,7 @@ struct ChatPreviewRow: View {
     }
 }
 
-// MARK: - Preview
+
 
 #Preview {
     ChatListView(

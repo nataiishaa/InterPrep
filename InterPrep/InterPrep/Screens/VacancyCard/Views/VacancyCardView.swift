@@ -119,7 +119,7 @@ public struct VacancyCardView: View {
         .buttonStyle(PlainButtonStyle())
     }
     
-    // MARK: - Helpers
+
     
     private var employmentTypeIcon: String {
         switch vacancy.employmentType {
@@ -152,8 +152,6 @@ public struct VacancyCardView: View {
         return formatter.string(from: date)
     }
 }
-
-// MARK: - Preview
 
 #if DEBUG
 struct VacancyCardView_Previews: PreviewProvider {

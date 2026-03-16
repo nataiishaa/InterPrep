@@ -77,8 +77,6 @@ struct UploadFileSheet: View {
     }
 }
 
-// MARK: - Preview
-
 #Preview {
     UploadFileSheet(onDismiss: {})
 }

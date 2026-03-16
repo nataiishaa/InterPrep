@@ -7,5 +7,4 @@
 
 import ArchitectureCore
 
-/// Typealias for Onboarding feature Store
 public typealias OnboardingStore = Store<OnboardingState, OnboardingEffectHandler>

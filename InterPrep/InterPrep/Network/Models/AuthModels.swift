@@ -1,7 +1,5 @@
 import Foundation
 
-// MARK: - User Profile
-
 public struct UserProfile: Codable, Identifiable, Sendable {
     public let id: String
     public let firstName: String
@@ -51,8 +49,6 @@ public struct UserProfile: Codable, Identifiable, Sendable {
         self.notificationsEnabled = notificationsEnabled
     }
 }
-
-// MARK: - Auth Requests
 
 public struct RegisterRequest: Codable, Sendable {
     public let firstName: String
@@ -111,8 +107,6 @@ public struct RefreshRequest: Codable, Sendable {
     }
 }
 
-// MARK: - Auth Responses
-
 public struct RegisterResponse: Codable, Sendable {
     public let accessToken: String
     public let refreshToken: String
@@ -146,8 +140,6 @@ public struct RefreshResponse: Codable, Sendable {
         case user
     }
 }
-
-// MARK: - Password Reset
 
 public struct PasswordResetCheckEmailRequest: Codable, Sendable {
     public let email: String

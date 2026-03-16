@@ -9,8 +9,6 @@ public actor JobsService {
         self.tokenStorage = tokenStorage
     }
     
-    // MARK: - Search Jobs
-    
     public func searchJobs(request: SearchJobsRequest) async throws -> SearchJobsResponse {
         guard let token = await tokenStorage.getAccessToken() else {
             throw APIError.unauthorized
@@ -27,8 +25,6 @@ public actor JobsService {
             token: token
         )
     }
-    
-    // MARK: - Favorites
     
     public func addFavorite(request: AddFavoriteRequest) async throws -> AddFavoriteResponse {
         guard let token = await tokenStorage.getAccessToken() else {

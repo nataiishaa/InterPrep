@@ -60,7 +60,6 @@ struct ChatInputBar: View {
             }
         
         HStack(spacing: 12) {
-            // Text field
             TextField("Сообщение", text: .init(
                 get: { text },
                 set: { onTextChanged($0) }
@@ -103,8 +102,6 @@ struct ChatInputBar: View {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     VStack {

@@ -9,7 +9,7 @@ public actor UserService {
         self.tokenStorage = tokenStorage
     }
     
-    // MARK: - Get Me
+
     
     public func getMe() async throws -> GetMeResponse {
         guard let token = await tokenStorage.getAccessToken() else {
@@ -24,7 +24,7 @@ public actor UserService {
         )
     }
     
-    // MARK: - Resume Profile
+
     
     public func getResumeProfile() async throws -> GetResumeProfileResponse {
         guard let token = await tokenStorage.getAccessToken() else {
@@ -56,7 +56,7 @@ public actor UserService {
         )
     }
     
-    // MARK: - User Profile
+
     
     public func updateUserProfile(request: UpdateUserProfileRequest) async throws -> UpdateUserProfileResponse {
         guard let token = await tokenStorage.getAccessToken() else {
@@ -75,7 +75,7 @@ public actor UserService {
         )
     }
     
-    // MARK: - Delete Account
+
     
     public func deleteAccount(request: DeleteAccountRequest) async throws -> DeleteAccountResponse {
         guard let token = await tokenStorage.getAccessToken() else {

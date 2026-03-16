@@ -40,8 +40,6 @@ public struct ProfileState {
     public init() {}
 }
 
-// MARK: - Models
-
 extension ProfileState {
     public struct User: Codable, Equatable, Sendable {
         public var id: String
@@ -181,26 +179,21 @@ extension ProfileState {
     }
 }
 
-// MARK: - FeatureState
-
 extension ProfileState: FeatureState {
     public enum Input: Sendable {
         case onAppear
         case refresh
         
-        // Profile editing
         case startEditingProfile
         case cancelEditingProfile
         case firstNameChanged(String)
         case lastNameChanged(String)
         case saveProfile
         
-        // Interviews
         case interviewTabChanged(InterviewTab)
         case loadInterviews
         case interviewTapped(Interview)
         
-        // Settings
         case notificationsToggled(Bool)
         case reminderTimeChanged(Int)
         case emailNotificationsToggled(Bool)
@@ -209,7 +202,6 @@ extension ProfileState: FeatureState {
         case analyticsToggled(Bool)
         case crashReportsToggled(Bool)
         
-        // Actions
         case viewResume
         case changeResume
         case logout
@@ -223,7 +215,6 @@ extension ProfileState: FeatureState {
     public enum Feedback: Sendable {
         case userLoaded(User)
         case statisticsLoaded(Statistics)
-        /// Профиль и статистика загружены с бэкенда (getMe). profilePhotoURL — локальный URL кеша, если фото загружено.
         case profileLoaded(user: User, statistics: Statistics, profilePhotoURL: URL?)
         case profilePhotoUpdated(URL)
         case profileUpdated(User)
@@ -263,7 +254,6 @@ extension ProfileState: FeatureState {
             state.isLoadingInterviews = true
             return .loadUser
             
-        // Profile editing
         case .input(.startEditingProfile):
             state.isEditingProfile = true
             if let user = state.user {
@@ -307,7 +297,6 @@ extension ProfileState: FeatureState {
             state.isLoading = true
             return .updateProfile(updatedUser)
             
-        // Settings
         case let .input(.notificationsToggled(enabled)):
             state.settings.notificationsEnabled = enabled
             return .saveSettings(state.settings)
@@ -336,7 +325,6 @@ extension ProfileState: FeatureState {
             state.settings.crashReportsEnabled = enabled
             return .saveSettings(state.settings)
             
-        // Actions
         case .input(.viewResume):
             state.isDownloadingResume = true
             state.errorMessage = nil
@@ -361,14 +349,12 @@ extension ProfileState: FeatureState {
             return nil
             
         case .input(.openCalDAVSettings):
-            // Handled in UI
             break
             
         case let .input(.uploadProfilePhoto(data)):
             guard let userId = state.user?.id else { return nil }
             return .uploadProfilePhoto(userId: userId, data: data)
             
-        // Interviews
         case let .input(.interviewTabChanged(tab)):
             state.selectedInterviewTab = tab
             
@@ -379,7 +365,6 @@ extension ProfileState: FeatureState {
         case let .input(.interviewTapped(interview)):
             return .navigateToInterview(interview)
             
-        // Feedback
         case let .feedback(.userLoaded(user)):
             state.isLoading = false
             state.user = user
@@ -407,7 +392,6 @@ extension ProfileState: FeatureState {
             state.user = user
             
         case .feedback(.settingsSaved):
-            // Settings saved successfully
             break
             
         case let .feedback(.loadingFailed(error)):

@@ -34,8 +34,6 @@ public struct ResumeUploadContainer: View {
             }
     }
     
-    // MARK: - Make Model
-    
     private func makeModel() -> ResumeUploadView.Model {
         .init(
             uploadStatus: store.state.uploadStatus,
@@ -60,8 +58,6 @@ public struct ResumeUploadContainer: View {
         )
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     ResumeUploadContainer(

@@ -31,7 +31,6 @@ public struct CalDAVSettings: Codable {
         self.lastSyncDate = lastSyncDate
     }
     
-    // Predefined servers
     public static let presets: [CalDAVPreset] = [
         .init(
             name: "Google Calendar",
@@ -68,7 +67,7 @@ public struct CalDAVPreset {
     }
 }
 
-// MARK: - Settings Manager
+
 
 public final class CalDAVSettingsManager {
     public static let shared = CalDAVSettingsManager()

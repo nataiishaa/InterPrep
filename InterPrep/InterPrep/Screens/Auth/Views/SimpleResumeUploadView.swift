@@ -13,7 +13,6 @@ struct SimpleResumeUploadView: View {
     
     var body: some View {
         ZStack {
-            // Background
             LinearGradient.brandBackground
                 .ignoresSafeArea()
             
@@ -21,14 +20,12 @@ struct SimpleResumeUploadView: View {
                 Spacer()
                     .frame(minHeight: 20)
                 
-                // Illustration
                 Image("upload_resume")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 280, height: 280)
                     .padding(.bottom, 32)
                 
-                // Text
                 VStack(spacing: 12) {
                     Text("Загрузите свое резюме,\nчтобы получить\nперсональные рекомендации")
                         .font(.title3)
@@ -48,7 +45,6 @@ struct SimpleResumeUploadView: View {
                 Spacer()
                     .frame(minHeight: 20)
                 
-                // Buttons
                 VStack(spacing: 16) {
                     Button {
                         model.onUpload()
@@ -83,18 +79,6 @@ struct SimpleResumeUploadView: View {
         }
     }
 }
-
-// MARK: - Model
-
-extension SimpleResumeUploadView {
-    struct Model {
-        let isLoading: Bool
-        let onUpload: () -> Void
-        let onSkip: () -> Void
-    }
-}
-
-// MARK: - Preview
 
 #Preview {
     SimpleResumeUploadView(model: .init(

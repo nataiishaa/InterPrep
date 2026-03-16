@@ -61,8 +61,6 @@ public struct ResumeUploadState: FeatureState {
         }
     }
     
-    // MARK: - FeatureState
-    
     public enum Input: Sendable {
         case selectFileTapped
         case fileSelected(URL)

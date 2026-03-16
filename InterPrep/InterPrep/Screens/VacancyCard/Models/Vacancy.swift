@@ -7,8 +7,6 @@
 
 import Foundation
 
-// MARK: - Vacancy Model
-
 public struct Vacancy: Identifiable, Codable, Equatable {
     public let id: String
     public let title: String
@@ -24,7 +22,7 @@ public struct Vacancy: Identifiable, Codable, Equatable {
     public let postedDate: Date
     public let applicationDeadline: Date?
     public let isRemote: Bool
-    public let companyLogo: String? // URL to logo
+    public let companyLogo: String?
     
     public init(
         id: String,
@@ -61,8 +59,6 @@ public struct Vacancy: Identifiable, Codable, Equatable {
     }
 }
 
-// MARK: - Salary Range
-
 public struct SalaryRange: Codable, Equatable {
     public let min: Int
     public let max: Int
@@ -88,8 +84,6 @@ public struct SalaryRange: Codable, Equatable {
     }
 }
 
-// MARK: - Employment Type
-
 public enum EmploymentType: String, Codable, CaseIterable {
     case fullTime = "full_time"
     case partTime = "part_time"
@@ -107,8 +101,6 @@ public enum EmploymentType: String, Codable, CaseIterable {
         }
     }
 }
-
-// MARK: - Experience Level
 
 public enum ExperienceLevel: String, Codable, CaseIterable {
     case intern = "intern"
@@ -128,8 +120,6 @@ public enum ExperienceLevel: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - Salary Period
-
 public enum SalaryPeriod: String, Codable {
     case hourly = "hourly"
     case monthly = "monthly"
@@ -143,8 +133,6 @@ public enum SalaryPeriod: String, Codable {
         }
     }
 }
-
-// MARK: - Mock Data
 
 #if DEBUG
 extension Vacancy {

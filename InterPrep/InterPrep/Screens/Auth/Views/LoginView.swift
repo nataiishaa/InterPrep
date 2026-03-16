@@ -153,21 +153,6 @@ struct LoginView: View {
     }
 }
 
-// MARK: - Model
-
-extension LoginView {
-    struct Model {
-        let email: String
-        let password: String
-        let isLoading: Bool
-        let errorMessage: String?
-        let onEmailChanged: (String) -> Void
-        let onPasswordChanged: (String) -> Void
-        let onLogin: () -> Void
-        let onForgotPassword: () -> Void
-    }
-}
-
 // MARK: - Layout
 
 private extension LoginView {
@@ -182,63 +167,17 @@ private extension LoginView {
     }
 }
 
-// MARK: - Fixtures
-
-#if DEBUG
-extension LoginView.Model {
-    static func fixture(
-        email: String = "",
-        password: String = "",
-        isLoading: Bool = false,
-        errorMessage: String? = nil,
-        onEmailChanged: @escaping (String) -> Void = { _ in },
-        onPasswordChanged: @escaping (String) -> Void = { _ in },
-        onLogin: @escaping () -> Void = {},
-        onForgotPassword: @escaping () -> Void = {}
-    ) -> Self {
-        .init(
-            email: email,
-            password: password,
-            isLoading: isLoading,
-            errorMessage: errorMessage,
-            onEmailChanged: onEmailChanged,
-            onPasswordChanged: onPasswordChanged,
-            onLogin: onLogin,
-            onForgotPassword: onForgotPassword
-        )
+struct LoginView_Previews: SwiftUI.PreviewProvider {
+    static var previews: some View {
+        Group {
+            LoginView(model: .fixture())
+                .previewDisplayName("Default")
+            LoginView(model: .loading)
+                .previewDisplayName("Loading")
+            LoginView(model: .fixtureWithError)
+                .previewDisplayName("With Error")
+            LoginView(model: .filled)
+                .previewDisplayName("Filled")
+        }
     }
-    
-    static var loading: Self {
-        .fixture(isLoading: true)
-    }
-    
-    static var withError: Self {
-        .fixture(errorMessage: "Неверный email или пароль")
-    }
-    
-    static var filled: Self {
-        .fixture(
-            email: "user@example.com",
-            password: "password123"
-        )
-    }
-}
-#endif
-
-// MARK: - Previews
-
-#Preview("Default") {
-    LoginView(model: .fixture())
-}
-
-#Preview("Loading") {
-    LoginView(model: .loading)
-}
-
-#Preview("With Error") {
-    LoginView(model: .withError)
-}
-
-#Preview("Filled") {
-    LoginView(model: .filled)
 }

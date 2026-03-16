@@ -60,7 +60,7 @@ public actor GRPCClient {
     }
 }
 
-// MARK: - API Error
+
 
 public enum APIError: Error, LocalizedError {
     case networkError(Error)
@@ -88,7 +88,7 @@ public enum APIError: Error, LocalizedError {
     }
 }
 
-// MARK: - Token Storage
+
 
 public actor TokenStorage {
     private var accessToken: String?

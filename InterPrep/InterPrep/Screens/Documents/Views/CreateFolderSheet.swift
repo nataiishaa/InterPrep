@@ -41,8 +41,6 @@ struct CreateFolderSheet: View {
     }
 }
 
-// MARK: - Preview
-
 #Preview {
     CreateFolderSheet(
         onDismiss: {},

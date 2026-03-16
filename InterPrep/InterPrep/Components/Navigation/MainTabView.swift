@@ -17,7 +17,6 @@ struct MainTabView: View {
     @State private var selectedTab: TabItem = .search
     @State private var showChatSheet: Bool = false
     @State private var showResumeUploadSheet: Bool = false
-    /// Store чата создаётся один раз при открытии sheet, чтобы сообщения и ответы не терялись при перерисовке.
     @State private var chatStore: ChatStore?
     private let appGraph: AppGraph
     private let onLogout: (() -> Void)?
@@ -78,8 +77,6 @@ struct MainTabView: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     let appGraph = AppGraph()

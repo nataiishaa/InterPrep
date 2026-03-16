@@ -65,8 +65,6 @@ public struct AuthContainer: View {
         }
     }
     
-    // MARK: - Views
-    
     @ViewBuilder
     private var currentFlowView: some View {
         switch store.state.authFlow {
@@ -99,8 +97,6 @@ public struct AuthContainer: View {
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         }
     }
-    
-    // MARK: - Make Models
     
     private func makeLoginModel() -> LoginView.Model {
         .init(

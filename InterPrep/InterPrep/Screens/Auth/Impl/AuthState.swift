@@ -109,7 +109,7 @@ extension AuthState: FeatureState {
         with message: Message<Input, Feedback>
     ) -> Effect? {
         switch message {
-        // MARK: - Navigation
+
         case .input(.showLogin):
             state.authFlow = .login
             state.errorMessage = nil
@@ -135,7 +135,7 @@ extension AuthState: FeatureState {
             }
             state.errorMessage = nil
             
-        // MARK: - Login
+
         case let .input(.loginEmailChanged(email)):
             state.loginEmail = email
             state.errorMessage = nil
@@ -156,7 +156,7 @@ extension AuthState: FeatureState {
         case .input(.forgotPasswordTapped):
             state.authFlow = .passwordReset
             
-        // MARK: - Registration Step 1
+
         case let .input(.registrationFirstNameChanged(name)):
             state.registrationFirstName = name
             state.errorMessage = nil
@@ -173,7 +173,7 @@ extension AuthState: FeatureState {
             state.authFlow = .registrationDetails
             state.errorMessage = nil
             
-        // MARK: - Registration Step 2
+
         case let .input(.registrationEmailChanged(email)):
             state.registrationEmail = email
             state.errorMessage = nil
@@ -210,7 +210,7 @@ extension AuthState: FeatureState {
                 password: state.registrationPassword
             )
             
-        // MARK: - Password Reset
+
         case let .input(.resetEmailChanged(email)):
             state.resetEmail = email
             state.errorMessage = nil
@@ -224,7 +224,7 @@ extension AuthState: FeatureState {
             state.errorMessage = nil
             return .sendResetCode(email: state.resetEmail)
             
-        // MARK: - OTP
+
         case let .input(.otpCodeChanged(code)):
             state.otpCode = code
             state.errorMessage = nil
@@ -240,7 +240,7 @@ extension AuthState: FeatureState {
         case .input(.otpResendTapped):
             return .sendResetCode(email: state.otpEmail)
             
-        // MARK: - Resume Upload
+
         case .input(.resumeUploadTapped):
             state.isLoading = true
             return .uploadResume
@@ -248,7 +248,7 @@ extension AuthState: FeatureState {
         case .input(.resumeSkipTapped):
             state.isAuthenticated = true
             
-        // MARK: - New Password
+
         case let .input(.newPasswordChanged(password)):
             state.newPassword = password
             state.errorMessage = nil
@@ -274,7 +274,7 @@ extension AuthState: FeatureState {
             state.errorMessage = nil
             return .changePassword(email: state.otpEmail, code: state.otpCode, newPassword: state.newPassword)
             
-        // MARK: - Feedback
+
         case .feedback(.loginSuccess):
             state.isLoading = false
             state.isAuthenticated = true

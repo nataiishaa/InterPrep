@@ -67,8 +67,6 @@ struct EditNoteSheet: View {
     }
 }
 
-// MARK: - Preview
-
 #Preview {
     EditNoteSheet(
         document: Document(
