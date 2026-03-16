@@ -8,16 +8,10 @@
 import XCTest
 import SwiftUI
 import SnapshotTesting
-@testable import DiscoveryFeature
+@testable import DiscoveryModule
 
-final class DiscoveryViewSnapshotTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Set to true when recording new snapshots
-        // isRecording = true
-    }
-    
+final class DiscoveryViewSnapshotTests: SnapshotTestCase {
+
     // MARK: - Tests
     
     func testDiscoveryView_noResume() {
@@ -88,7 +82,7 @@ final class DiscoveryViewSnapshotTests: XCTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone14Pro),
+            as: .image(on: .iPhone13Pro),
             named: "iPhone14Pro"
         )
     }

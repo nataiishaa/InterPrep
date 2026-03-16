@@ -8,6 +8,7 @@
 import Foundation
 import UserNotifications
 import ArchitectureCore
+import NetworkService
 
 // MARK: - Service Protocol
 
@@ -132,6 +133,12 @@ public actor CalendarEffectHandler: EffectHandler {
     }
     
     private func userFacingMessage(for error: Error) -> String {
+        if let ne = error as? NetworkError, ne.isConnectionError {
+            return "Проверьте подключение к интернету и попробуйте снова."
+        }
+        if let api = (error as? NetworkError)?.asAPIError {
+            return api.userMessage
+        }
         let text = error.localizedDescription.lowercased()
         if text.contains("connection was lost") || text.contains("network") || text.contains("timed out") || text.contains("offline") {
             return "Проверьте подключение к интернету и попробуйте снова."
@@ -192,8 +199,7 @@ public actor CalendarEffectHandler: EffectHandler {
                 return .loadingFailed("Не удалось удалить событие")
             }
         } catch {
-            let msg = userFacingMessage(for: error)
-            return .loadingFailed(msg.contains("подключение") ? msg : "Не удалось удалить событие: \(error.localizedDescription)")
+            return .loadingFailed(userFacingMessage(for: error))
         }
     }
     

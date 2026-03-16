@@ -7,8 +7,6 @@
 
 import SwiftUI
 import DesignSystem
-// TODO: После генерации Tuist раскомментировать:
-// import VacancyCardModule
 
 public struct DiscoveryView: View {
     let model: Model
@@ -36,7 +34,7 @@ public struct DiscoveryView: View {
         }
         .background(Color.backgroundPrimary)
         .safeAreaInset(edge: .bottom) {
-            Color.clear.frame(height: 60) // Отступ для навигационной панели
+            Color.clear.frame(height: 60)
         }
     }
     
@@ -274,11 +272,11 @@ public struct DiscoveryView: View {
                     //     model.onVacancyTap(vacancy)
                     // }
                     
-                    // Красивая карточка вакансии: тап по карточке открывает вакансию, кнопка закладки — только избранное
+
                     VStack(alignment: .leading, spacing: 0) {
-                        // Header с компанией и избранным
+
                         HStack(alignment: .top, spacing: 12) {
-                            // Область тапа «открыть вакансию» (логотип + название)
+ 
                             HStack(alignment: .top, spacing: 12) {
                                 Group {
                                     if let urlString = vacancy.companyLogoURL, let url = URL(string: urlString) {
@@ -331,8 +329,7 @@ public struct DiscoveryView: View {
                             .buttonStyle(.plain)
                         }
                         .padding(16)
-                        
-                        // Описание и футер — тап открывает вакансию
+      
                         VStack(alignment: .leading, spacing: 0) {
                             Text(vacancy.description)
                                 .font(.subheadline)
@@ -416,21 +413,7 @@ public struct DiscoveryView: View {
                     .foregroundColor(.white)
             )
     }
-    
-    // TODO: После генерации Tuist - конвертер из DiscoveryState.Vacancy в Vacancy
-    // private func convertToVacancy(_ vacancy: DiscoveryState.Vacancy) -> Vacancy {
-    //     Vacancy(
-    //         id: vacancy.id,
-    //         title: vacancy.title,
-    //         company: vacancy.company,
-    //         location: "Москва", // TODO: Добавить в модель
-    //         salary: nil, // TODO: Добавить в модель
-    //         employmentType: .fullTime,
-    //         experienceLevel: .middle,
-    //         description: vacancy.description,
-    //         postedDate: Date()
-    //     )
-    // }
+
 }
 
 // MARK: - Model

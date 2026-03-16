@@ -15,6 +15,24 @@ struct ChatView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Ошибка + Повторить (гайд: при INTERNAL предлагай кнопку «Повторить»)
+                if let error = model.error {
+                    HStack(spacing: 12) {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .lineLimit(2)
+                        Spacer(minLength: 8)
+                        Button("Повторить") {
+                            model.onDismissError()
+                        }
+                        .font(.caption.weight(.medium))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.red.opacity(0.12))
+                }
+                
                 // Messages
                 if model.isLoading && model.messages.isEmpty {
                     Spacer()
@@ -44,7 +62,6 @@ struct ChatView: View {
                     }
                 }
                 
-                // Input bar
                 ChatInputBar(
                     text: model.inputText,
                     isSending: model.isSending,
@@ -77,6 +94,15 @@ struct ChatView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        model.onClearHistory()
+                    } label: {
+                        Text("Новый чат")
+                            .font(.subheadline)
+                            .foregroundColor(.brandPrimary)
+                    }
+                }
             }
         }
     }
@@ -92,11 +118,14 @@ extension ChatView {
         let isLoading: Bool
         let isSending: Bool
         let isConnected: Bool
+        let error: String?
         let systemHints: [String]
         let onInputTextChanged: (String) -> Void
         let onSendMessage: () -> Void
         let onHintTapped: (String) -> Void
         let onButtonTapped: (MessageButton) -> Void
+        let onDismissError: () -> Void
+        let onClearHistory: () -> Void
     }
 }
 
@@ -122,11 +151,14 @@ extension ChatView.Model {
             isLoading: false,
             isSending: false,
             isConnected: true,
+            error: nil,
             systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
             onHintTapped: { _ in },
-            onButtonTapped: { _ in }
+            onButtonTapped: { _ in },
+            onDismissError: {},
+            onClearHistory: {}
         )
     }
     
@@ -143,11 +175,14 @@ extension ChatView.Model {
             isLoading: false,
             isSending: false,
             isConnected: true,
+            error: nil,
             systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
             onHintTapped: { _ in },
-            onButtonTapped: { _ in }
+            onButtonTapped: { _ in },
+            onDismissError: {},
+            onClearHistory: {}
         )
     }
     
@@ -169,11 +204,14 @@ extension ChatView.Model {
             isLoading: false,
             isSending: false,
             isConnected: true,
+            error: nil,
             systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
             onHintTapped: { _ in },
-            onButtonTapped: { _ in }
+            onButtonTapped: { _ in },
+            onDismissError: {},
+            onClearHistory: {}
         )
     }
     
@@ -185,11 +223,14 @@ extension ChatView.Model {
             isLoading: true,
             isSending: false,
             isConnected: true,
+            error: nil,
             systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
             onHintTapped: { _ in },
-            onButtonTapped: { _ in }
+            onButtonTapped: { _ in },
+            onDismissError: {},
+            onClearHistory: {}
         )
     }
     
@@ -204,11 +245,14 @@ extension ChatView.Model {
             isLoading: false,
             isSending: true,
             isConnected: true,
+            error: nil,
             systemHints: ChatState.systemHints,
             onInputTextChanged: { _ in },
             onSendMessage: {},
             onHintTapped: { _ in },
-            onButtonTapped: { _ in }
+            onButtonTapped: { _ in },
+            onDismissError: {},
+            onClearHistory: {}
         )
     }
 }

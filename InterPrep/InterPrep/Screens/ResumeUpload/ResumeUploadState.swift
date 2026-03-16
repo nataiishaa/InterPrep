@@ -18,16 +18,16 @@ public struct ResumeUploadState: FeatureState {
     public init() {}
     
     public enum UploadStatus: Sendable {
-        case idle           // Ничего не выбрано
-        case selected       // Файл выбран
-        case uploading      // Загрузка
-        case success        // Успешно загружено
-        case failed         // Ошибка
+        case idle
+        case selected
+        case uploading
+        case success
+        case failed
     }
     
     public struct SelectedFile: Equatable, Sendable {
         public let name: String
-        public let size: Int64      // Размер в байтах
+        public let size: Int64
         public let url: URL
         public let type: FileType
         
@@ -139,8 +139,6 @@ public struct ResumeUploadState: FeatureState {
         case .feedback(.uploadCompleted):
             state.uploadStatus = .success
             state.uploadProgress = 1.0
-            // Автоматически переходим на главный экран через 1 секунду
-            // (будет обработано в EffectHandler)
             
         case let .feedback(.uploadFailed(error)):
             state.uploadStatus = .failed

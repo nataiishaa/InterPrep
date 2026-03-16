@@ -132,11 +132,12 @@ public final actor FileUploadServiceImpl: FileUploadService {
             }
             return
         case .failure(let error):
-            // Check for specific network errors
             if (error as? NetworkError)?.isConnectionError == true {
                 throw FileUploadError.networkUnavailable
             }
-            
+            if let api = (error as? NetworkError)?.asAPIError {
+                throw FileUploadError.serverError(api.userMessage)
+            }
             throw FileUploadError.uploadFailed
         }
     }
@@ -150,6 +151,7 @@ enum FileUploadError: LocalizedError {
     case fileNotFound
     case networkUnavailable
     case uploadFailed
+    case serverError(String)
     
     var errorDescription: String? {
         switch self {
@@ -163,6 +165,8 @@ enum FileUploadError: LocalizedError {
             return "Нет соединения с интернетом. Проверьте подключение и попробуйте снова"
         case .uploadFailed:
             return "Не удалось загрузить файл. Попробуйте еще раз"
+        case .serverError(let message):
+            return message
         }
     }
 }

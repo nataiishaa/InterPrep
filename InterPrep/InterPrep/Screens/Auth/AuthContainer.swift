@@ -23,11 +23,9 @@ public struct AuthContainer: View {
     public var body: some View {
         NavigationStack {
             ZStack {
-                // Current flow view
                 currentFlowView
                     .animation(.easeInOut(duration: 0.3), value: store.state.authFlow)
                 
-                // Back button
                 if store.state.authFlow != .login && store.state.authFlow != .resumeUpload {
                     VStack {
                         HStack {
@@ -183,17 +181,4 @@ public struct AuthContainer: View {
             onSubmit: { store.send(.newPasswordSubmitTapped) }
         )
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    let store = Store(
-        state: AuthState(),
-        effectHandler: AuthEffectHandler(
-            authService: AuthServiceMock()
-        )
-    )
-    
-    AuthContainer(store: store, onAuthComplete: {})
 }

@@ -65,6 +65,15 @@ public actor ChatEffectHandler: EffectHandler {
             } catch {
                 return .loadingFailed(error.localizedDescription)
             }
+            
+        case .clearHistory:
+            do {
+                await chatService.clearHistory()
+                let messages = try await chatService.fetchMessages()
+                return .messagesLoaded(messages)
+            } catch {
+                return .loadingFailed(error.localizedDescription)
+            }
         }
     }
 }
@@ -79,6 +88,8 @@ public protocol ChatServiceProtocol: Actor {
     /// Отправляет сообщение; возвращает опциональный ответ консультанта (длинный ответ приходит одним сообщением).
     func sendMessage(_ message: ChatMessage) async throws -> ChatMessage?
     func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage
+    /// Сбросить контекст диалога (conversation_id); следующий запрос начнёт новый чат.
+    func clearHistory() async
 }
 
 // MARK: - Mock Service
@@ -195,4 +206,6 @@ public final actor ChatServiceMock: ChatServiceProtocol {
             )
         }
     }
+    
+    public func clearHistory() async {}
 }

@@ -16,7 +16,7 @@ public struct CalendarContainer: View {
     }
     
     public init() {
-        // Mock service for preview - will be replaced by real service from AppGraph
+
         _store = StateObject(wrappedValue: Store(
             state: CalendarState(),
             effectHandler: CalendarEffectHandler(calendarService: MockCalendarService())

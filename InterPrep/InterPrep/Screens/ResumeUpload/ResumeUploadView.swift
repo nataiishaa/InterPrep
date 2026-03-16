@@ -173,7 +173,6 @@ struct ResumeUploadView: View {
             
             Spacer()
             
-            // Remove button
             if model.uploadStatus != .uploading && model.uploadStatus != .success {
                 Button {
                     model.onRemoveFile()

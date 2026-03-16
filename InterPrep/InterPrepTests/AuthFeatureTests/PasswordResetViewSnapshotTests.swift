@@ -10,14 +10,8 @@ import SwiftUI
 import SnapshotTesting
 @testable import AuthFeature
 
-final class PasswordResetViewSnapshotTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Set to true when recording new snapshots
-        // isRecording = true
-    }
-    
+final class PasswordResetViewSnapshotTests: SnapshotTestCase {
+
     // MARK: - Tests
     
     func testPasswordResetView_default() {

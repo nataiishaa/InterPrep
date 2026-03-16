@@ -10,14 +10,8 @@ import SwiftUI
 import SnapshotTesting
 @testable import ResumeUploadFeature
 
-final class ResumeUploadViewSnapshotTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Set to true when recording new snapshots
-        // isRecording = true
-    }
-    
+final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
+
     // MARK: - Tests
     
     func testResumeUploadView_idle() {
@@ -101,7 +95,7 @@ final class ResumeUploadViewSnapshotTests: XCTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone14Pro),
+            as: .image(on: .iPhone13Pro),
             named: "iPhone14Pro"
         )
     }

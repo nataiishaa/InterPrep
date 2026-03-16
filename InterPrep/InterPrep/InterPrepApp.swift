@@ -48,7 +48,6 @@ final class AppCoordinator: ObservableObject {
         }
     }
     
-    /// Токены сохраняются в UserDefaults (TokenStorage) — при перезапуске приложения сессия восстанавливается.
     private static func hasStoredSession() -> Bool {
         let ud = UserDefaults.standard
         return ud.string(forKey: accessTokenKey) != nil && ud.string(forKey: refreshTokenKey) != nil

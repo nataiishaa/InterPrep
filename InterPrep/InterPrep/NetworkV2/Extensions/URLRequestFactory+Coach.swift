@@ -2,12 +2,15 @@ import Foundation
 import SwiftProtobuf
 
 extension URLRequestFactory {
+    /// LLM-запросы могут занимать до 60–120 с; таймаут 120 с. При обрыве соединения (-1005) — один повтор.
     func ask(
         _ message: Coach_AskRequest
     ) -> ProtoRequest<Coach_AskResponse> {
         assemble(
             path: "/gateway.BackendGateway/Ask",
-            message: message
+            message: message,
+            timeout: 120,
+            retryPolicy: RetryPolicy(maxRetries: 1)
         )
     }
     

@@ -7,5 +7,4 @@
 
 import ArchitectureCore
 
-/// Typealias for Discovery feature Store
 public typealias DiscoveryStore = Store<DiscoveryState, DiscoveryEffectHandler>

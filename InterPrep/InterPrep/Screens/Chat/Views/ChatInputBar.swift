@@ -73,7 +73,6 @@ struct ChatInputBar: View {
             .focused($isFocused)
             .disabled(isSending)
             
-            // Send button
             Button(action: {
                 onSend()
                 isFocused = true

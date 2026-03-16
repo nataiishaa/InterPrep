@@ -24,7 +24,7 @@ public struct DiscoveryContainer: View {
             .sheet(item: $selectedVacancy) { vacancy in
                 if let urlString = vacancy.url, let url = URL(string: urlString) {
                     NavigationStack {
-                        VacancyWebView(url: url, title: vacancy.title)
+                        VacancyWebView(url: url, title: vacancy.title, vacancyId: vacancy.id)
                     }
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)

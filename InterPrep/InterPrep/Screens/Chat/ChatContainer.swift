@@ -32,6 +32,7 @@ public struct ChatContainer: View {
             isLoading: store.state.isLoading,
             isSending: store.state.isSending,
             isConnected: store.state.isConnected,
+            error: store.state.error,
             systemHints: ChatState.systemHints,
             onInputTextChanged: { text in
                 store.send(.inputTextChanged(text))
@@ -44,6 +45,12 @@ public struct ChatContainer: View {
             },
             onButtonTapped: { button in
                 store.send(.buttonTapped(button))
+            },
+            onDismissError: {
+                store.send(.dismissError)
+            },
+            onClearHistory: {
+                store.send(.clearHistory)
             }
         )
     }

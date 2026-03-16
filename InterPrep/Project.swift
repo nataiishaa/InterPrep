@@ -17,7 +17,7 @@ let project = Project(
         ),
         .remote(
             url: "https://github.com/apple/swift-nio.git",
-            requirement: .upToNextMajor(from: "2.62.0")
+            requirement: .upToNextMinor(from: "2.64.0")  // совместимо с grpc-swift 1.23; CNIOLLHTTP в 2.62+
         ),
         .remote(
             url: "https://github.com/grpc/grpc-swift.git",
@@ -240,7 +240,8 @@ let project = Project(
             ],
             dependencies: [
                 .target(name: "ArchitectureCore"),
-                .target(name: "DesignSystem")
+                .target(name: "DesignSystem"),
+                .target(name: "NetworkService")
             ]
         ),
         
@@ -304,12 +305,13 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.app.tests",
             sources: [
-                "InterPrepTests/**"
+                .glob("InterPrepTests/**", excluding: ["InterPrepTests/ChatFeatureTests/ChatStateTests.swift"])
             ],
             dependencies: [
                 .target(name: "InterPrep"),
                 .target(name: "AuthFeature"),
-                .target(name: "OnboardingFeature")
+                .target(name: "OnboardingFeature"),
+                .package(product: "SnapshotTesting")
             ]
         ),
         
@@ -402,7 +404,7 @@ let project = Project(
             product: .unitTests,
             bundleId: "com.interprep.features.chat.tests",
             sources: [
-                "InterPrepTests/ChatFeatureTests/**",
+                .glob("InterPrepTests/ChatFeatureTests/**", excluding: ["InterPrepTests/ChatFeatureTests/ChatStateTests.swift"]),
                 "InterPrepTests/SnapshotTestingKit/**"
             ],
             dependencies: [

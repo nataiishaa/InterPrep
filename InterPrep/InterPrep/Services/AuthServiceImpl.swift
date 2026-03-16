@@ -26,6 +26,15 @@ public final class AuthServiceImpl: AuthService {
             if (error as? NetworkError)?.isConnectionError == true {
                 throw AuthError.networkUnavailable
             }
+            if let api = (error as? NetworkError)?.asAPIError {
+                if api.code == .alreadyExists { throw AuthError.emailAlreadyExists }
+                if api.code == .invalidArgument {
+                    let msg = api.serverMessage.lowercased()
+                    if msg.contains("email") { throw AuthError.invalidEmail }
+                    if msg.contains("password") { throw AuthError.weakPassword }
+                }
+                throw AuthError.invalidCredentials
+            }
             throw AuthError.invalidCredentials
         }
     }
@@ -42,30 +51,18 @@ public final class AuthServiceImpl: AuthService {
         case .success:
             break
         case .failure(let error):
-            
             if (error as? NetworkError)?.isConnectionError == true {
                 throw AuthError.networkUnavailable
             }
-            
-            if case .httpError(let code, let data) = error {
-                if let data = data,
-                   let errorText = String(data: data, encoding: .utf8) {
-                    if errorText.contains("already exists") || errorText.contains("уже существует") {
-                        throw AuthError.emailAlreadyExists
-                    } else if errorText.contains("invalid email") || errorText.contains("неверный email") {
-                        throw AuthError.invalidEmail
-                    } else if errorText.contains("password") && errorText.contains("weak") {
-                        throw AuthError.weakPassword
-                    }
+            if let api = (error as? NetworkError)?.asAPIError {
+                if api.code == .alreadyExists { throw AuthError.emailAlreadyExists }
+                if api.code == .invalidArgument {
+                    let msg = api.serverMessage.lowercased()
+                    if msg.contains("email") { throw AuthError.invalidEmail }
+                    if msg.contains("password") && msg.contains("8") { throw AuthError.weakPassword }
                 }
-                
-                if code == 409 {
-                    throw AuthError.emailAlreadyExists
-                } else if code == 400 {
-                    throw AuthError.invalidData
-                }
+                throw AuthError.invalidData
             }
-            
             throw AuthError.invalidData
         }
     }

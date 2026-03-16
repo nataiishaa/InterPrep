@@ -132,14 +132,10 @@ public actor AsyncNetworkService {
             }
             
         case 400:
-            // Bad Request
-            return .failure(.httpError(400, data))
+            return .failure(.apiError(APIError.from(httpStatusCode: 400, body: data)))
             
         case 401:
-            // Unauthorized
             await tokenProvider.authenticateIfNeeded()
-            
-            // If request had token and got 401, retry without token
             if tokenWasSet {
                 let deauthorizedRequest = protoRequest.deauthorized()
                 return await performInternal(request: deauthorizedRequest, tokenWasSet: false)
@@ -147,8 +143,13 @@ public actor AsyncNetworkService {
                 return .failure(.unauthorized)
             }
             
+        case 403, 404, 409, 412, 429:
+            return .failure(.apiError(APIError.from(httpStatusCode: httpResponse.statusCode, body: data)))
+            
         default:
-            // Other errors - check retry policy
+            if (500...599).contains(httpResponse.statusCode) {
+                return .failure(.apiError(APIError.from(httpStatusCode: httpResponse.statusCode, body: data)))
+            }
             if protoRequest.shouldRetry {
                 return await performInternal(
                     request: protoRequest.withReducedRetries(),

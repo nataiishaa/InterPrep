@@ -24,6 +24,9 @@ public actor DocumentsEffectHandler: EffectHandler {
         if let ne = error as? NetworkError, ne.isConnectionError {
             return "Соединение разорвано. Проверьте интернет и попробуйте снова."
         }
+        if let api = (error as? NetworkError)?.asAPIError {
+            return api.userMessage
+        }
         return error.localizedDescription
     }
     
