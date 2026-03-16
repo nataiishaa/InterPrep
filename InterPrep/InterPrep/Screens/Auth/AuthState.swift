@@ -245,8 +245,8 @@ extension AuthState: FeatureState {
             state.errorMessage = nil
             
         case .input(.otpSubmitTapped):
-            guard state.otpCode.count == 4 else {
-                state.errorMessage = "Введите код из 4 цифр"
+            guard state.otpCode.count == 6 else {
+                state.errorMessage = "Введите код из 6 символов"
                 return nil
             }
             state.isLoading = true

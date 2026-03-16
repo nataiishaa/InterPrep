@@ -24,38 +24,8 @@ public struct AuthContainer: View {
         NavigationStack {
             ZStack {
                 // Current flow view
-                Group {
-                    switch store.state.authFlow {
-                    case .login:
-                        LoginView(model: makeLoginModel())
-                            .transition(.opacity.combined(with: .move(edge: .trailing)))
-                        
-                    case .registration:
-                        RegistrationView(model: makeRegistrationModel())
-                            .transition(.opacity.combined(with: .move(edge: .trailing)))
-                        
-                    case .registrationDetails:
-                        RegistrationDetailsView(model: makeRegistrationDetailsModel())
-                            .transition(.opacity.combined(with: .move(edge: .trailing)))
-                        
-                    case .passwordReset:
-                        PasswordResetView(model: makePasswordResetModel())
-                            .transition(.opacity.combined(with: .move(edge: .trailing)))
-                        
-                    case .otpVerification:
-                        OTPView(model: makeOTPModel())
-                            .transition(.opacity.combined(with: .move(edge: .trailing)))
-                        
-                    case .resumeUpload:
-                        SimpleResumeUploadView(model: makeResumeUploadModel())
-                            .transition(.opacity.combined(with: .scale))
-                        
-                    case .newPassword:
-                        // TODO: Add new password view
-                        Text("New Password")
-                    }
-                }
-                .animation(.easeInOut(duration: 0.3), value: store.state.authFlow)
+                currentFlowView
+                    .animation(.easeInOut(duration: 0.3), value: store.state.authFlow)
                 
                 // Back button
                 if store.state.authFlow != .login && store.state.authFlow != .resumeUpload {
@@ -94,6 +64,41 @@ public struct AuthContainer: View {
                     onAuthComplete()
                 }
             }
+        }
+    }
+    
+    // MARK: - Views
+    
+    @ViewBuilder
+    private var currentFlowView: some View {
+        switch store.state.authFlow {
+        case .login:
+            LoginView(model: makeLoginModel())
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+            
+        case .registration:
+            RegistrationView(model: makeRegistrationModel())
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+            
+        case .registrationDetails:
+            RegistrationDetailsView(model: makeRegistrationDetailsModel())
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+            
+        case .passwordReset:
+            PasswordResetView(model: makePasswordResetModel())
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+            
+        case .otpVerification:
+            OTPView(model: makeOTPModel())
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+            
+        case .resumeUpload:
+            SimpleResumeUploadView(model: makeResumeUploadModel())
+                .transition(.opacity.combined(with: .scale))
+            
+        case .newPassword:
+            NewPasswordView(model: makeNewPasswordModel())
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
         }
     }
     
@@ -150,6 +155,7 @@ public struct AuthContainer: View {
     private func makeOTPModel() -> OTPView.Model {
         .init(
             code: store.state.otpCode,
+            email: store.state.otpEmail.isEmpty ? nil : store.state.otpEmail,
             isLoading: store.state.isLoading,
             errorMessage: store.state.errorMessage,
             onCodeChanged: { store.send(.otpCodeChanged($0)) },
@@ -163,6 +169,18 @@ public struct AuthContainer: View {
             isLoading: store.state.isLoading,
             onUpload: { store.send(.resumeUploadTapped) },
             onSkip: { store.send(.resumeSkipTapped) }
+        )
+    }
+    
+    private func makeNewPasswordModel() -> NewPasswordView.Model {
+        .init(
+            password: store.state.newPassword,
+            passwordConfirm: store.state.newPasswordConfirm,
+            isLoading: store.state.isLoading,
+            errorMessage: store.state.errorMessage,
+            onPasswordChanged: { store.send(.newPasswordChanged($0)) },
+            onPasswordConfirmChanged: { store.send(.newPasswordConfirmChanged($0)) },
+            onSubmit: { store.send(.newPasswordSubmitTapped) }
         )
     }
 }
