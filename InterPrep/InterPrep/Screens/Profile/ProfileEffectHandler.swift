@@ -115,6 +115,7 @@ public actor ProfileEffectHandler: EffectHandler {
                 avatarURL: nil,
                 position: nil,
                 experience: nil,
+                resumeUploaded: u.resumeUploaded,
                 registeredDate: nil
             )
             let statistics = ProfileState.Statistics(
@@ -167,6 +168,7 @@ public actor ProfileEffectHandler: EffectHandler {
                 avatarURL: nil,
                 position: nil,
                 experience: nil,
+                resumeUploaded: false,
                 registeredDate: nil
             )
             let data = try JSONEncoder().encode(defaultUser)

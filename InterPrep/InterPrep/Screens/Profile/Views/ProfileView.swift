@@ -203,11 +203,13 @@ struct ProfileView: View {
                         .cornerRadius(12)
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Ваше резюме загружено")
+                        Text((model.user?.resumeUploaded ?? false) ? "Ваше резюме загружено" : "Резюме не загружено")
                             .font(.body)
                             .fontWeight(.medium)
                         
-                        Text("Посмотрите данные на основе которых мы предлагаем вам вакансии.")
+                        Text((model.user?.resumeUploaded ?? false)
+                             ? "Посмотрите данные на основе которых мы предлагаем вам вакансии."
+                             : "Загрузите резюме, чтобы мы могли подбирать подходящие вакансии.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .lineLimit(2)
@@ -219,25 +221,27 @@ struct ProfileView: View {
                 
                 Divider()
                 
-                Button {
-                    model.onViewResume()
-                } label: {
-                    HStack {
-                        Image(systemName: "doc.text.magnifyingglass")
-                            .font(.body)
-                        Text("Посмотреть резюме")
-                            .font(.body)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                if model.user?.resumeUploaded == true {
+                    Button {
+                        model.onViewResume()
+                    } label: {
+                        HStack {
+                            Image(systemName: "doc.text.magnifyingglass")
+                                .font(.body)
+                            Text("Посмотреть резюме")
+                                .font(.body)
+                                .fontWeight(.medium)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .foregroundColor(.primary)
+                        .padding()
                     }
-                    .foregroundColor(.primary)
-                    .padding()
+                    
+                    Divider()
                 }
-                
-                Divider()
                 
                 Button {
                     model.onChangeResume()
@@ -245,7 +249,7 @@ struct ProfileView: View {
                     HStack {
                         Image(systemName: "arrow.up.doc.fill")
                             .font(.body)
-                        Text("Загрузить новое резюме")
+                        Text((model.user?.resumeUploaded ?? false) ? "Загрузить новое резюме" : "Загрузить резюме")
                             .font(.body)
                             .fontWeight(.medium)
                         Spacer()
