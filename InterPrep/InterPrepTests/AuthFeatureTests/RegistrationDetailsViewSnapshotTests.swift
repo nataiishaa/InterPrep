@@ -10,14 +10,8 @@ import SwiftUI
 import SnapshotTesting
 @testable import AuthFeature
 
-final class RegistrationDetailsViewSnapshotTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Set to true when recording new snapshots
-        // isRecording = true
-    }
-    
+final class RegistrationDetailsViewSnapshotTests: SnapshotTestCase {
+
     // MARK: - Tests
     
     func testRegistrationDetailsView_default() {

@@ -28,7 +28,7 @@ final class AppGraph {
     private lazy var vacancyService: VacancyService = VacancyServiceImpl()
     private lazy var fileUploadService: FileUploadService = FileUploadServiceImpl()
     private lazy var documentService: DocumentServiceProtocol = DocumentServiceImpl()
-    private lazy var chatService: ChatServiceProtocol = ChatServiceMock()
+    private lazy var chatService: ChatServiceProtocol = ChatServiceImpl()
     private lazy var calendarService: CalendarServiceProtocol = CalendarServiceImpl()
     
     // MARK: - State
@@ -156,12 +156,14 @@ private struct AppProfileSessionService: ProfileSessionService {
         case .failure(let error):
             let message: String
             switch error {
+            case .apiError(let apiError):
+                message = apiError.userMessage
             case .unauthorized:
                 message = "Неверный пароль"
             case .httpError(let code, _):
                 message = code == 401 ? "Неверный пароль" : "Ошибка сервера. Попробуйте позже."
             case .transportError, .decodingFailed, .noData, .invalidURL, .encodingFailed, .unknown:
-                message = "Ошибка сети. Проверьте подключение."
+                message = (error as? LocalizedError)?.errorDescription ?? "Ошибка сети. Проверьте подключение."
             }
             return .failure(ProfileSessionError(message))
         }

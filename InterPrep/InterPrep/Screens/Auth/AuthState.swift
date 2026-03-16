@@ -15,36 +15,29 @@ public struct AuthState {
     public var isAuthenticated = false
     
     public init() {}
-    
-    // Login fields
+
     public var loginEmail = ""
     public var loginPassword = ""
-    
-    // Registration fields
+
     public var registrationFirstName = ""
     public var registrationLastName = ""
     public var registrationEmail = ""
     public var registrationPassword = ""
     public var registrationPasswordConfirm = ""
     
-    // Password reset
     public var resetEmail = ""
     
-    // OTP verification
     public var otpCode = ""
     public var otpEmail = ""
-    
-    // Resume upload
     public var hasUploadedResume = false
     
-    // New password
     public var newPassword = ""
     public var newPasswordConfirm = ""
     
     public enum AuthFlow: Equatable, Sendable {
         case login
         case registration
-        case registrationDetails // После первого экрана регистрации
+        case registrationDetails
         case passwordReset
         case otpVerification
         case resumeUpload
@@ -54,43 +47,35 @@ public struct AuthState {
 
 extension AuthState: FeatureState {
     public enum Input: Sendable {
-        // Navigation
         case showLogin
         case showRegistration
         case showPasswordReset
         case backTapped
         
-        // Login
         case loginEmailChanged(String)
         case loginPasswordChanged(String)
         case loginTapped
         case forgotPasswordTapped
         
-        // Registration step 1 (Name)
         case registrationFirstNameChanged(String)
         case registrationLastNameChanged(String)
         case registrationContinueTapped
         
-        // Registration step 2 (Email & Password)
         case registrationEmailChanged(String)
         case registrationPasswordChanged(String)
         case registrationPasswordConfirmChanged(String)
         case registrationSubmitTapped
-        
-        // Password reset
+
         case resetEmailChanged(String)
         case sendResetCodeTapped
         
-        // OTP
         case otpCodeChanged(String)
         case otpSubmitTapped
         case otpResendTapped
         
-        // Resume upload
         case resumeUploadTapped
         case resumeSkipTapped
         
-        // New password
         case newPasswordChanged(String)
         case newPasswordConfirmChanged(String)
         case newPasswordSubmitTapped

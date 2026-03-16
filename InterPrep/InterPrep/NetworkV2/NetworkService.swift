@@ -10,7 +10,6 @@ public final class NetworkServiceV2: ObservableObject {
     private let factory: URLRequestFactory
     private let networkService: AsyncNetworkService
     private let tokenStorage: TokenStorage
-    /// gRPC клиент для Register/Login (сервер на :9090 говорит по gRPC/HTTP2).
     private let grpcAuthClient: BackendGatewayGRPCClient?
     
     private init() {
@@ -26,8 +25,8 @@ public final class NetworkServiceV2: ObservableObject {
         )
         
         let sessionConfiguration = URLSessionConfiguration.default
-        sessionConfiguration.timeoutIntervalForRequest = 60  // Increased for file uploads
-        sessionConfiguration.timeoutIntervalForResource = 300  // 5 minutes for large files
+        sessionConfiguration.timeoutIntervalForRequest = 60
+        sessionConfiguration.timeoutIntervalForResource = 300
         sessionConfiguration.waitsForConnectivity = true
         sessionConfiguration.requestCachePolicy = .reloadIgnoringLocalCacheData
         
@@ -62,6 +61,7 @@ public final class NetworkServiceV2: ObservableObject {
                 )
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -93,6 +93,7 @@ public final class NetworkServiceV2: ObservableObject {
                 )
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -155,6 +156,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.getMe(accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -169,6 +171,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.getResumeProfile(accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -186,6 +189,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.updateResumeProfile(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -212,6 +216,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.updateUserProfile(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -230,6 +235,7 @@ public final class NetworkServiceV2: ObservableObject {
                 }
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -247,6 +253,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.getProfilePhoto(accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -266,6 +273,7 @@ public final class NetworkServiceV2: ObservableObject {
             let response = try await client.uploadProfilePhoto(request: request, accessToken: token)
             return .success(response)
         } catch {
+            if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
             return .failure(.transportError(error))
         }
     }
@@ -279,6 +287,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.searchJobs(page: page, perPage: perPage, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -295,6 +304,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.addFavorite(vacancyId: vacancyId, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -310,6 +320,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.removeFavorite(vacancyId: vacancyId, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -325,6 +336,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.listFavorites(accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -352,6 +364,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.uploadFile(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -364,13 +377,13 @@ public final class NetworkServiceV2: ObservableObject {
         var request = Materials_DownloadFileRequest()
         request.materialID = materialId
         
-        // Use gRPC client for file download
         if let client = grpcAuthClient {
             do {
                 let token = await tokenStorage.getAccessToken()
                 let response = try await client.downloadFile(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -384,13 +397,13 @@ public final class NetworkServiceV2: ObservableObject {
             request.parentID = parentId
         }
         
-        // Use gRPC client for listing folders
         if let client = grpcAuthClient {
             do {
                 let token = await tokenStorage.getAccessToken()
                 let response = try await client.listFolder(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -410,6 +423,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.createFolder(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -442,6 +456,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.renameNode(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -457,6 +472,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.deleteNode(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -465,7 +481,7 @@ public final class NetworkServiceV2: ObservableObject {
     
     // MARK: - Coach
     
-    func ask(conversationId: String? = nil, question: String, resumeProfile: User_ResumeProfile? = nil, contextChunks: [Coach_ContextChunk] = []) async -> Result<Coach_AskResponse, NetworkError> {
+    public func ask(conversationId: String? = nil, question: String, resumeProfile: User_ResumeProfile? = nil, contextChunks: [Coach_ContextChunk] = []) async -> Result<Coach_AskResponse, NetworkError> {
         var request = Coach_AskRequest()
         if let conversationId = conversationId {
             request.conversationID = conversationId
@@ -475,6 +491,15 @@ public final class NetworkServiceV2: ObservableObject {
             request.resumeProfile = resumeProfile
         }
         request.contextChunks = contextChunks
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.ask(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
         return await networkService.perform(factory.ask(request))
     }
     
@@ -534,6 +559,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.createEvent(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -548,6 +574,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.getEvent(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -610,6 +637,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.updateEvent(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -624,6 +652,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.deleteEvent(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -660,6 +689,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.listEvents(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -684,6 +714,7 @@ public final class NetworkServiceV2: ObservableObject {
                 let response = try await client.listUpcoming(request: request, accessToken: token)
                 return .success(response)
             } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
         }
@@ -918,6 +949,19 @@ public final class BackendGatewayGRPCClient: Sendable {
         return try await eventLoopFutureToAsync(call.response)
     }
     
+    // MARK: - Coach (gRPC HTTP/2; LLM — таймаут 120 с)
+    
+    public func ask(request: Coach_AskRequest, accessToken: String?) async throws -> Coach_AskResponse {
+        let options = callOptionsForLLM(with: accessToken)
+        let call: UnaryCall<Coach_AskRequest, Coach_AskResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/Ask",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
     // MARK: - Calendar (gRPC HTTP/2, same as Materials)
     
     public func listEvents(request: Calendar_ListEventsRequest, accessToken: String?) async throws -> Calendar_ListEventsResponse {
@@ -993,6 +1037,35 @@ public final class BackendGatewayGRPCClient: Sendable {
         }
         return CallOptions(customMetadata: metadata)
     }
+    
+    /// Таймаут 120 с для LLM-запросов (Ask и др.), как в гайде.
+    private func callOptionsForLLM(with token: String?) -> CallOptions {
+        var metadata = HPACKHeaders()
+        if let token = token, !token.isEmpty {
+            metadata.add(name: "authorization", value: "Bearer \(token)")
+        }
+        return CallOptions(
+            customMetadata: metadata,
+            timeLimit: .timeout(.seconds(120))
+        )
+    }
+}
+
+private func apiErrorFromGRPC(_ error: Error) -> APIError? {
+    guard let status = error as? GRPCStatus else { return nil }
+    let code: APIErrorCode
+    switch status.code {
+    case .unauthenticated: code = .unauthenticated
+    case .invalidArgument: code = .invalidArgument
+    case .notFound: code = .notFound
+    case .alreadyExists: code = .alreadyExists
+    case .permissionDenied: code = .permissionDenied
+    case .resourceExhausted: code = .resourceExhausted
+    case .failedPrecondition: code = .failedPrecondition
+    case .internalError: code = .internalError
+    default: code = .unknown
+    }
+    return APIError(code: code, serverMessage: status.message ?? "")
 }
 
 private func eventLoopFutureToAsync<T>(_ future: EventLoopFuture<T>) async throws -> T {

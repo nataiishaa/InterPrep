@@ -11,7 +11,6 @@ import ArchitectureCore
 public struct OnboardingContainer: View {
     @StateObject private var store: OnboardingStore
     
-    // Callback when onboarding is completed
     let onComplete: () -> Void
     
     public init(

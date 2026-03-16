@@ -11,16 +11,16 @@ import ArchitectureCore
 public struct DiscoveryState {
     public var selectedFilter: FilterType = .all
     public var isLoading = false
-    public var hasResume = false  // Если нет резюме - показываем заглушку
+    public var hasResume = false 
     public var vacancies: [Vacancy] = []
-    public var selectedVacancy: Vacancy? = nil // Для навигации к WebView
-    public var searchQuery: String = "" // Поисковый запрос
+    public var selectedVacancy: Vacancy? = nil
+    public var searchQuery: String = ""
     
     public init() {}
     
     public enum FilterType: Sendable {
-        case all        // Все вакансии
-        case favorites  // Избранное
+        case all
+        case favorites
     }
 }
 

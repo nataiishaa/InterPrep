@@ -10,14 +10,17 @@ import WebKit
 public struct VacancyWebView: View {
     let url: URL
     let title: String
+    /// ID вакансии (hh.ru) — если передан, в тулбаре показывается кнопка «Копировать ID»
+    let vacancyId: String?
     @Environment(\.dismiss) private var dismiss
     @State private var isLoading = true
     @State private var canGoBack = false
     @State private var canGoForward = false
     
-    public init(url: URL, title: String) {
+    public init(url: URL, title: String, vacancyId: String? = nil) {
         self.url = url
         self.title = title
+        self.vacancyId = vacancyId
     }
     
     public var body: some View {
@@ -46,6 +49,16 @@ public struct VacancyWebView: View {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title3)
                         .foregroundColor(.secondary)
+                }
+            }
+            
+            if let vacancyId = vacancyId {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        UIPasteboard.general.string = vacancyId
+                    } label: {
+                        Label("Копировать ID", systemImage: "doc.on.doc")
+                    }
                 }
             }
             

@@ -8,7 +8,6 @@
 import SwiftUI
 
 extension View {
-    /// Executes action on first appear only
     func onFirstAppear(perform action: @escaping () -> Void) -> some View {
         modifier(OnFirstAppearModifier(action: action))
     }

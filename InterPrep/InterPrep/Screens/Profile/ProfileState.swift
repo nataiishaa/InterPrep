@@ -38,12 +38,9 @@ public struct ProfileState {
     public var completedInterviews: [Interview] = []
     public var isLoadingInterviews: Bool = false
     
-    /// После выхода или удаления аккаунта — показать экран авторизации
     public var authRequired: Bool = false
-    /// Ошибка при удалении аккаунта (например, неверный пароль)
     public var deleteAccountError: String?
     
-    /// URL закешированного фото профиля (локальный файл). Если есть — не дергаем GetProfilePhoto.
     public var cachedProfilePhotoURL: URL?
     
     public init() {}

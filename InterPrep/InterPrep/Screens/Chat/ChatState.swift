@@ -150,6 +150,10 @@ extension ChatState: FeatureState {
         case buttonTapped(MessageButton)
         /// Выбор системной подсказки — только подставить текст в поле, запрос не отправлять
         case systemHintTapped(String)
+        /// Закрыть ошибку (после «Повторить» или по желанию пользователя)
+        case dismissError
+        /// Очистить историю и начать новый диалог (сброс conversation_id на бэкенде)
+        case clearHistory
     }
     
     public enum Feedback: Sendable {
@@ -170,6 +174,7 @@ extension ChatState: FeatureState {
         case connect
         case sendMessage(ChatMessage)
         case handleButtonAction(ButtonAction)
+        case clearHistory
     }
     
     @MainActor
@@ -215,6 +220,16 @@ extension ChatState: FeatureState {
             
         case .input(.buttonTapped(let button)):
             return .handleButtonAction(button.action)
+            
+        case .input(.dismissError):
+            state.error = nil
+            return nil
+            
+        case .input(.clearHistory):
+            state.error = nil
+            state.isSending = false
+            state.isLoading = true
+            return .clearHistory
             
         case .feedback(.messagesLoaded(let messages)):
             state.messages = messages

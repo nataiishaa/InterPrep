@@ -10,14 +10,8 @@ import SwiftUI
 import SnapshotTesting
 @testable import AuthFeature
 
-final class LoginViewSnapshotTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Set to true when recording new snapshots
-        // isRecording = true
-    }
-    
+final class LoginViewSnapshotTests: SnapshotTestCase {
+
     // MARK: - Tests
     
     func testLoginView_default() {
@@ -75,7 +69,7 @@ final class LoginViewSnapshotTests: XCTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone14Pro),
+            as: .image(on: .iPhone13Pro),
             named: "iPhone14Pro"
         )
     }

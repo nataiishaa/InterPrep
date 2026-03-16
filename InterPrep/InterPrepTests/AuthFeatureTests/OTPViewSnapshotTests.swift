@@ -10,19 +10,14 @@ import SwiftUI
 import SnapshotTesting
 @testable import AuthFeature
 
-final class OTPViewSnapshotTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Set to true when recording new snapshots
-        // isRecording = true
-    }
-    
+final class OTPViewSnapshotTests: SnapshotTestCase {
+
     // MARK: - Tests
     
     func testOTPView_default() {
         let view = OTPView(model: .init(
             code: "",
+            email: nil,
             isLoading: false,
             errorMessage: nil,
             onCodeChanged: { _ in },
@@ -41,6 +36,7 @@ final class OTPViewSnapshotTests: XCTestCase {
     func testOTPView_loading() {
         let view = OTPView(model: .init(
             code: "1234",
+            email: nil,
             isLoading: true,
             errorMessage: nil,
             onCodeChanged: { _ in },
@@ -59,6 +55,7 @@ final class OTPViewSnapshotTests: XCTestCase {
     func testOTPView_withError() {
         let view = OTPView(model: .init(
             code: "1234",
+            email: nil,
             isLoading: false,
             errorMessage: "Неверный код",
             onCodeChanged: { _ in },
