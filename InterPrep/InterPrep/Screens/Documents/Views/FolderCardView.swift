@@ -41,14 +41,7 @@ struct FolderCardView: View {
     }
     
     private var folderColor: Color {
-        switch folder.color {
-        case .blue: return .blue
-        case .green: return .green
-        case .orange: return .orange
-        case .purple: return .purple
-        case .red: return .red
-        case .gray: return .gray
-        }
+        Color.brandPrimary
     }
 }
 

@@ -61,6 +61,7 @@ extension ProfileState {
         public var avatarURL: String?
         public var position: String?
         public var experience: String?
+        public var resumeUploaded: Bool = false
         /// Не отдаётся бэкендом — только для локального кэша при необходимости
         public var registeredDate: Date?
         
@@ -75,7 +76,7 @@ extension ProfileState {
             return s.trimmingCharacters(in: .whitespaces).isEmpty ? "?" : s
         }
         
-        public init(id: String, firstName: String, lastName: String, email: String, phone: String? = nil, avatarURL: String? = nil, position: String? = nil, experience: String? = nil, registeredDate: Date? = nil) {
+        public init(id: String, firstName: String, lastName: String, email: String, phone: String? = nil, avatarURL: String? = nil, position: String? = nil, experience: String? = nil, resumeUploaded: Bool = false, registeredDate: Date? = nil) {
             self.id = id
             self.firstName = firstName
             self.lastName = lastName
@@ -84,7 +85,26 @@ extension ProfileState {
             self.avatarURL = avatarURL
             self.position = position
             self.experience = experience
+            self.resumeUploaded = resumeUploaded
             self.registeredDate = registeredDate
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            id = try c.decode(String.self, forKey: .id)
+            firstName = try c.decode(String.self, forKey: .firstName)
+            lastName = try c.decode(String.self, forKey: .lastName)
+            email = try c.decode(String.self, forKey: .email)
+            phone = try c.decodeIfPresent(String.self, forKey: .phone)
+            avatarURL = try c.decodeIfPresent(String.self, forKey: .avatarURL)
+            position = try c.decodeIfPresent(String.self, forKey: .position)
+            experience = try c.decodeIfPresent(String.self, forKey: .experience)
+            resumeUploaded = try c.decodeIfPresent(Bool.self, forKey: .resumeUploaded) ?? false
+            registeredDate = try c.decodeIfPresent(Date.self, forKey: .registeredDate)
+        }
+        
+        private enum CodingKeys: String, CodingKey {
+            case id, firstName, lastName, email, phone, avatarURL, position, experience, resumeUploaded, registeredDate
         }
     }
     
