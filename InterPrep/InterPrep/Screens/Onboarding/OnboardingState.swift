@@ -48,7 +48,7 @@ extension OnboardingState.OnboardingPage {
             id: 2,
             imageName: "chart.line.uptrend.xyaxis.circle.fill",
             title: "Прокачивайте карьеру",
-            description: "AI подскажет, что улучшить в навыках и куда расти дальше"
+            description: "Карьерный консунтант подскажет, что улучшить в навыках и куда расти дальше"
         )
     ]
 }
