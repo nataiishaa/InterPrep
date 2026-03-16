@@ -9,8 +9,6 @@ import Foundation
 import NetworkService
 import CalendarFeature
 
-// MARK: - Service Implementation
-
 public final actor CalendarServiceImpl: CalendarServicing {
     private let networkService: NetworkServiceV2
     
@@ -121,8 +119,6 @@ public final actor CalendarServiceImpl: CalendarServicing {
             throw error
         }
     }
-    
-    // MARK: - Mapping Helpers
     
     private func mapFromProtoEvent(_ proto: Calendar_Event) -> CalendarEvent {
         CalendarEvent(

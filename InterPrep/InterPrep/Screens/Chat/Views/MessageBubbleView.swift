@@ -34,7 +34,6 @@ struct MessageBubbleView: View {
                             .fill(isUser ? Color.brandPrimary : bubbleBackgroundColor)
                     )
                 
-                // Кнопки под сообщением (как в Telegram)
                 if !message.buttons.isEmpty, let onButtonTap = onButtonTap {
                     VStack(spacing: 6) {
                         ForEach(message.buttons) { button in
@@ -109,8 +108,6 @@ struct MessageBubbleView: View {
         colorScheme == .dark ? Color(red: 0.2, green: 0.2, blue: 0.2) : Color(.systemGray5)
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     VStack(spacing: 12) {

@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-/// Этапы поиска работы для таймлайна
 private let jobSearchStages = [
     "Отклик",
     "Резюме на рассмотрении",

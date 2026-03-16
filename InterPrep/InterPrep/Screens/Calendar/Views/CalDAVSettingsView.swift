@@ -31,7 +31,6 @@ public struct CalDAVSettingsView: View {
     public var body: some View {
         NavigationStack {
             Form {
-                // Enable toggle
                 Section {
                     Toggle("Включить синхронизацию", isOn: $settings.isEnabled)
                         .tint(.brandPrimary)
@@ -42,7 +41,6 @@ public struct CalDAVSettingsView: View {
                 }
                 
                 if settings.isEnabled {
-                    // Presets
                     Section("Сервис календаря") {
                         ForEach(CalDAVSettings.presets, id: \.name) { preset in
                             Button {
@@ -64,7 +62,6 @@ public struct CalDAVSettingsView: View {
                         }
                     }
                     
-                    // Instructions
                     if let preset = selectedPreset {
                         Section {
                             Text(preset.instructions)
@@ -73,7 +70,6 @@ public struct CalDAVSettingsView: View {
                         }
                     }
                     
-                    // Connection details
                     Section("Данные для входа") {
                         TextField("Адрес сервера календаря", text: $settings.serverURL)
                             .textContentType(.URL)
@@ -102,7 +98,6 @@ public struct CalDAVSettingsView: View {
                         }
                     }
                     
-                    // Test connection
                     Section {
                         Button {
                             testConnection()
@@ -131,7 +126,6 @@ public struct CalDAVSettingsView: View {
                         }
                     }
                     
-                    // Sync info
                     if let lastSync = settings.lastSyncDate {
                         Section("Информация") {
                             HStack {
@@ -195,8 +189,6 @@ public struct CalDAVSettingsView: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     CalDAVSettingsView(

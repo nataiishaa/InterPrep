@@ -14,7 +14,6 @@ struct DocumentRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Icon
             Image(systemName: document.type.icon)
                 .font(.title2)
                 .foregroundColor(.brandPrimary)
@@ -22,7 +21,6 @@ struct DocumentRowView: View {
                 .background(Color.brandPrimary.opacity(0.1))
                 .cornerRadius(8)
 
-            // Info
             VStack(alignment: .leading, spacing: 4) {
                 Text(document.name)
                     .font(.body)
@@ -46,7 +44,6 @@ struct DocumentRowView: View {
             
             Spacer()
             
-            // Chevron
             Image(systemName: "chevron.right")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -62,8 +59,6 @@ struct DocumentRowView: View {
         colorScheme == .dark ? .clear : .black.opacity(0.05)
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     VStack(spacing: 12) {

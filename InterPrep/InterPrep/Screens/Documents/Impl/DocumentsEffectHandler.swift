@@ -9,8 +9,6 @@ import Foundation
 import ArchitectureCore
 import NetworkService
 
-// MARK: - Effect Handler
-
 public actor DocumentsEffectHandler: EffectHandler {
     public typealias S = DocumentsState
     
@@ -159,15 +157,12 @@ public actor DocumentsEffectHandler: EffectHandler {
     }
 }
 
-// MARK: - Real Service
-
 public final actor DocumentServiceImpl: DocumentServicing {
     private let networkService: NetworkServiceV2
     private var nodeIdByDocumentId: [UUID: UInt32] = [:]
     private var documentIdToMaterialId: [UUID: String] = [:]
     private var folderIdToNodeId: [UUID: UInt32] = [:]
     
-    /// Стабильный UUID из node.id: один и тот же node всегда даёт один и тот же UUID.
     private static func uuidFromNodeId(_ nodeId: UInt32, folder: Bool) -> UUID {
         var bytes = [UInt8](repeating: 0, count: 16)
         bytes[0] = folder ? 0 : 1
@@ -178,7 +173,6 @@ public final actor DocumentServiceImpl: DocumentServicing {
         return UUID(uuid: (bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7], bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]))
     }
     
-    /// Безопасная дата из unix timestamp; избегает NaN/невалидных дат при отрисовке.
     private static func safeDate(timestamp: Int64) -> Date {
         let t = TimeInterval(timestamp)
         guard t.isFinite else { return Date() }
@@ -196,8 +190,6 @@ public final actor DocumentServiceImpl: DocumentServicing {
         case .success(let response):
             folderIdToNodeId.removeAll()
             let folderNodes = response.nodes.filter { $0.type == "folder" }
-            // listFolder(nil) возвращает только корень — файлы внутри папок не приходят.
-            // Считаем реальное количество: для каждой папки запрашиваем содержимое.
             var folders: [Folder] = []
             await withTaskGroup(of: (node: Materials_Node, count: Int).self) { group in
                 for node in folderNodes {

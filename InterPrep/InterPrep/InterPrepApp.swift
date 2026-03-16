@@ -21,7 +21,7 @@ struct InterPrepApp: App {
     }
 }
 
-// MARK: - App Coordinator
+
 
 @MainActor
 final class AppCoordinator: ObservableObject {

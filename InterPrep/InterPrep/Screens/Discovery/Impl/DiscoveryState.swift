@@ -24,8 +24,6 @@ public struct DiscoveryState {
     }
 }
 
-// MARK: - Models
-
 extension DiscoveryState {
     public struct Vacancy: Identifiable, Equatable, Hashable, Sendable {
         public let id: String
@@ -64,8 +62,6 @@ extension DiscoveryState {
         }
     }
 }
-
-// MARK: - FeatureState
 
 extension DiscoveryState: FeatureState {
     public enum Input: Sendable {

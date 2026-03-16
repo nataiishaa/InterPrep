@@ -30,8 +30,6 @@ public struct OnboardingContainer: View {
             }
     }
     
-    // MARK: - Make Model
-    
     private func makeModel() -> OnboardingView.Model {
         .init(
             currentPage: store.state.currentPage,
@@ -58,8 +56,6 @@ public struct OnboardingContainer: View {
         )
     }
     
-    // MARK: - Mappers
-    
     private func mapPage(_ page: OnboardingState.OnboardingPage) -> OnboardingView.Model.PageModel {
         .init(
             id: page.id,
@@ -69,8 +65,6 @@ public struct OnboardingContainer: View {
         )
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     OnboardingContainer(

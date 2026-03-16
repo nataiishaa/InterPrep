@@ -16,7 +16,6 @@ struct CreateNoteSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Title field
                 TextField("Название заметки", text: $noteTitle)
                     .font(.title2)
                     .fontWeight(.bold)
@@ -25,7 +24,6 @@ struct CreateNoteSheet: View {
                 
                 Divider()
                 
-                // Content editor
                 TextEditor(text: $noteContent)
                     .font(.body)
                     .padding()
@@ -51,8 +49,6 @@ struct CreateNoteSheet: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     CreateNoteSheet(

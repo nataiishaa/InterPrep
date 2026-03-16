@@ -19,7 +19,6 @@ public final actor ChatServiceImpl: ChatServicing {
     }
 
     public func fetchMessages() async throws -> [ChatMessage] {
-        // История диалога не подгружается с бэкенда; показываем приветствие локально.
         return [
             ChatMessage(
                 text: "Здравствуйте! Я карьерный консультант. Задайте вопрос по карьере, подготовке к собеседованию или резюме.",
@@ -44,7 +43,6 @@ public final actor ChatServiceImpl: ChatServicing {
     }
 
     public func connect() async throws {
-        // Ask — stateless по подключению; авторизация в каждом запросе через JWT.
     }
 
     public func disconnect() async {}
@@ -96,7 +94,6 @@ public final actor ChatServiceImpl: ChatServicing {
         }
     }
 
-    /// Сообщение для пользователя при обрыве соединения / таймауте (вместо сырого -1005).
     private func userFacingError(for error: NetworkError) -> Error {
         if error.isConnectionError {
             return ChatServiceError(message: "Соединение разорвано или таймаут. Проверьте интернет и нажмите «Повторить».")
@@ -129,8 +126,6 @@ public final actor ChatServiceImpl: ChatServicing {
         }
     }
 }
-
-// MARK: - User-facing error
 
 private struct ChatServiceError: Error, LocalizedError {
     let message: String

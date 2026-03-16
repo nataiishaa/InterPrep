@@ -129,22 +129,6 @@ struct RegistrationDetailsView: View {
     }
 }
 
-// MARK: - Model
-
-extension RegistrationDetailsView {
-    struct Model {
-        let email: String
-        let password: String
-        let passwordConfirm: String
-        let isLoading: Bool
-        let errorMessage: String?
-        let onEmailChanged: (String) -> Void
-        let onPasswordChanged: (String) -> Void
-        let onPasswordConfirmChanged: (String) -> Void
-        let onSubmit: () -> Void
-    }
-}
-
 // MARK: - Preview
 
 #Preview {

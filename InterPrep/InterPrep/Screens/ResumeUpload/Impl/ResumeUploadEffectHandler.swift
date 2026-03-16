@@ -50,21 +50,16 @@ public actor ResumeUploadEffectHandler: EffectHandler {
             
         case .navigateBack,
              .navigateToMain:
-            // Navigation handled by coordinator
             return nil
         }
     }
     
 }
 
-// MARK: - File Upload Service
-
 public protocol FileUploadService: Actor {
     func validateFile(_ url: URL) async throws -> ResumeUploadState.SelectedFile
     func uploadFile(_ file: ResumeUploadState.SelectedFile) async throws
 }
-
-// MARK: - Real Service
 
 public final actor FileUploadServiceImpl: FileUploadService {
     private let networkService: NetworkServiceV2
@@ -137,8 +132,6 @@ public final actor FileUploadServiceImpl: FileUploadService {
         }
     }
 }
-
-// MARK: - Errors
 
 enum FileUploadError: LocalizedError {
     case unsupportedFormat

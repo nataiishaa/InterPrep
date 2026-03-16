@@ -8,8 +8,6 @@
 import Foundation
 import ArchitectureCore
 
-// MARK: - State
-
 public struct ChatState {
     public var messages: [ChatMessage] = []
     public var inputText: String = ""
@@ -19,7 +17,6 @@ public struct ChatState {
     public var error: String?
     public var consultant: Consultant?
     public var currentScenario: ChatScenario?
-    /// Системные подсказки над полем ввода. При выборе только подставляют текст; запрос уходит только по «Отправить».
     public static let systemHints: [String] = [
         "Расскажи про свой опыт",
         "Какие вопросы задают на интервью?",
@@ -30,8 +27,6 @@ public struct ChatState {
     
     public init() {}
 }
-
-// MARK: - Models
 
 public struct ChatMessage: Identifiable, Equatable, Sendable {
     public let id: UUID
@@ -57,8 +52,6 @@ public struct ChatMessage: Identifiable, Equatable, Sendable {
         self.buttons = buttons
     }
 }
-
-// MARK: - Message Button (как в Telegram)
 
 public struct MessageButton: Identifiable, Equatable, Sendable {
     public let id: UUID
@@ -118,8 +111,6 @@ public struct Consultant: Identifiable, Equatable, Sendable {
     }
 }
 
-// MARK: - Chat Scenario
-
 public enum ChatScenario: String, Identifiable, CaseIterable, Sendable {
     case interviewPrep = "interview_prep"
     case resumeConsultation = "resume_consultation"
@@ -139,8 +130,6 @@ public enum ChatScenario: String, Identifiable, CaseIterable, Sendable {
     }
 }
 
-// MARK: - FeatureState
-
 extension ChatState: FeatureState {
     public enum Input: Sendable {
         case onAppear
@@ -148,11 +137,8 @@ extension ChatState: FeatureState {
         case sendMessage
         case messageReceived(ChatMessage)
         case buttonTapped(MessageButton)
-        /// Выбор системной подсказки — только подставить текст в поле, запрос не отправлять
         case systemHintTapped(String)
-        /// Закрыть ошибку (после «Повторить» или по желанию пользователя)
         case dismissError
-        /// Очистить историю и начать новый диалог (сброс conversation_id на бэкенде)
         case clearHistory
     }
     
@@ -163,7 +149,6 @@ extension ChatState: FeatureState {
         case connectionStatusChanged(Bool)
         case loadingFailed(String)
         case consultantResponded(ChatMessage)
-        /// Чанк длинного (стримингового) ответа консультанта — задел на будущее
         case consultantChunk(messageId: UUID, chunk: String)
         case consultantStreamFinished(messageId: UUID)
     }
@@ -185,8 +170,6 @@ extension ChatState: FeatureState {
         switch message {
         case .input(.onAppear):
             state.isLoading = true
-            // Note: We can only return one effect, so we'll load messages first
-            // The effect handler will chain loading consultant and connecting
             return .loadMessages
             
         case .input(.inputTextChanged(let text)):

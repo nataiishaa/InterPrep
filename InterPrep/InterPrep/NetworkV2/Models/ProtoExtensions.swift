@@ -1,8 +1,6 @@
 import Foundation
 import SwiftProtobuf
 
-// MARK: - Timestamp Extensions
-
 extension SwiftProtobuf.Google_Protobuf_Timestamp {
     init(date: Date) {
         self.init()
@@ -21,8 +19,6 @@ extension Date {
     }
 }
 
-// MARK: - UserProfile Extensions
-
 extension User_UserProfile {
     var displayName: String {
         if !firstName.isEmpty && !lastName.isEmpty {
@@ -36,8 +32,6 @@ extension User_UserProfile {
         }
     }
 }
-
-// MARK: - Vacancy Extensions
 
 extension Jobs_Vacancy {
     var salaryString: String? {
@@ -64,8 +58,6 @@ extension Jobs_Vacancy {
         hasArea ? area.name : "Не указано"
     }
 }
-
-// MARK: - Event Extensions
 
 extension Calendar_Event {
     var startDate: Date {
@@ -123,8 +115,6 @@ extension Calendar_Event {
     }
 }
 
-// MARK: - Node Extensions
-
 extension Materials_Node {
     var isFolder: Bool {
         type == "folder"
@@ -177,8 +167,6 @@ extension Materials_Node {
         return "📄"
     }
 }
-
-// MARK: - ResumeProfile Extensions
 
 extension User_ResumeProfile {
     var experienceLevelString: String {

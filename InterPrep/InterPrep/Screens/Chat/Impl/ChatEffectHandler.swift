@@ -8,8 +8,6 @@
 import Foundation
 import ArchitectureCore
 
-// MARK: - Effect Handler
-
 public actor ChatEffectHandler: EffectHandler {
     public typealias S = ChatState
     
@@ -24,11 +22,8 @@ public actor ChatEffectHandler: EffectHandler {
         case .loadMessages:
             do {
                 let messages = try await chatService.fetchMessages()
-                // Also load consultant and connect after loading messages
                 let consultant = try await chatService.fetchConsultant()
                 try await chatService.connect()
-                // Note: We can only return one feedback at a time
-                // In a real app, you might want to chain these differently
                 return .messagesLoaded(messages)
             } catch {
                 return .loadingFailed(error.localizedDescription)
@@ -78,15 +73,11 @@ public actor ChatEffectHandler: EffectHandler {
     }
 }
 
-// MARK: - Mock Service
-
 public final actor ChatServiceMock: ChatServicing {
     public init() {}
     
     public func fetchMessages() async throws -> [ChatMessage] {
         try await Task.sleep(nanoseconds: 500_000_000)
-        
-        // Приветственное сообщение с кнопками выбора сценария
         return [
             ChatMessage(
                 text: "Здравствуйте! Я карьерный консультант, чем могу помочь?",

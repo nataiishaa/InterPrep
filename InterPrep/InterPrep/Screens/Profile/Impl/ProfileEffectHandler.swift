@@ -11,14 +11,12 @@ import ArchitectureCore
 import DesignSystem
 import NetworkService
 
-/// Ошибка сервиса сессии (удаление аккаунта и т.п.)
 public struct ProfileSessionError: Error, Sendable, LocalizedError {
     public let message: String
     public init(_ message: String) { self.message = message }
     public var errorDescription: String? { message }
 }
 
-/// Сервис выхода и удаления аккаунта (реализуется в приложении, чтобы не тянуть NetworkService в модуль профиля).
 public protocol ProfileSessionService: Sendable {
     func clearTokens() async
     func deleteAccount(password: String) async -> Result<Void, ProfileSessionError>
@@ -76,7 +74,6 @@ public actor ProfileEffectHandler: EffectHandler {
             return await downloadResume()
             
         case .navigateToResumeUpload:
-            // Navigation handled by coordinator
             return nil
             
         case .performLogout:
@@ -89,15 +86,12 @@ public actor ProfileEffectHandler: EffectHandler {
             return await loadInterviews()
             
         case .navigateToInterview:
-            // Navigation handled by coordinator
             return nil
             
         case let .uploadProfilePhoto(userId, data):
             return await uploadProfilePhoto(userId: userId, data: data)
         }
     }
-    
-    // MARK: - Private Methods
     
     private func loadUser() async -> ProfileState.Feedback {
         await loadAndApplyTheme()
@@ -210,7 +204,6 @@ public actor ProfileEffectHandler: EffectHandler {
                 let statistics = try JSONDecoder().decode(ProfileState.Statistics.self, from: data)
                 return .statisticsLoaded(statistics)
             } else {
-                // Return default statistics
                 return .statisticsLoaded(ProfileState.Statistics())
             }
         } catch {
@@ -244,7 +237,6 @@ public actor ProfileEffectHandler: EffectHandler {
             let data = try JSONEncoder().encode(settings)
             userDefaults.set(data, forKey: settingsKey)
             
-            // Apply theme change
             await applyTheme(settings.theme)
             
             return .settingsSaved
@@ -354,7 +346,6 @@ public actor ProfileEffectHandler: EffectHandler {
                 }
             }
             
-            // Sort: upcoming by date ascending, completed by date descending
             upcoming.sort { $0.date < $1.date }
             completed.sort { $0.date > $1.date }
             

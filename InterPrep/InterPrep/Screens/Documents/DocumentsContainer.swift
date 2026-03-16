@@ -22,8 +22,6 @@ public struct DocumentsContainer: View {
             }
     }
     
-    // MARK: - Make Model
-    
     private func makeModel() -> DocumentsView.Model {
         .init(
             folders: store.state.folders,
@@ -111,8 +109,6 @@ public struct DocumentsContainer: View {
         )
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     DocumentsContainer(store: Store(

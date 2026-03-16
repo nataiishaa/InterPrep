@@ -98,18 +98,6 @@ struct PasswordResetView: View {
     }
 }
 
-// MARK: - Model
-
-extension PasswordResetView {
-    struct Model {
-        let email: String
-        let isLoading: Bool
-        let errorMessage: String?
-        let onEmailChanged: (String) -> Void
-        let onSendCode: () -> Void
-    }
-}
-
 // MARK: - Preview
 
 #Preview {

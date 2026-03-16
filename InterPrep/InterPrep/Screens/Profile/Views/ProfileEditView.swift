@@ -97,21 +97,7 @@ struct ProfileEditView: View {
     }
 }
 
-// MARK: - Model
-
 extension ProfileEditView {
-    struct Model {
-        let firstName: String
-        let lastName: String
-        let email: String
-        let errorMessage: String?
-        let onPhotoSelected: (Data) -> Void
-        let onFirstNameChanged: (String) -> Void
-        let onLastNameChanged: (String) -> Void
-        let onSave: () -> Void
-        let onCancel: () -> Void
-    }
-    
     private func loadImageData(from item: PhotosPickerItem) async -> Data? {
         guard let image = try? await item.loadTransferable(type: Image.self) else { return nil }
         return imageToJPEGData(image: image)
@@ -129,7 +115,6 @@ extension ProfileEditView {
         guard let uiImage = renderer.uiImage else { return nil }
         let w = uiImage.size.width, h = uiImage.size.height
         guard w > 0, h > 0, w.isFinite, h.isFinite else { return nil }
-        // gRPC default limit ~4MB — сжимаем до ~2MB чтобы надёжно проходить
         let maxBytes = 2 * 1024 * 1024
         var quality: CGFloat = 0.85
         repeat {
@@ -141,8 +126,6 @@ extension ProfileEditView {
         return uiImage.jpegData(compressionQuality: 0.5)
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     ProfileEditView(model: .init(

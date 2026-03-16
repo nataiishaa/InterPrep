@@ -29,8 +29,6 @@ public actor OnboardingEffectHandler: EffectHandler {
     }
 }
 
-// MARK: - Storage Service
-
 public protocol OnboardingStorageService {
     func markOnboardingCompleted()
     func isOnboardingCompleted() -> Bool

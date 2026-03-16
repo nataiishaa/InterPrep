@@ -55,8 +55,6 @@ struct FolderDetailView: View {
     }
 }
 
-// MARK: - Preview
-
 #Preview {
     NavigationStack {
         FolderDetailView(

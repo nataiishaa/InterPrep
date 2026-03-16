@@ -22,7 +22,7 @@ public struct ChatContainer: View {
             }
     }
     
-    // MARK: - Make Model
+
     
     private func makeModel() -> ChatView.Model {
         .init(
@@ -56,7 +56,7 @@ public struct ChatContainer: View {
     }
 }
 
-// MARK: - Preview
+
 
 #Preview {
     ChatContainer(store: Store(

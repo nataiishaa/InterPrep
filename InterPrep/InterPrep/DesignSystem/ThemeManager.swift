@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// MARK: - Theme Mode
+
 
 public enum ThemeMode: String, CaseIterable, Identifiable {
     case light = "Светлая"
@@ -25,7 +25,7 @@ public enum ThemeMode: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - Theme Manager
+
 
 @MainActor
 public class ThemeManager: ObservableObject {
@@ -54,7 +54,7 @@ public class ThemeManager: ObservableObject {
     }
 }
 
-// MARK: - View Extension
+
 
 public extension View {
     func applyTheme() -> some View {

@@ -23,7 +23,6 @@ public final actor ResumeServiceImpl: ResumeService {
         case .success(let response):
             let profile = response.profile
             
-            // Считаем, что резюме есть, если заполнены какие-либо ключевые поля
             let hasTargetRoles = !profile.targetRoles.isEmpty
             let hasAreas = !profile.areas.isEmpty
             let hasSkills = !profile.skillsTop.isEmpty

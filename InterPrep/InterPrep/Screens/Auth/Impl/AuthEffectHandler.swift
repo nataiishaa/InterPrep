@@ -75,8 +75,6 @@ public actor AuthEffectHandler: EffectHandler {
     }
 }
 
-// MARK: - Auth Service
-
 public protocol AuthService {
     func login(email: String, password: String) async throws
     func register(firstName: String, lastName: String, email: String, password: String) async throws
@@ -86,7 +84,6 @@ public protocol AuthService {
     func changePassword(email: String, code: String, newPassword: String) async throws
 }
 
-// Mock implementation
 public final class AuthServiceMock: AuthService {
     public init() {}
     public func login(email: String, password: String) async throws {

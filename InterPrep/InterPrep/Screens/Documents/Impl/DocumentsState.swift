@@ -8,13 +8,10 @@
 import Foundation
 import ArchitectureCore
 
-// MARK: - State
-
 public struct DocumentsState {
     public var folders: [Folder] = []
     public var recentDocuments: [Document] = []
     public var selectedFolder: Folder?
-    /// Содержимое текущей открытой папки (подпапки и файлы)
     public var folderContentsFolders: [Folder] = []
     public var folderContentsDocuments: [Document] = []
     public var isLoading: Bool = false
@@ -26,13 +23,10 @@ public struct DocumentsState {
     public var showingCreateNoteSheet: Bool = false
     public var showingEditNoteSheet: Bool = false
     public var editingNote: Document?
-    /// URL загруженного файла для просмотра (QuickLook)
     public var documentURLToOpen: URL?
     
     public init() {}
 }
-
-// MARK: - Models
 
 public struct Folder: Identifiable, Equatable, Sendable {
     public let id: UUID
@@ -133,7 +127,6 @@ public enum DocumentType: String, CaseIterable, Sendable {
         }
     }
 
-    /// Расширение файла для корректного превью в QuickLook (по типу контента).
     public var fileExtension: String {
         switch self {
         case .pdf: return "pdf"
@@ -145,8 +138,6 @@ public enum DocumentType: String, CaseIterable, Sendable {
         }
     }
 }
-
-// MARK: - FeatureState
 
 extension DocumentsState: FeatureState {
     public enum Input: Sendable {
@@ -211,8 +202,6 @@ extension DocumentsState: FeatureState {
         switch message {
         case .input(.onAppear):
             state.isLoading = true
-            // Note: We can only return one effect, so we'll load folders first
-            // The effect handler will chain loading recent documents
             return .loadFolders
             
         case .input(.folderTapped(let folder)):

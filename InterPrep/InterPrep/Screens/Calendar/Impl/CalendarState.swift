@@ -16,7 +16,6 @@ public struct CalendarState {
     public var isLoading: Bool = false
     public var errorMessage: String?
     
-    // Event creation / edit
     public var editingEventId: String?
     public var newEventTitle: String = ""
     public var newEventDescription: String = ""
@@ -29,8 +28,6 @@ public struct CalendarState {
     
     public init() {}
 }
-
-// MARK: - Models
 
 extension CalendarState {
     public struct CalendarEvent: Identifiable, Equatable, Codable, Sendable {
@@ -103,8 +100,6 @@ extension CalendarState {
     }
 }
 
-// MARK: - FeatureState
-
 extension CalendarState: FeatureState {
     public enum Input: Sendable {
         case onAppear
@@ -113,7 +108,6 @@ extension CalendarState: FeatureState {
         case createEventTapped
         case cancelEventCreation
         
-        // Event creation
         case eventTitleChanged(String)
         case eventDescriptionChanged(String)
         case eventDateChanged(Date)
@@ -124,10 +118,8 @@ extension CalendarState: FeatureState {
         case eventReminderMinutesChanged(Int)
         case saveEventTapped
         
-        // Event management
         case deleteEvent(String)
         case editEvent(CalendarEvent)
-        /// Результат CalDAV-синхронизации: подставляем объединённый список событий
         case syncCompleted([CalendarEvent])
     }
     
@@ -194,7 +186,6 @@ extension CalendarState: FeatureState {
             state.isCreatingEvent = false
             state.errorMessage = nil
             
-        // Event creation inputs
         case let .input(.eventTitleChanged(title)):
             state.newEventTitle = title
             state.errorMessage = nil
@@ -226,7 +217,6 @@ extension CalendarState: FeatureState {
                 return nil
             }
             
-            // Combine date and time
             let calendar = Calendar.current
             let dateComponents = calendar.dateComponents([.year, .month, .day], from: state.newEventDate)
             let timeComponents = calendar.dateComponents([.hour, .minute], from: state.newEventTime)
@@ -288,7 +278,6 @@ extension CalendarState: FeatureState {
         case let .input(.syncCompleted(events)):
             state.events = events
             
-        // Feedback
         case let .feedback(.eventsLoaded(events)):
             state.isLoading = false
             state.events = events
@@ -317,7 +306,6 @@ extension CalendarState: FeatureState {
             state.errorMessage = error
             
         case let .feedback(.reminderScheduled(event)):
-            // Reminder scheduled successfully
             break
         }
         
@@ -325,7 +313,7 @@ extension CalendarState: FeatureState {
     }
 }
 
-// MARK: - Date Helpers
+
 
 extension Date {
     var startOfMonth: Date {
