@@ -34,10 +34,8 @@ public actor ResumeUploadEffectHandler: EffectHandler {
             uploadTask?.cancel()
             
             do {
-                // Perform actual upload
                 try await fileService.uploadFile(file)
                 
-                // Return success feedback
                 return .uploadCompleted
             } catch is CancellationError {
                 return .uploadFailed("Загрузка отменена")
@@ -76,12 +74,10 @@ public final actor FileUploadServiceImpl: FileUploadService {
     }
     
     public func validateFile(_ url: URL) async throws -> ResumeUploadState.SelectedFile {
-        // Получаем информацию о файле
         let resources = try url.resourceValues(forKeys: [.fileSizeKey, .nameKey])
         let fileName = resources.name ?? "resume.pdf"
         let fileSize = Int64(resources.fileSize ?? 0)
         
-        // Определяем тип файла
         let fileExtension = url.pathExtension.lowercased()
         let fileType: ResumeUploadState.SelectedFile.FileType
         
@@ -98,8 +94,7 @@ public final actor FileUploadServiceImpl: FileUploadService {
             throw FileUploadError.unsupportedFormat
         }
         
-        // Проверяем размер (макс 10 МБ)
-        let maxSize: Int64 = 10 * 1024 * 1024 // 10 MB
+        let maxSize: Int64 = 10 * 1024 * 1024
         guard fileSize <= maxSize else {
             throw FileUploadError.fileTooLarge
         }

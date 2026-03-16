@@ -11,7 +11,7 @@ import CalendarFeature
 
 // MARK: - Service Implementation
 
-public final actor CalendarServiceImpl: CalendarServiceProtocol {
+public final actor CalendarServiceImpl: CalendarServicing {
     private let networkService: NetworkServiceV2
     
     public init(networkService: NetworkServiceV2 = .shared) {

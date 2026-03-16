@@ -14,9 +14,9 @@ import NetworkService
 public actor DocumentsEffectHandler: EffectHandler {
     public typealias S = DocumentsState
     
-    private let documentService: DocumentServiceProtocol
+    private let documentService: DocumentServicing
     
-    public init(documentService: DocumentServiceProtocol) {
+    public init(documentService: DocumentServicing) {
         self.documentService = documentService
     }
     
@@ -159,27 +159,9 @@ public actor DocumentsEffectHandler: EffectHandler {
     }
 }
 
-// MARK: - Service Protocol
-
-public protocol DocumentServiceProtocol: Actor {
-    func fetchFolders() async throws -> [Folder]
-    func fetchRecentDocuments() async throws -> [Document]
-    func fetchFolderContents(parentNodeId: UInt32) async throws -> (folders: [Folder], documents: [Document])
-    func createFolder(name: String, parentId: UInt32?) async throws
-    func uploadFile(url: URL, folderId: UUID?) async throws
-    func createNote(title: String, content: String, parentId: UInt32?) async throws
-    func updateNote(document: Document, newName: String, content: String) async throws
-    func loadNoteContent(id: UUID) async throws -> String
-    func deleteDocument(id: UUID) async throws
-    func renameFolder(folder: Folder, newName: String) async throws
-    func deleteFolder(folder: Folder) async throws
-    /// Скачивает файл по id документа. Возвращает (данные, имя файла).
-    func downloadDocument(id: UUID) async throws -> (Data, String)
-}
-
 // MARK: - Real Service
 
-public final actor DocumentServiceImpl: DocumentServiceProtocol {
+public final actor DocumentServiceImpl: DocumentServicing {
     private let networkService: NetworkServiceV2
     private var nodeIdByDocumentId: [UUID: UInt32] = [:]
     private var documentIdToMaterialId: [UUID: String] = [:]
