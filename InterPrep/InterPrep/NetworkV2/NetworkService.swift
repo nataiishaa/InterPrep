@@ -136,6 +136,17 @@ public final class NetworkServiceV2: ObservableObject {
     public func sendPasswordResetCode(email: String) async -> Result<Auth_PasswordResetSendCodeResponse, NetworkError> {
         var request = Auth_PasswordResetSendCodeRequest()
         request.email = email
+        
+        if let client = grpcAuthClient {
+            do {
+                let response = try await client.sendPasswordResetCode(request: request)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
+        
         return await networkService.perform(factory.sendPasswordResetCode(request))
     }
     
@@ -144,6 +155,17 @@ public final class NetworkServiceV2: ObservableObject {
         request.email = email
         request.code = code
         request.password = password
+        
+        if let client = grpcAuthClient {
+            do {
+                let response = try await client.verifyPasswordReset(request: request)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
+        
         return await networkService.perform(factory.verifyPasswordReset(request))
     }
     
@@ -761,6 +783,16 @@ public final class BackendGatewayGRPCClient: Sendable {
 
     public func login(request: Auth_LoginRequest) async throws -> Auth_LoginResponse {
         let call = client.login(request, callOptions: nil)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func sendPasswordResetCode(request: Auth_PasswordResetSendCodeRequest) async throws -> Auth_PasswordResetSendCodeResponse {
+        let call = client.sendPasswordResetCode(request, callOptions: nil)
+        return try await eventLoopFutureToAsync(call.response)
+    }
+
+    public func verifyPasswordReset(request: Auth_PasswordResetVerifyRequest) async throws -> Auth_PasswordResetVerifyResponse {
+        let call = client.verifyPasswordReset(request, callOptions: nil)
         return try await eventLoopFutureToAsync(call.response)
     }
 

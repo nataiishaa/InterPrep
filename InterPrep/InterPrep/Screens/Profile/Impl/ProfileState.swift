@@ -26,6 +26,8 @@ public struct ProfileState {
     
     public var resumePDFURL: URL?
     public var isDownloadingResume: Bool = false
+    public var hasResumeData: Bool = false
+    public var resumeSourceMaterialId: String?
     
     public var selectedInterviewTab: InterviewTab = .upcoming
     public var upcomingInterviews: [Interview] = []
@@ -225,6 +227,7 @@ extension ProfileState: FeatureState {
         case deleteAccountFailed(String)
         case resumeDownloaded(URL)
         case resumeDownloadFailed(String)
+        case resumeInfoLoaded(hasData: Bool, sourceMaterialId: String?)
         case interviewsLoaded(upcoming: [Interview], completed: [Interview])
         case interviewsLoadFailed(String)
     }
@@ -232,6 +235,7 @@ extension ProfileState: FeatureState {
     public enum Effect: Sendable {
         case loadUser
         case loadStatistics
+        case loadResumeInfo
         case updateProfile(User)
         case saveSettings(AppSettings)
         case downloadResume
@@ -380,7 +384,7 @@ extension ProfileState: FeatureState {
             state.user = user
             state.statistics = statistics
             state.cachedProfilePhotoURL = profilePhotoURL
-            return nil
+            return .loadResumeInfo
             
         case let .feedback(.profilePhotoUpdated(url)):
             state.cachedProfilePhotoURL = url
@@ -419,6 +423,10 @@ extension ProfileState: FeatureState {
         case let .feedback(.resumeDownloadFailed(error)):
             state.isDownloadingResume = false
             state.errorMessage = error
+            
+        case let .feedback(.resumeInfoLoaded(hasData, sourceMaterialId)):
+            state.hasResumeData = hasData
+            state.resumeSourceMaterialId = sourceMaterialId
             
         case let .feedback(.interviewsLoaded(upcoming, completed)):
             state.isLoadingInterviews = false

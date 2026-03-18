@@ -18,6 +18,7 @@ extension ProfileView {
         let upcomingInterviews: [ProfileState.Interview]
         let completedInterviews: [ProfileState.Interview]
         let isLoadingInterviews: Bool
+        let hasResumeData: Bool
         let onNotificationsToggled: (Bool) -> Void
         let onThemeChanged: (ProfileState.AppSettings.Theme) -> Void
         let onChangeResume: () -> Void

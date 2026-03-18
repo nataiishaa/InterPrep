@@ -71,7 +71,9 @@ struct MainTabView: View {
         }
         .sheet(isPresented: $showResumeUploadSheet) {
             appGraph.makeResumeUploadContainer(
-                onComplete: { showResumeUploadSheet = false },
+                onComplete: { 
+                    showResumeUploadSheet = false
+                },
                 onCancel: { showResumeUploadSheet = false }
             )
         }

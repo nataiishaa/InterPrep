@@ -11,8 +11,11 @@ import NetworkService
 
 struct ResumeProfileDetailView: View {
     var userId: String?
+    var onUploadNewResume: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var profile: User_ResumeProfile?
+    @State private var status: User_ResumeProfileStatus = .unspecified
+    @State private var sourceMaterialId: String?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var isEditing = false
@@ -30,8 +33,9 @@ struct ResumeProfileDetailView: View {
     @State private var educationLevel = ""
     @State private var notesText = ""
     
-    init(userId: String? = nil) {
+    init(userId: String? = nil, onUploadNewResume: (() -> Void)? = nil) {
         self.userId = userId
+        self.onUploadNewResume = onUploadNewResume
     }
     
     var body: some View {
@@ -48,15 +52,37 @@ struct ResumeProfileDetailView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let error = errorMessage {
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundColor(.orange)
+                    VStack(spacing: 20) {
+                        Image(systemName: "doc.text.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.secondary.opacity(0.5))
+                        
                         Text(error)
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
+                        
+                        if onUploadNewResume != nil {
+                            Button {
+                                if let callback = onUploadNewResume {
+                                    callback()
+                                    dismiss()
+                                }
+                            } label: {
+                                HStack {
+                                    Image(systemName: "arrow.up.doc.fill")
+                                    Text("Загрузить резюме")
+                                        .fontWeight(.medium)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color.brandPrimary)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                            }
+                            .padding(.horizontal, 32)
+                        }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if isEditing {
@@ -94,6 +120,11 @@ struct ResumeProfileDetailView: View {
                             }
                         }
                     }
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if profile != nil && !isLoading && !isEditing {
+                    uploadNewResumeButton
                 }
             }
             .task {
@@ -160,6 +191,8 @@ struct ResumeProfileDetailView: View {
     private func readOnlyContent(profile: User_ResumeProfile) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                statusBanner
+                
                 if !profile.targetRoles.isEmpty {
                     section(title: "Целевые роли", items: profile.targetRoles)
                 }
@@ -188,14 +221,126 @@ struct ResumeProfileDetailView: View {
                 if profile.targetRoles.isEmpty && !profile.hasExperienceLevel && profile.areas.isEmpty &&
                     !profile.hasSalaryMin && profile.workFormat.isEmpty && profile.skillsTop.isEmpty &&
                     !profile.hasEducationLevel && !profile.hasNotes {
-                    Text("Данные резюме пока не заполнены")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding()
+                    emptyStateView
                 }
             }
             .padding()
+        }
+    }
+    
+    @ViewBuilder
+    private var statusBanner: some View {
+        HStack(spacing: 12) {
+            Image(systemName: statusIcon)
+                .font(.title3)
+                .foregroundColor(statusColor)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(statusTitle)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                
+                Text(statusDescription)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .background(statusColor.opacity(0.1))
+        .cornerRadius(12)
+    }
+    
+    @ViewBuilder
+    private var emptyStateView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "doc.text.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.secondary.opacity(0.5))
+            
+            Text("Данные резюме пока не заполнены")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+            
+            Text("Загрузите файл резюме или заполните форму вручную")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+    }
+    
+    @ViewBuilder
+    private var uploadNewResumeButton: some View {
+        VStack(spacing: 0) {
+            Divider()
+            Button {
+                if let callback = onUploadNewResume {
+                    callback()
+                    dismiss()
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "arrow.up.doc.fill")
+                        .font(.body)
+                    Text("Загрузить новое резюме")
+                        .font(.body)
+                        .fontWeight(.medium)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color(.systemBackground))
+                .foregroundColor(.brandPrimary)
+            }
+        }
+        .background(Color(.systemBackground))
+    }
+    
+    private var statusIcon: String {
+        switch status {
+        case .confirmed:
+            return "checkmark.circle.fill"
+        case .draft:
+            return "pencil.circle.fill"
+        case .unspecified, .UNRECOGNIZED:
+            return "doc.circle.fill"
+        }
+    }
+    
+    private var statusColor: Color {
+        switch status {
+        case .confirmed:
+            return .green
+        case .draft:
+            return .orange
+        case .unspecified, .UNRECOGNIZED:
+            return .gray
+        }
+    }
+    
+    private var statusTitle: String {
+        switch status {
+        case .confirmed:
+            return "Резюме подтверждено"
+        case .draft:
+            return "Резюме в черновике"
+        case .unspecified, .UNRECOGNIZED:
+            return "Статус неизвестен"
+        }
+    }
+    
+    private var statusDescription: String {
+        switch status {
+        case .confirmed:
+            return "Данные проверены и используются для подбора вакансий"
+        case .draft:
+            return "Данные распознаны автоматически, рекомендуем проверить и подтвердить"
+        case .unspecified, .UNRECOGNIZED:
+            return "Загрузите резюме или заполните данные вручную"
         }
     }
     
@@ -229,6 +374,7 @@ struct ResumeProfileDetailView: View {
         switch result {
         case .success:
             profile = updated
+            status = .confirmed
             isEditing = false
         case .failure(let error):
             saveError = error.localizedDescription
@@ -278,13 +424,44 @@ struct ResumeProfileDetailView: View {
         isLoading = false
         switch result {
         case .success(let response):
+            print("🔍 DEBUG GetResumeProfile response:")
+            print("   - status: \(response.status)")
+            print("   - hasProfile: \(response.hasProfile)")
+            print("   - hasSourceMaterialID: \(response.hasSourceMaterialID)")
+            print("   - sourceMaterialID: '\(response.sourceMaterialID)'")
+            print("   - version: \(response.version)")
+            print("   - confirmedFields: \(response.confirmedFields)")
+            if response.hasProfile {
+                let p = response.profile
+                print("   - profile.targetRoles: \(p.targetRoles)")
+                print("   - profile.areas: \(p.areas.map { $0.name })")
+                print("   - profile.skillsTop: \(p.skillsTop)")
+                print("   - profile.workFormat: \(p.workFormat)")
+                print("   - profile.hasExperienceLevel: \(p.hasExperienceLevel)")
+                print("   - profile.hasSalaryMin: \(p.hasSalaryMin)")
+                print("   - profile.hasEducationLevel: \(p.hasEducationLevel)")
+            }
+            
+            status = response.status
+            sourceMaterialId = response.hasSourceMaterialID ? response.sourceMaterialID : nil
+            
+            // Проверяем наличие профиля:
+            // 1. Если hasProfile = true - показываем профиль (даже если пустой)
+            // 2. Если hasProfile = false, но есть sourceMaterialID - показываем пустой профиль для заполнения
+            // 3. Иначе - показываем ошибку
             if response.hasProfile {
                 profile = response.profile
+                print("✅ Profile loaded successfully")
+            } else if response.hasSourceMaterialID && !response.sourceMaterialID.isEmpty {
+                profile = User_ResumeProfile()
+                print("⚠️ Profile empty but has sourceMaterialID - showing empty form")
             } else {
                 profile = nil
-                errorMessage = "Резюме не найдено"
+                errorMessage = "Резюме не найдено. Загрузите файл резюме или заполните данные вручную."
+                print("❌ No profile and no sourceMaterialID - showing error")
             }
         case .failure(let error):
+            print("🔍 DEBUG GetResumeProfile error: \(error)")
             errorMessage = error.localizedDescription
         }
     }
