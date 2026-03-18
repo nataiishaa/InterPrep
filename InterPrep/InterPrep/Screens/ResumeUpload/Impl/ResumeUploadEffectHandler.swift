@@ -108,6 +108,8 @@ public final actor FileUploadServiceImpl: FileUploadService {
         }
         
         let fileData = try Data(contentsOf: file.url)
+        print("🔍 DEBUG Upload: uploading file '\(file.name)' (\(fileData.count) bytes)")
+        
         let result = await networkService.uploadFile(
             fileContent: fileData,
             filename: file.name,
@@ -117,11 +119,108 @@ public final actor FileUploadServiceImpl: FileUploadService {
         
         switch result {
         case .success(let response):
+            print("🔍 DEBUG Upload: success, materialID: '\(response.materialID)'")
+            
             if !response.materialID.isEmpty {
-                _ = await networkService.parseResume(materialId: response.materialID)
+                print("🔍 DEBUG Parse: calling parseResume with materialID: '\(response.materialID)'")
+                let parseResult = await networkService.parseResume(materialId: response.materialID)
+                
+                switch parseResult {
+                case .success(let parseResponse):
+                    print("🔍 DEBUG Parse: success")
+                    print("   - sessionId: '\(parseResponse.sessionID)'")
+                    print("   - status: '\(parseResponse.status)'")
+                    print("   - hasDraft: \(parseResponse.hasDraft)")
+                    
+                    if parseResponse.hasDraft {
+                        let draft = parseResponse.draft
+                        print("   - draft.targetRoles: \(draft.targetRoles)")
+                        print("   - draft.areas: \(draft.areas.map { $0.name })")
+                        print("   - draft.skillsTop: \(draft.skillsTop)")
+                        print("   - draft.workFormat: \(draft.workFormat)")
+                        print("   - draft.hasExperienceLevel: \(draft.hasExperienceLevel)")
+                        print("   - draft.hasSalaryMin: \(draft.hasSalaryMin)")
+                        
+                        // Конвертируем draft в User_ResumeProfile и сохраняем
+                        print("🔍 DEBUG: Converting draft to User_ResumeProfile and saving...")
+                        var userProfile = User_ResumeProfile()
+                        userProfile.targetRoles = draft.targetRoles
+                        if draft.hasExperienceLevel {
+                            userProfile.experienceLevel = draft.experienceLevel
+                        }
+                        userProfile.areas = draft.areas.map { area in
+                            var userArea = User_Area()
+                            userArea.id = area.id
+                            userArea.name = area.name
+                            return userArea
+                        }
+                        if draft.hasSalaryMin {
+                            userProfile.salaryMin = draft.salaryMin
+                        }
+                        if draft.hasCurrency {
+                            userProfile.currency = draft.currency
+                        }
+                        userProfile.workFormat = draft.workFormat
+                        userProfile.skillsTop = draft.skillsTop
+                        if draft.hasNotes {
+                            userProfile.notes = draft.notes
+                        }
+                        
+                        // Получаем userId из текущего профиля
+                        let getMeResult = await networkService.getMe()
+                        if case .success(let meResponse) = getMeResult {
+                            let userId = meResponse.user.id
+                            print("   - Saving to User_ResumeProfile for userId: \(userId)")
+                            
+                            let updateResult = await networkService.updateUser_ResumeProfile(
+                                userId: userId,
+                                profile: userProfile
+                            )
+                            
+                            switch updateResult {
+                            case .success:
+                                print("   ✅ Profile saved successfully!")
+                            case .failure(let err):
+                                print("   ❌ Failed to save profile: \(err)")
+                            }
+                            
+                            // Проверяем обновился ли флаг resumeUploaded в UserProfile
+                            print("🔍 DEBUG: Checking UserProfile.resumeUploaded flag...")
+                            let meCheckResult = await networkService.getMe()
+                            switch meCheckResult {
+                            case .success(let meResponse):
+                                print("   - UserProfile.resumeUploaded = \(meResponse.user.resumeUploaded)")
+                                print("   - UserProfile.id = \(meResponse.user.id)")
+                            case .failure(let err):
+                                print("   - GetMe check failed: \(err)")
+                            }
+                        } else {
+                            print("   ❌ Failed to get current user ID")
+                        }
+                        
+                        // После сохранения проверяем что данные действительно сохранились
+                        print("🔍 DEBUG: Checking if profile was saved correctly...")
+                        let profileCheckResult = await networkService.getUser_ResumeProfile()
+                        switch profileCheckResult {
+                        case .success(let profileResponse):
+                            print("   - Profile check: hasProfile = \(profileResponse.hasProfile)")
+                            print("   - Profile check: status = \(profileResponse.status)")
+                            print("   - Profile check: sourceMaterialID = '\(profileResponse.sourceMaterialID)'")
+                            if profileResponse.hasProfile {
+                                print("   - Profile check: targetRoles = \(profileResponse.profile.targetRoles)")
+                            }
+                        case .failure(let err):
+                            print("   - Profile check failed: \(err)")
+                        }
+                    }
+                    print("   - questions count: \(parseResponse.questions.count)")
+                case .failure(let error):
+                    print("🔍 DEBUG Parse: error - \(error)")
+                }
             }
             return
         case .failure(let error):
+            print("🔍 DEBUG Upload: error - \(error)")
             if (error as? NetworkError)?.isConnectionError == true {
                 throw FileUploadError.networkUnavailable
             }

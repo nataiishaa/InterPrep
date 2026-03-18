@@ -79,7 +79,6 @@ public final class AuthServiceImpl: AuthService {
     }
     
     public func verifyOTP(email: String, code: String) async throws {
-
     }
     
     public func uploadResume() async throws {

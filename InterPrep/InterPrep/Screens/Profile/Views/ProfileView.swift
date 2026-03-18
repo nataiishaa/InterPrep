@@ -203,11 +203,11 @@ struct ProfileView: View {
                         .cornerRadius(12)
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text((model.user?.resumeUploaded ?? false) ? "Ваше резюме загружено" : "Резюме не загружено")
+                        Text(model.hasResumeData ? "Ваше резюме загружено" : "Резюме не загружено")
                             .font(.body)
                             .fontWeight(.medium)
                         
-                        Text((model.user?.resumeUploaded ?? false)
+                        Text(model.hasResumeData
                              ? "Посмотрите данные на основе которых мы предлагаем вам вакансии."
                              : "Загрузите резюме, чтобы мы могли подбирать подходящие вакансии.")
                             .font(.caption)
@@ -221,7 +221,7 @@ struct ProfileView: View {
                 
                 Divider()
                 
-                if model.user?.resumeUploaded == true {
+                if model.hasResumeData {
                     Button {
                         model.onViewResume()
                     } label: {
@@ -249,7 +249,7 @@ struct ProfileView: View {
                     HStack {
                         Image(systemName: "arrow.up.doc.fill")
                             .font(.body)
-                        Text((model.user?.resumeUploaded ?? false) ? "Загрузить новое резюме" : "Загрузить резюме")
+                        Text(model.hasResumeData ? "Загрузить новое резюме" : "Загрузить резюме")
                             .font(.body)
                             .fontWeight(.medium)
                         Spacer()
@@ -748,6 +748,7 @@ private struct ProfileContactDevelopersView: View {
             .init(id: "3", title: "Middle iOS", company: "Авито", date: Date().addingTimeInterval(-86400), type: "Собеседование", isCompleted: true)
         ],
         isLoadingInterviews: false,
+        hasResumeData: true,
         onNotificationsToggled: { _ in },
         onThemeChanged: { _ in },
         onChangeResume: {},

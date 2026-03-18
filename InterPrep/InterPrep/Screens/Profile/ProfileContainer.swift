@@ -39,7 +39,17 @@ public struct ProfileContainer: View {
                 }
             }
             .sheet(isPresented: $showResumeDetailSheet) {
-                ResumeProfileDetailView(userId: store.state.user?.id)
+                store.send(.refresh)
+            } content: {
+                ResumeProfileDetailView(
+                    userId: store.state.user?.id,
+                    onUploadNewResume: {
+                        showResumeDetailSheet = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            onNavigateToResumeUpload?() ?? store.send(.changeResume)
+                        }
+                    }
+                )
             }
     }
     
@@ -54,6 +64,7 @@ public struct ProfileContainer: View {
             upcomingInterviews: store.state.upcomingInterviews,
             completedInterviews: store.state.completedInterviews,
             isLoadingInterviews: store.state.isLoadingInterviews,
+            hasResumeData: store.state.hasResumeData,
             onNotificationsToggled: { enabled in
                 store.send(.notificationsToggled(enabled))
             },

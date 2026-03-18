@@ -19,6 +19,8 @@ public enum Gateway_BackendGatewayClientMetadata {
     methods: [
       Gateway_BackendGatewayClientMetadata.Methods.register,
       Gateway_BackendGatewayClientMetadata.Methods.login,
+      Gateway_BackendGatewayClientMetadata.Methods.sendPasswordResetCode,
+      Gateway_BackendGatewayClientMetadata.Methods.verifyPasswordReset,
       Gateway_BackendGatewayClientMetadata.Methods.getResumeProfile,
       Gateway_BackendGatewayClientMetadata.Methods.searchJobs,
       Gateway_BackendGatewayClientMetadata.Methods.listFavorites,
@@ -34,6 +36,16 @@ public enum Gateway_BackendGatewayClientMetadata {
     public static let login = GRPCMethodDescriptor(
       name: "Login",
       path: "/gateway.BackendGateway/Login",
+      type: GRPCCallType.unary
+    )
+    public static let sendPasswordResetCode = GRPCMethodDescriptor(
+      name: "SendPasswordResetCode",
+      path: "/gateway.BackendGateway/SendPasswordResetCode",
+      type: GRPCCallType.unary
+    )
+    public static let verifyPasswordReset = GRPCMethodDescriptor(
+      name: "VerifyPasswordReset",
+      path: "/gateway.BackendGateway/VerifyPasswordReset",
       type: GRPCCallType.unary
     )
     public static let getResumeProfile = GRPCMethodDescriptor(
@@ -61,6 +73,8 @@ public protocol Gateway_BackendGatewayClientProtocol: GRPCClient {
   var interceptors: Gateway_BackendGatewayClientInterceptorFactoryProtocol? { get }
   func register(_ request: Auth_RegisterRequest, callOptions: CallOptions?) -> UnaryCall<Auth_RegisterRequest, Auth_RegisterResponse>
   func login(_ request: Auth_LoginRequest, callOptions: CallOptions?) -> UnaryCall<Auth_LoginRequest, Auth_LoginResponse>
+  func sendPasswordResetCode(_ request: Auth_PasswordResetSendCodeRequest, callOptions: CallOptions?) -> UnaryCall<Auth_PasswordResetSendCodeRequest, Auth_PasswordResetSendCodeResponse>
+  func verifyPasswordReset(_ request: Auth_PasswordResetVerifyRequest, callOptions: CallOptions?) -> UnaryCall<Auth_PasswordResetVerifyRequest, Auth_PasswordResetVerifyResponse>
   func getResumeProfile(_ request: User_GetResumeProfileRequest, callOptions: CallOptions?) -> UnaryCall<User_GetResumeProfileRequest, User_GetResumeProfileResponse>
   func searchJobs(_ request: Jobs_SearchJobsRequest, callOptions: CallOptions?) -> UnaryCall<Jobs_SearchJobsRequest, Jobs_SearchJobsResponse>
   func listFavorites(_ request: Jobs_ListFavoritesRequest, callOptions: CallOptions?) -> UnaryCall<Jobs_ListFavoritesRequest, Jobs_ListFavoritesResponse>
@@ -90,6 +104,30 @@ extension Gateway_BackendGatewayClientProtocol {
       request: request,
       callOptions: callOptions ?? defaultCallOptions,
       interceptors: interceptors?.makeLoginInterceptors() ?? []
+    )
+  }
+
+  public func sendPasswordResetCode(
+    _ request: Auth_PasswordResetSendCodeRequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Auth_PasswordResetSendCodeRequest, Auth_PasswordResetSendCodeResponse> {
+    makeUnaryCall(
+      path: Gateway_BackendGatewayClientMetadata.Methods.sendPasswordResetCode.path,
+      request: request,
+      callOptions: callOptions ?? defaultCallOptions,
+      interceptors: interceptors?.makeSendPasswordResetCodeInterceptors() ?? []
+    )
+  }
+
+  public func verifyPasswordReset(
+    _ request: Auth_PasswordResetVerifyRequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Auth_PasswordResetVerifyRequest, Auth_PasswordResetVerifyResponse> {
+    makeUnaryCall(
+      path: Gateway_BackendGatewayClientMetadata.Methods.verifyPasswordReset.path,
+      request: request,
+      callOptions: callOptions ?? defaultCallOptions,
+      interceptors: interceptors?.makeVerifyPasswordResetInterceptors() ?? []
     )
   }
 
@@ -135,6 +173,8 @@ extension Gateway_BackendGatewayClientProtocol {
 public protocol Gateway_BackendGatewayClientInterceptorFactoryProtocol {
   func makeRegisterInterceptors() -> [ClientInterceptor<Auth_RegisterRequest, Auth_RegisterResponse>]
   func makeLoginInterceptors() -> [ClientInterceptor<Auth_LoginRequest, Auth_LoginResponse>]
+  func makeSendPasswordResetCodeInterceptors() -> [ClientInterceptor<Auth_PasswordResetSendCodeRequest, Auth_PasswordResetSendCodeResponse>]
+  func makeVerifyPasswordResetInterceptors() -> [ClientInterceptor<Auth_PasswordResetVerifyRequest, Auth_PasswordResetVerifyResponse>]
   func makeGetResumeProfileInterceptors() -> [ClientInterceptor<User_GetResumeProfileRequest, User_GetResumeProfileResponse>]
   func makeSearchJobsInterceptors() -> [ClientInterceptor<Jobs_SearchJobsRequest, Jobs_SearchJobsResponse>]
   func makeListFavoritesInterceptors() -> [ClientInterceptor<Jobs_ListFavoritesRequest, Jobs_ListFavoritesResponse>]

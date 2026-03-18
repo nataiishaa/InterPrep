@@ -64,6 +64,9 @@ public actor ProfileEffectHandler: EffectHandler {
         case .loadStatistics:
             return await loadStatistics()
             
+        case .loadResumeInfo:
+            return await loadResumeInfo()
+            
         case let .updateProfile(user):
             return await updateProfile(user)
             
@@ -93,6 +96,29 @@ public actor ProfileEffectHandler: EffectHandler {
         }
     }
     
+    private func loadResumeInfo() async -> ProfileState.Feedback {
+        let result = await NetworkServiceV2.shared.getUser_ResumeProfile()
+        switch result {
+        case .success(let response):
+            print("🔍 DEBUG ProfileEffectHandler.loadResumeInfo:")
+            print("   - hasProfile: \(response.hasProfile)")
+            print("   - hasSourceMaterialID: \(response.hasSourceMaterialID)")
+            print("   - status: \(response.status)")
+            
+            let hasData = response.hasProfile || (response.hasSourceMaterialID && !response.sourceMaterialID.isEmpty)
+            let materialId = response.hasSourceMaterialID ? response.sourceMaterialID : nil
+            
+            print("   - hasData (computed): \(hasData)")
+            print("   - materialId: \(materialId ?? "nil")")
+            
+            return .resumeInfoLoaded(hasData: hasData, sourceMaterialId: materialId)
+            
+        case .failure(let error):
+            print("🔍 DEBUG ProfileEffectHandler.loadResumeInfo failed: \(error)")
+            return .resumeInfoLoaded(hasData: false, sourceMaterialId: nil)
+        }
+    }
+    
     private func loadUser() async -> ProfileState.Feedback {
         await loadAndApplyTheme()
         
@@ -100,6 +126,14 @@ public actor ProfileEffectHandler: EffectHandler {
         switch result {
         case .success(let response):
             let u = response.user
+            print("🔍 DEBUG GetMe response:")
+            print("   - id: \(u.id)")
+            print("   - firstName: \(u.firstName)")
+            print("   - lastName: \(u.lastName)")
+            print("   - email: \(u.email)")
+            print("   - resumeUploaded: \(u.resumeUploaded) ⬅️ THIS IS THE FLAG!")
+            print("   - totalInterviews: \(u.totalInterviews)")
+            
             let user = ProfileState.User(
                 id: String(u.id),
                 firstName: u.firstName,
