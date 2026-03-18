@@ -47,6 +47,20 @@ struct ChatView: View {
                                     )
                                     .id(message.id)
                                 }
+                                
+                                if model.isSending && model.messages.last?.sender == .user && model.messages.last?.status != .sent {
+                                    HStack {
+                                        ProgressView()
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 10)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .fill(Color(.systemGray5))
+                                            )
+                                        Spacer(minLength: 60)
+                                    }
+                                    .id("loading-indicator")
+                                }
                             }
                             .padding()
                         }
@@ -54,6 +68,13 @@ struct ChatView: View {
                             if let lastMessage = model.messages.last {
                                 withAnimation {
                                     proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                }
+                            }
+                        }
+                        .onChange(of: model.isSending) { _, isSending in
+                            if isSending {
+                                withAnimation {
+                                    proxy.scrollTo("loading-indicator", anchor: .bottom)
                                 }
                             }
                         }
@@ -96,7 +117,7 @@ struct ChatView: View {
                     Button {
                         model.onClearHistory()
                     } label: {
-                        Text("Новый чат")
+                        Text("Очистить чат")
                             .font(.subheadline)
                             .foregroundColor(.brandPrimary)
                     }

@@ -19,19 +19,21 @@ public final actor ChatServiceImpl: ChatServicing {
     }
 
     public func fetchMessages() async throws -> [ChatMessage] {
-        return [
-            ChatMessage(
-                text: "Здравствуйте! Я карьерный консультант. Задайте вопрос по карьере, подготовке к собеседованию или резюме.",
-                sender: .consultant,
-                timestamp: Date(),
-                status: .read,
-                buttons: [
-                    MessageButton(text: "Помощь в подготовке к собеседованию", action: .selectScenario(.interviewPrep)),
-                    MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation)),
-                    MessageButton(text: "Другое", action: .selectScenario(.other))
-                ]
-            )
-        ]
+        let historyMessages = try await getCoachChatHistory(pageSize: 50, pageOffset: 0)
+        
+        let welcomeMessage = ChatMessage(
+            text: "Здравствуйте! Я карьерный консультант. Задайте вопрос по карьере, подготовке к собеседованию или резюме.",
+            sender: .consultant,
+            timestamp: Date().addingTimeInterval(-86400),
+            status: .read,
+            buttons: [
+                MessageButton(text: "Подготовка к собеседованию", action: .selectScenario(.interviewPrep)),
+                MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation)),
+                MessageButton(text: "Другое", action: .selectScenario(.other))
+            ]
+        )
+        
+        return [welcomeMessage] + historyMessages.reversed()
     }
 
     public func fetchConsultant() async throws -> Consultant {
@@ -73,24 +75,51 @@ public final actor ChatServiceImpl: ChatServicing {
     }
 
     public func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage {
-        let question = questionForButtonAction(action)
-        let result = await networkService.ask(
-            conversationId: conversationId,
-            question: question
-        )
-        switch result {
-        case .success(let response):
-            if !response.conversationID.isEmpty {
-                conversationId = response.conversationID
-            }
+        switch action {
+        case .selectScenario(.interviewPrep):
             return ChatMessage(
-                text: response.answer,
+                text: "Отлично! Для подготовки к собеседованию мне нужен ID вакансии с hh.ru.\n\nВы можете скопировать его в правом верхнем углу после клика на вакансию и открытия подробной информации.\n\nПожалуйста, отправьте ID вакансии.",
                 sender: .consultant,
                 timestamp: Date(),
                 status: .sent
             )
-        case .failure(let error):
-            throw userFacingError(for: error)
+            
+        case .selectScenario(.resumeConsultation):
+            return ChatMessage(
+                text: "Анализирую ваше резюме...",
+                sender: .consultant,
+                timestamp: Date(),
+                status: .sent
+            )
+            
+        case .selectScenario(.other):
+            return ChatMessage(
+                text: "Чем могу помочь?",
+                sender: .consultant,
+                timestamp: Date(),
+                status: .sent
+            )
+            
+        default:
+            let question = questionForButtonAction(action)
+            let result = await networkService.ask(
+                conversationId: conversationId,
+                question: question
+            )
+            switch result {
+            case .success(let response):
+                if !response.conversationID.isEmpty {
+                    conversationId = response.conversationID
+                }
+                return ChatMessage(
+                    text: response.answer,
+                    sender: .consultant,
+                    timestamp: Date(),
+                    status: .sent
+                )
+            case .failure(let error):
+                throw userFacingError(for: error)
+            }
         }
     }
 
@@ -123,6 +152,72 @@ public final actor ChatServiceImpl: ChatServicing {
             default:
                 return "Подготовка к собеседованию"
             }
+        case .requestVacancyId:
+            return "Запрос ID вакансии"
+        case .reviewResumeNow:
+            return "Анализ резюме"
+        }
+    }
+    
+    public func prepareForVacancy(vacancyId: String) async throws -> String {
+        let result = await networkService.prepareForVacancy(vacancyId: vacancyId)
+        switch result {
+        case .success(let response):
+            return response.recommendations
+        case .failure(let error):
+            throw userFacingError(for: error)
+        }
+    }
+    
+    public func reviewResume() async throws -> (score: Double, recommendations: String) {
+        let result = await networkService.reviewResume()
+        switch result {
+        case .success(let response):
+            return (score: response.score, recommendations: response.recommendations)
+        case .failure(let error):
+            throw userFacingError(for: error)
+        }
+    }
+    
+    public func clearChatHistory(conversationId: String?) async throws -> (ok: Bool, deletedConversations: Int) {
+        let result = await networkService.clearChatHistory(conversationId: conversationId)
+        switch result {
+        case .success(let response):
+            if conversationId == nil || conversationId == self.conversationId {
+                self.conversationId = nil
+            }
+            return (ok: response.ok, deletedConversations: Int(response.deletedConversations))
+        case .failure(let error):
+            throw userFacingError(for: error)
+        }
+    }
+    
+    public func getCoachChatHistory(pageSize: Int, pageOffset: Int) async throws -> [ChatMessage] {
+        let result = await networkService.getCoachChatHistory(pageSize: Int32(pageSize), pageOffset: Int32(pageOffset))
+        switch result {
+        case .success(let response):
+            return response.entries.compactMap { entry -> ChatMessage? in
+                let sender: MessageSender
+                switch entry.kind {
+                case .askUser:
+                    sender = .user
+                case .askAssistant, .reviewResume, .prepareVacancy:
+                    sender = .consultant
+                default:
+                    return nil
+                }
+                
+                let timestamp = ISO8601DateFormatter().date(from: entry.createdAt) ?? Date()
+                
+                return ChatMessage(
+                    text: entry.content,
+                    sender: sender,
+                    timestamp: timestamp,
+                    status: .read
+                )
+            }
+        case .failure(let error):
+            throw userFacingError(for: error)
         }
     }
 }

@@ -544,6 +544,68 @@ public final class NetworkServiceV2: ObservableObject {
         return await networkService.perform(factory.getResumeSession(request))
     }
     
+    public func prepareForVacancy(vacancyId: String) async -> Result<Coach_PrepareForVacancyResponse, NetworkError> {
+        var request = Coach_PrepareForVacancyRequest()
+        request.vacancyID = vacancyId
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.prepareForVacancy(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
+        return await networkService.perform(factory.prepareForVacancy(request))
+    }
+    
+    public func reviewResume() async -> Result<Coach_ReviewResumeResponse, NetworkError> {
+        let request = Coach_ReviewResumeRequest()
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.reviewResume(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
+        return await networkService.perform(factory.reviewResume(request))
+    }
+    
+    public func clearChatHistory(conversationId: String? = nil) async -> Result<Coach_ClearChatHistoryResponse, NetworkError> {
+        var request = Coach_ClearChatHistoryRequest()
+        if let conversationId = conversationId {
+            request.conversationID = conversationId
+        }
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.clearChatHistory(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
+        return await networkService.perform(factory.clearChatHistory(request))
+    }
+    
+    public func getCoachChatHistory(pageSize: Int32 = 50, pageOffset: Int32 = 0) async -> Result<Coach_GetCoachChatHistoryResponse, NetworkError> {
+        var request = Coach_GetCoachChatHistoryRequest()
+        request.pageSize = pageSize
+        request.pageOffset = pageOffset
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.getCoachChatHistory(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
+        return await networkService.perform(factory.getCoachChatHistory(request))
+    }
+    
     // MARK: - Calendar
     
     func createCalendar_Event(event: Calendar_Event) async -> Result<Calendar_CreateEventResponse, NetworkError> {
@@ -987,6 +1049,50 @@ public final class BackendGatewayGRPCClient: Sendable {
         let options = callOptionsForLLM(with: accessToken)
         let call: UnaryCall<Coach_AskRequest, Coach_AskResponse> = connection.makeUnaryCall(
             path: "/gateway.BackendGateway/Ask",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func prepareForVacancy(request: Coach_PrepareForVacancyRequest, accessToken: String?) async throws -> Coach_PrepareForVacancyResponse {
+        let options = callOptionsForLLM(with: accessToken)
+        let call: UnaryCall<Coach_PrepareForVacancyRequest, Coach_PrepareForVacancyResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/PrepareForVacancy",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func reviewResume(request: Coach_ReviewResumeRequest, accessToken: String?) async throws -> Coach_ReviewResumeResponse {
+        let options = callOptionsForLLM(with: accessToken)
+        let call: UnaryCall<Coach_ReviewResumeRequest, Coach_ReviewResumeResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/ReviewResume",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func clearChatHistory(request: Coach_ClearChatHistoryRequest, accessToken: String?) async throws -> Coach_ClearChatHistoryResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Coach_ClearChatHistoryRequest, Coach_ClearChatHistoryResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/ClearChatHistory",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
+    public func getCoachChatHistory(request: Coach_GetCoachChatHistoryRequest, accessToken: String?) async throws -> Coach_GetCoachChatHistoryResponse {
+        let options = callOptions(with: accessToken)
+        let call: UnaryCall<Coach_GetCoachChatHistoryRequest, Coach_GetCoachChatHistoryResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/GetCoachChatHistory",
             request: request,
             callOptions: options,
             interceptors: []
