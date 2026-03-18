@@ -56,14 +56,34 @@ public actor ChatEffectHandler: EffectHandler {
         case .handleButtonAction(let action):
             do {
                 let response = try await chatService.handleButtonAction(action)
+                if case .selectScenario(.resumeConsultation) = action {
+                    let (score, recommendations) = try await chatService.reviewResume()
+                    return .resumeReviewReceived(score: score, recommendations: recommendations)
+                }
                 return .consultantResponded(response)
+            } catch {
+                return .loadingFailed(error.localizedDescription)
+            }
+            
+        case .prepareForVacancy(let vacancyId):
+            do {
+                let recommendations = try await chatService.prepareForVacancy(vacancyId: vacancyId)
+                return .vacancyPreparationReceived(recommendations)
+            } catch {
+                return .loadingFailed(error.localizedDescription)
+            }
+            
+        case .reviewResume:
+            do {
+                let (score, recommendations) = try await chatService.reviewResume()
+                return .resumeReviewReceived(score: score, recommendations: recommendations)
             } catch {
                 return .loadingFailed(error.localizedDescription)
             }
             
         case .clearHistory:
             do {
-                await chatService.clearHistory()
+                _ = try await chatService.clearChatHistory(conversationId: nil)
                 let messages = try await chatService.fetchMessages()
                 return .messagesLoaded(messages)
             } catch {
@@ -85,7 +105,7 @@ public final actor ChatServiceMock: ChatServicing {
                 timestamp: Date(),
                 status: .read,
                 buttons: [
-                    MessageButton(text: "Помощь в подготовке к собеседованию", action: .selectScenario(.interviewPrep)),
+                    MessageButton(text: "Подготовка к собеседованию", action: .selectScenario(.interviewPrep)),
                     MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation)),
                     MessageButton(text: "Другое", action: .selectScenario(.other))
                 ]
@@ -126,28 +146,19 @@ public final actor ChatServiceMock: ChatServicing {
             switch scenario {
             case .interviewPrep:
                 return ChatMessage(
-                    text: "Отлично! Выберите тип собеседования:",
-                    sender: .consultant,
-                    buttons: [
-                        MessageButton(text: "Техническое интервью", action: .selectInterviewType("technical")),
-                        MessageButton(text: "Поведенческое интервью", action: .selectInterviewType("behavioral")),
-                        MessageButton(text: "Общие советы", action: .selectInterviewType("general"))
-                    ]
+                    text: "Отлично! Для подготовки к собеседованию мне нужен ID вакансии с hh.ru.\n\nВы можете скопировать его в правом верхнем углу после клика на вакансию и открытия подробной информации.\n\nПожалуйста, отправьте ID вакансии.",
+                    sender: .consultant
                 )
                 
             case .resumeConsultation:
                 return ChatMessage(
-                    text: "Хочешь получить независимую оценку своего резюме или у тебя другие вопросы?",
-                    sender: .consultant,
-                    buttons: [
-                        MessageButton(text: "Да", action: .confirmYes),
-                        MessageButton(text: "Нет", action: .confirmNo)
-                    ]
+                    text: "Анализирую ваше резюме...",
+                    sender: .consultant
                 )
                 
             case .other:
                 return ChatMessage(
-                    text: "Расскажите, чем я могу вам помочь?",
+                    text: "Чем могу помочь?",
                     sender: .consultant
                 )
             }
@@ -181,8 +192,50 @@ public final actor ChatServiceMock: ChatServicing {
                 text: responseText,
                 sender: .consultant
             )
+            
+        case .requestVacancyId, .reviewResumeNow:
+            return ChatMessage(
+                text: "Обрабатываю запрос...",
+                sender: .consultant
+            )
         }
     }
     
     public func clearHistory() async {}
+    
+    public func prepareForVacancy(vacancyId: String) async throws -> String {
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        return "Рекомендации по подготовке к вакансии:\n\n1. Изучите требования к позиции\n2. Подготовьте примеры из опыта\n3. Изучите компанию и её продукты\n4. Подготовьте вопросы интервьюеру"
+    }
+    
+    public func reviewResume() async throws -> (score: Double, recommendations: String) {
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        return (
+            score: 7.5,
+            recommendations: "Ваше резюме выглядит хорошо! Рекомендации:\n\n1. Добавьте больше конкретных достижений\n2. Укажите используемые технологии\n3. Добавьте ссылки на проекты"
+        )
+    }
+    
+    public func clearChatHistory(conversationId: String?) async throws -> (ok: Bool, deletedConversations: Int) {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        return (ok: true, deletedConversations: conversationId != nil ? 1 : 5)
+    }
+    
+    public func getCoachChatHistory(pageSize: Int, pageOffset: Int) async throws -> [ChatMessage] {
+        try await Task.sleep(nanoseconds: 500_000_000)
+        return [
+            ChatMessage(
+                text: "Как подготовиться к техническому интервью?",
+                sender: .user,
+                timestamp: Date().addingTimeInterval(-3600),
+                status: .read
+            ),
+            ChatMessage(
+                text: "Вот несколько советов для подготовки к техническому интервью:\n\n1. Повторите основы алгоритмов\n2. Практикуйтесь на LeetCode\n3. Изучите систем дизайн",
+                sender: .consultant,
+                timestamp: Date().addingTimeInterval(-3500),
+                status: .read
+            )
+        ]
+    }
 }

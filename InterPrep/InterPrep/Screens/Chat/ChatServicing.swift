@@ -15,4 +15,8 @@ public protocol ChatServicing: Actor {
     func sendMessage(_ message: ChatMessage) async throws -> ChatMessage?
     func handleButtonAction(_ action: ButtonAction) async throws -> ChatMessage
     func clearHistory() async
+    func prepareForVacancy(vacancyId: String) async throws -> String
+    func reviewResume() async throws -> (score: Double, recommendations: String)
+    func clearChatHistory(conversationId: String?) async throws -> (ok: Bool, deletedConversations: Int)
+    func getCoachChatHistory(pageSize: Int, pageOffset: Int) async throws -> [ChatMessage]
 }

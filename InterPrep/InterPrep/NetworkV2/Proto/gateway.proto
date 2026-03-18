@@ -3,7 +3,6 @@ syntax = "proto3";
 package gateway;
 
 option go_package = "proto/gateway";
-option swift_prefix = "Gateway_";
 
 import "auth.proto";
 import "user.proto";
@@ -35,7 +34,6 @@ service BackendGateway {
   rpc UploadFile(materials.UploadFileRequest) returns (materials.UploadFileResponse);
   rpc DownloadFile(materials.DownloadFileRequest) returns (materials.DownloadFileResponse);
   rpc ListFolder(materials.ListFolderRequest) returns (materials.ListFolderResponse);
-  rpc ListRecentFiles(materials.ListRecentFilesRequest) returns (materials.ListRecentFilesResponse);
   rpc CreateFolder(materials.CreateFolderRequest) returns (materials.CreateFolderResponse);
   rpc CreateLink(materials.CreateLinkRequest) returns (materials.CreateLinkResponse);
   rpc RenameNode(materials.RenameNodeRequest) returns (materials.RenameNodeResponse);
@@ -43,16 +41,17 @@ service BackendGateway {
   
   // Coach
   rpc Ask(coach.AskRequest) returns (coach.AskResponse);
-  rpc ParseResume(coach.ParseResumeRequest) returns (coach.ParseResumeResponse);
+  rpc ParseResume(coach.ParseResumeRequest) returns (coach.ParseResumeResponse); // TODO: delete
   rpc UploadAndParseResume(coach.UploadAndParseResumeRequest) returns (coach.UploadAndParseResumeResponse);
   rpc AnswerResume(coach.AnswerResumeRequest) returns (coach.AnswerResumeResponse);
   rpc GetResumeSession(coach.GetResumeSessionRequest) returns (coach.GetResumeSessionResponse);
   rpc PrepareForVacancy(coach.PrepareForVacancyRequest) returns (coach.PrepareForVacancyResponse);
   rpc ReviewResume(coach.ReviewResumeRequest) returns (coach.ReviewResumeResponse);
+  rpc ClearChatHistory(coach.ClearChatHistoryRequest) returns (coach.ClearChatHistoryResponse);
+  rpc GetCoachChatHistory(coach.GetCoachChatHistoryRequest) returns (coach.GetCoachChatHistoryResponse);
   
   // Jobs
   rpc SearchJobs(jobs.SearchJobsRequest) returns (jobs.SearchJobsResponse);
-  rpc GetVacancy(jobs.GetVacancyRequest) returns (jobs.GetVacancyResponse);
   rpc AddFavorite(jobs.AddFavoriteRequest) returns (jobs.AddFavoriteResponse);
   rpc RemoveFavorite(jobs.RemoveFavoriteRequest) returns (jobs.RemoveFavoriteResponse);
   rpc ListFavorites(jobs.ListFavoritesRequest) returns (jobs.ListFavoritesResponse);
@@ -64,4 +63,5 @@ service BackendGateway {
   rpc DeleteEvent(calendar.DeleteEventRequest) returns (calendar.DeleteEventResponse);
   rpc ListEvents(calendar.ListEventsRequest) returns (calendar.ListEventsResponse);
   rpc ListUpcoming(calendar.ListUpcomingRequest) returns (calendar.ListUpcomingResponse);
+  rpc GetInterviewStats(calendar.GetInterviewStatsRequest) returns (calendar.GetInterviewStatsResponse);
 }

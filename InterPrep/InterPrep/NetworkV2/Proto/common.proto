@@ -3,7 +3,6 @@ syntax = "proto3";
 package common;
 
 option go_package = "proto/common";
-option swift_prefix = "Common_";
 
 message Empty {}
 

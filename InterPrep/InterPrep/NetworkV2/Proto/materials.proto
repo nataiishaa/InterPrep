@@ -3,7 +3,6 @@ syntax = "proto3";
 package materials;
 
 option go_package = "proto/materials";
-option swift_prefix = "Materials_";
 
 import "common.proto";
 
@@ -68,16 +67,6 @@ message ListFolderResponse {
   repeated Node nodes = 1;
 }
 
-message ListRecentFilesRequest {
-  int32 limit = 1;   // default 50
-  int32 offset = 2; // for pagination
-}
-
-message ListRecentFilesResponse {
-  repeated Node nodes = 1;
-  bool has_more = 2;
-}
-
 message CreateFolderRequest {
   string name = 1;
   optional uint32 parent_id = 2;
@@ -128,7 +117,6 @@ service MaterialsService {
   rpc UploadFile(UploadFileRequest) returns (UploadFileResponse);
   rpc DownloadFile(DownloadFileRequest) returns (DownloadFileResponse);
   rpc ListFolder(ListFolderRequest) returns (ListFolderResponse);
-  rpc ListRecentFiles(ListRecentFilesRequest) returns (ListRecentFilesResponse);
   rpc CreateFolder(CreateFolderRequest) returns (CreateFolderResponse);
   rpc CreateLink(CreateLinkRequest) returns (CreateLinkResponse);
   rpc RenameNode(RenameNodeRequest) returns (RenameNodeResponse);

@@ -17,6 +17,7 @@ public struct ChatState {
     public var error: String?
     public var consultant: Consultant?
     public var currentScenario: ChatScenario?
+    public var waitingForVacancyId: Bool = false
     public static let systemHints: [String] = [
         "Расскажи про свой опыт",
         "Какие вопросы задают на интервью?",
@@ -74,6 +75,8 @@ public enum ButtonAction: Equatable, Sendable {
     case confirmYes
     case confirmNo
     case selectInterviewType(String)
+    case requestVacancyId
+    case reviewResumeNow
 }
 
 public enum MessageSender: Equatable, Sendable {
@@ -121,7 +124,7 @@ public enum ChatScenario: String, Identifiable, CaseIterable, Sendable {
     public var title: String {
         switch self {
         case .interviewPrep:
-            return "Помощь в подготовке к собеседованию"
+            return "Подготовка к собеседованию"
         case .resumeConsultation:
             return "Консультация по резюме"
         case .other:
@@ -140,6 +143,7 @@ extension ChatState: FeatureState {
         case systemHintTapped(String)
         case dismissError
         case clearHistory
+        case sendVacancyId(String)
     }
     
     public enum Feedback: Sendable {
@@ -151,6 +155,8 @@ extension ChatState: FeatureState {
         case consultantResponded(ChatMessage)
         case consultantChunk(messageId: UUID, chunk: String)
         case consultantStreamFinished(messageId: UUID)
+        case vacancyPreparationReceived(String)
+        case resumeReviewReceived(score: Double, recommendations: String)
     }
     
     public enum Effect: Sendable {
@@ -160,6 +166,8 @@ extension ChatState: FeatureState {
         case sendMessage(ChatMessage)
         case handleButtonAction(ButtonAction)
         case clearHistory
+        case prepareForVacancy(String)
+        case reviewResume
     }
     
     @MainActor
@@ -192,8 +200,19 @@ extension ChatState: FeatureState {
             )
             
             state.messages.append(message)
+            let text = state.inputText
             state.inputText = ""
             state.isSending = true
+            
+            if state.waitingForVacancyId {
+                state.waitingForVacancyId = false
+                let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmedText.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil && !trimmedText.isEmpty {
+                    return .prepareForVacancy(trimmedText)
+                } else {
+                    return .sendMessage(message)
+                }
+            }
             
             return .sendMessage(message)
             
@@ -202,7 +221,12 @@ extension ChatState: FeatureState {
             return nil
             
         case .input(.buttonTapped(let button)):
+            state.isSending = true
             return .handleButtonAction(button.action)
+            
+        case .input(.sendVacancyId(let vacancyId)):
+            state.isSending = true
+            return .prepareForVacancy(vacancyId)
             
         case .input(.dismissError):
             state.error = nil
@@ -221,6 +245,43 @@ extension ChatState: FeatureState {
             
         case .feedback(.consultantResponded(let message)):
             state.messages.append(message)
+            state.isSending = false
+            if message.text.contains("ID вакансии") {
+                state.waitingForVacancyId = true
+            }
+            return nil
+            
+        case .feedback(.vacancyPreparationReceived(let recommendations)):
+            if let lastIndex = state.messages.lastIndex(where: { $0.sender == .user }) {
+                let userMessage = state.messages[lastIndex]
+                state.messages[lastIndex] = ChatMessage(
+                    id: userMessage.id,
+                    text: userMessage.text,
+                    sender: userMessage.sender,
+                    timestamp: userMessage.timestamp,
+                    status: .sent
+                )
+            }
+            let message = ChatMessage(
+                text: recommendations,
+                sender: .consultant,
+                timestamp: Date(),
+                status: .sent
+            )
+            state.messages.append(message)
+            state.isSending = false
+            state.waitingForVacancyId = false
+            return nil
+            
+        case .feedback(.resumeReviewReceived(let score, let recommendations)):
+            let message = ChatMessage(
+                text: "Оценка вашего резюме: \(String(format: "%.1f", score))/10\n\n\(recommendations)",
+                sender: .consultant,
+                timestamp: Date(),
+                status: .sent
+            )
+            state.messages.append(message)
+            state.isSending = false
             return nil
             
         case .feedback(.consultantChunk(let messageId, let chunk)):

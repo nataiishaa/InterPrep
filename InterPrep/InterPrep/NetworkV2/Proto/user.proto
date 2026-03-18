@@ -3,7 +3,6 @@ syntax = "proto3";
 package user;
 
 option go_package = "proto/user";
-option swift_prefix = "User_";
 
 enum ResumeProfileStatus {
   RESUME_PROFILE_STATUS_UNSPECIFIED = 0;
@@ -109,7 +108,6 @@ message PatchResumeProfileInternalResponse {
 }
 
 message UpdateResumeProfileRequest {
-  uint32 user_id = 1;
   ResumeProfile profile = 2;
 }
 
