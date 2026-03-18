@@ -53,15 +53,6 @@ struct EditNoteSheet: View {
                     .fontWeight(.semibold)
                     .disabled(noteName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
-                if onDelete != nil {
-                    ToolbarItem(placement: .bottomBar) {
-                        Button(role: .destructive) {
-                            onDelete?()
-                        } label: {
-                            Label("Удалить заметку", systemImage: "trash")
-                        }
-                    }
-                }
             }
         }
     }
