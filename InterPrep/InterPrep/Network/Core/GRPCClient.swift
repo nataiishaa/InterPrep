@@ -6,10 +6,10 @@ public actor GRPCClient {
     private let baseURL: URL
     private let session: URLSession
     
-    public init(host: String = "193.124.33.223", port: Int = 9090) {
+    public init(host: String = "api.interprep.ru", port: Int = 443) {
         self.host = host
         self.port = port
-        self.baseURL = URL(string: "http://\(host):\(port)")!
+        self.baseURL = URL(string: "https://\(host)")!
         
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30

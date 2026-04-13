@@ -10,6 +10,9 @@ import SwiftUI
 import ArchitectureCore
 import DesignSystem
 import NetworkService
+import NotificationService
+import CacheService
+import NetworkMonitorService
 
 public struct ProfileSessionError: Error, Sendable, LocalizedError {
     public let message: String
@@ -26,6 +29,7 @@ public actor ProfileEffectHandler: EffectHandler {
     public typealias S = ProfileState
     
     private let userDefaults = UserDefaults.standard
+    private let cacheManager = CacheManager.shared
     
     private static func profilePhotoCacheFileURL(userId: String) -> URL? {
         guard let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
@@ -100,21 +104,11 @@ public actor ProfileEffectHandler: EffectHandler {
         let result = await NetworkServiceV2.shared.getUser_ResumeProfile()
         switch result {
         case .success(let response):
-            print("🔍 DEBUG ProfileEffectHandler.loadResumeInfo:")
-            print("   - hasProfile: \(response.hasProfile)")
-            print("   - hasSourceMaterialID: \(response.hasSourceMaterialID)")
-            print("   - status: \(response.status)")
-            
             let hasData = response.hasProfile || (response.hasSourceMaterialID && !response.sourceMaterialID.isEmpty)
             let materialId = response.hasSourceMaterialID ? response.sourceMaterialID : nil
-            
-            print("   - hasData (computed): \(hasData)")
-            print("   - materialId: \(materialId ?? "nil")")
-            
             return .resumeInfoLoaded(hasData: hasData, sourceMaterialId: materialId)
             
-        case .failure(let error):
-            print("🔍 DEBUG ProfileEffectHandler.loadResumeInfo failed: \(error)")
+        case .failure:
             return .resumeInfoLoaded(hasData: false, sourceMaterialId: nil)
         }
     }
@@ -126,14 +120,6 @@ public actor ProfileEffectHandler: EffectHandler {
         switch result {
         case .success(let response):
             let u = response.user
-            print("🔍 DEBUG GetMe response:")
-            print("   - id: \(u.id)")
-            print("   - firstName: \(u.firstName)")
-            print("   - lastName: \(u.lastName)")
-            print("   - email: \(u.email)")
-            print("   - resumeUploaded: \(u.resumeUploaded) ⬅️ THIS IS THE FLAG!")
-            print("   - totalInterviews: \(u.totalInterviews)")
-            
             let user = ProfileState.User(
                 id: String(u.id),
                 firstName: u.firstName,
@@ -160,6 +146,9 @@ public actor ProfileEffectHandler: EffectHandler {
             if let data = try? JSONEncoder().encode(statistics) {
                 userDefaults.set(data, forKey: statisticsKey)
             }
+            try? await cacheManager.save(user, forKey: CacheKey.profileUser)
+            try? await cacheManager.save(statistics, forKey: CacheKey.profileStatistics)
+            
             var profilePhotoURL: URL? = Self.profilePhotoCachedURL(userId: user.id)
             if profilePhotoURL == nil {
                 let photoResult = await NetworkServiceV2.shared.getProfilePhoto()
@@ -180,12 +169,12 @@ public actor ProfileEffectHandler: EffectHandler {
                let statData = userDefaults.data(forKey: statisticsKey),
                let statistics = try? JSONDecoder().decode(ProfileState.Statistics.self, from: statData) {
                 let photoURL = Self.profilePhotoCachedURL(userId: user.id)
-                return .profileLoaded(user: user, statistics: statistics, profilePhotoURL: photoURL)
+                return .profileLoadedFromCache(user: user, statistics: statistics, profilePhotoURL: photoURL)
             }
             if let userData = userDefaults.data(forKey: userKey),
                let user = try? JSONDecoder().decode(ProfileState.User.self, from: userData) {
                 let photoURL = Self.profilePhotoCachedURL(userId: user.id)
-                return .profileLoaded(user: user, statistics: ProfileState.Statistics(), profilePhotoURL: photoURL)
+                return .profileLoadedFromCache(user: user, statistics: ProfileState.Statistics(), profilePhotoURL: photoURL)
             }
             let defaultUser = ProfileState.User(
                 id: "",
@@ -201,7 +190,7 @@ public actor ProfileEffectHandler: EffectHandler {
             )
             let data = try JSONEncoder().encode(defaultUser)
             userDefaults.set(data, forKey: userKey)
-            return .profileLoaded(user: defaultUser, statistics: ProfileState.Statistics(), profilePhotoURL: nil)
+            return .profileLoadedFromCache(user: defaultUser, statistics: ProfileState.Statistics(), profilePhotoURL: nil)
         } catch {
             return .loadingFailed("Не удалось загрузить профиль")
         }
@@ -257,11 +246,30 @@ public actor ProfileEffectHandler: EffectHandler {
             do {
                 let data = try JSONEncoder().encode(user)
                 userDefaults.set(data, forKey: userKey)
+                try? await cacheManager.save(user, forKey: CacheKey.profileUser)
                 return .profileUpdated(user)
             } catch {
                 return .loadingFailed("Не удалось сохранить профиль")
             }
         case .failure(let error):
+            if (error as? NetworkError)?.isConnectionError == true {
+                do {
+                    let data = try JSONEncoder().encode(user)
+                    userDefaults.set(data, forKey: userKey)
+                    try? await cacheManager.save(user, forKey: CacheKey.profileUser)
+                    
+                    await MainActor.run {
+                        OfflineSyncManager.shared.addOperation(.updateProfile(
+                            firstName: user.firstName,
+                            lastName: user.lastName
+                        ))
+                    }
+                    
+                    return .profileUpdated(user)
+                } catch {
+                    return .loadingFailed("Не удалось сохранить профиль")
+                }
+            }
             return .loadingFailed(error.localizedDescription)
         }
     }
@@ -272,10 +280,20 @@ public actor ProfileEffectHandler: EffectHandler {
             userDefaults.set(data, forKey: settingsKey)
             
             await applyTheme(settings.theme)
+            await applyNotificationSettings(settings.notificationsEnabled)
             
             return .settingsSaved
         } catch {
             return .loadingFailed("Не удалось сохранить настройки")
+        }
+    }
+    
+    @MainActor
+    private func applyNotificationSettings(_ enabled: Bool) async {
+        NotificationManager.shared.isEnabled = enabled
+        
+        if enabled && !NotificationManager.shared.isAuthorized {
+            _ = await NotificationManager.shared.requestAuthorization()
         }
     }
     
@@ -383,9 +401,16 @@ public actor ProfileEffectHandler: EffectHandler {
             upcoming.sort { $0.date < $1.date }
             completed.sort { $0.date > $1.date }
             
+            try? await cacheManager.save(upcoming, forKey: CacheKey.profileInterviewsUpcoming)
+            try? await cacheManager.save(completed, forKey: CacheKey.profileInterviewsCompleted)
+            
             return .interviewsLoaded(upcoming: upcoming, completed: completed)
             
         case .failure:
+            if let cachedUpcoming = try? await cacheManager.load(forKey: CacheKey.profileInterviewsUpcoming, as: [ProfileState.Interview].self),
+               let cachedCompleted = try? await cacheManager.load(forKey: CacheKey.profileInterviewsCompleted, as: [ProfileState.Interview].self) {
+                return .interviewsLoadedFromCache(upcoming: cachedUpcoming, completed: cachedCompleted)
+            }
             return .interviewsLoadFailed("Не удалось загрузить собеседования")
         }
     }

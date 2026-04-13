@@ -22,7 +22,7 @@ public final class NetworkService: ObservableObject {
         self.calendar = CalendarService(client: grpcClient, tokenStorage: tokenStorage)
     }
     
-    public func configure(host: String = "193.124.33.223", port: Int = 9090) {
+    public func configure(host: String = "api.interprep.ru", port: Int = 443) {
         // Configuration can be done here if needed
     }
 }

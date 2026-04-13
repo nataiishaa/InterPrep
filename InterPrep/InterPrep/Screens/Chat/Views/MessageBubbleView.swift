@@ -12,6 +12,7 @@ struct MessageBubbleView: View {
     let message: ChatMessage
     let onButtonTap: ((MessageButton) -> Void)?
     @Environment(\.colorScheme) var colorScheme
+    @State private var showCopiedFeedback = false
     
     private var isUser: Bool {
         message.sender == .user
@@ -33,6 +34,32 @@ struct MessageBubbleView: View {
                         RoundedRectangle(cornerRadius: 20)
                             .fill(isUser ? Color.brandPrimary : bubbleBackgroundColor)
                     )
+                    .contextMenu {
+                        Button {
+                            UIPasteboard.general.string = message.text
+                            showCopiedFeedback = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                showCopiedFeedback = false
+                            }
+                        } label: {
+                            Label("Копировать", systemImage: "doc.on.doc")
+                        }
+                    }
+                    .overlay(alignment: isUser ? .bottomTrailing : .bottomLeading) {
+                        if showCopiedFeedback {
+                            Text("Скопировано")
+                                .font(.caption2)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.black.opacity(0.7))
+                                )
+                                .offset(y: -40)
+                                .transition(.opacity.combined(with: .scale))
+                        }
+                    }
                 
                 if !message.buttons.isEmpty, let onButtonTap = onButtonTap {
                     VStack(spacing: 6) {

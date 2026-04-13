@@ -23,6 +23,16 @@ extension URLRequestFactory {
         )
     }
     
+    func uploadAndParseResume(
+        _ message: Coach_UploadAndParseResumeRequest
+    ) -> ProtoRequest<Coach_UploadAndParseResumeResponse> {
+        assemble(
+            path: "/gateway.BackendGateway/UploadAndParseResume",
+            message: message,
+            timeout: 120
+        )
+    }
+    
     func answerResume(
         _ message: Coach_AnswerResumeRequest
     ) -> ProtoRequest<Coach_AnswerResumeResponse> {

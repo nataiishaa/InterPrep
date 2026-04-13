@@ -13,6 +13,7 @@ public struct ProfileState {
     public var isLoading: Bool = false
     public var errorMessage: String?
     public var statistics: Statistics = Statistics()
+    public var isOfflineMode: Bool = false
     
     public var settings: AppSettings = AppSettings()
     
@@ -218,6 +219,7 @@ extension ProfileState: FeatureState {
         case userLoaded(User)
         case statisticsLoaded(Statistics)
         case profileLoaded(user: User, statistics: Statistics, profilePhotoURL: URL?)
+        case profileLoadedFromCache(user: User, statistics: Statistics, profilePhotoURL: URL?)
         case profilePhotoUpdated(URL)
         case profileUpdated(User)
         case settingsSaved
@@ -229,6 +231,7 @@ extension ProfileState: FeatureState {
         case resumeDownloadFailed(String)
         case resumeInfoLoaded(hasData: Bool, sourceMaterialId: String?)
         case interviewsLoaded(upcoming: [Interview], completed: [Interview])
+        case interviewsLoadedFromCache(upcoming: [Interview], completed: [Interview])
         case interviewsLoadFailed(String)
     }
     
@@ -384,6 +387,15 @@ extension ProfileState: FeatureState {
             state.user = user
             state.statistics = statistics
             state.cachedProfilePhotoURL = profilePhotoURL
+            state.isOfflineMode = false
+            return .loadResumeInfo
+            
+        case let .feedback(.profileLoadedFromCache(user, statistics, profilePhotoURL)):
+            state.isLoading = false
+            state.user = user
+            state.statistics = statistics
+            state.cachedProfilePhotoURL = profilePhotoURL
+            state.isOfflineMode = true
             return .loadResumeInfo
             
         case let .feedback(.profilePhotoUpdated(url)):
@@ -432,6 +444,13 @@ extension ProfileState: FeatureState {
             state.isLoadingInterviews = false
             state.upcomingInterviews = upcoming
             state.completedInterviews = completed
+            state.isOfflineMode = false
+            
+        case let .feedback(.interviewsLoadedFromCache(upcoming, completed)):
+            state.isLoadingInterviews = false
+            state.upcomingInterviews = upcoming
+            state.completedInterviews = completed
+            state.isOfflineMode = true
             
         case let .feedback(.interviewsLoadFailed(error)):
             state.isLoadingInterviews = false

@@ -36,6 +36,7 @@ public struct CalendarContainer: View {
             currentMonth: store.state.currentMonth,
             events: store.state.events,
             isCreatingEvent: store.state.isCreatingEvent,
+            isOfflineMode: store.state.isOfflineMode,
             onDateSelected: { date in
                 store.send(.dateSelected(date))
             },

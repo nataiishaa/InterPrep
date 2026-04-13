@@ -15,6 +15,7 @@ public struct CalendarState {
     public var isCreatingEvent: Bool = false
     public var isLoading: Bool = false
     public var errorMessage: String?
+    public var isOfflineMode: Bool = false
     
     public var editingEventId: String?
     public var newEventTitle: String = ""
@@ -125,6 +126,7 @@ extension CalendarState: FeatureState {
     
     public enum Feedback: Sendable {
         case eventsLoaded([CalendarEvent])
+        case eventsLoadedFromCache([CalendarEvent])
         case eventCreated(CalendarEvent)
         case eventUpdated(CalendarEvent)
         case eventDeleted(String)
@@ -281,6 +283,12 @@ extension CalendarState: FeatureState {
         case let .feedback(.eventsLoaded(events)):
             state.isLoading = false
             state.events = events
+            state.isOfflineMode = false
+            
+        case let .feedback(.eventsLoadedFromCache(events)):
+            state.isLoading = false
+            state.events = events
+            state.isOfflineMode = true
             
         case let .feedback(.eventCreated(event)):
             state.editingEventId = nil

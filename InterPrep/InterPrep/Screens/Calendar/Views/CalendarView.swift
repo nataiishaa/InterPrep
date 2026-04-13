@@ -71,7 +71,20 @@ struct CalendarView: View {
     @ViewBuilder
     private var header: some View {
         VStack(spacing: 16) {
-            // Month navigation with sync button
+            if model.isOfflineMode {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise.icloud")
+                        .font(.caption)
+                    Text("Данные из кеша")
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.secondary.opacity(0.1))
+                .cornerRadius(12)
+            }
+            
             HStack {
                 Button {
                     model.onMonthChanged(previousMonth)
@@ -803,6 +816,7 @@ private struct EventDetailSheet: View {
             )
         ],
         isCreatingEvent: false,
+        isOfflineMode: false,
         onDateSelected: { _ in },
         onMonthChanged: { _ in },
         onCreateEventTapped: {},

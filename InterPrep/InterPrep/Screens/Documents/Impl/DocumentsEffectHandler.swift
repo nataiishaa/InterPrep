@@ -8,11 +8,19 @@
 import Foundation
 import ArchitectureCore
 import NetworkService
+import CacheService
+import NetworkMonitorService
+
+private struct FolderContentsCache: Codable {
+    let folders: [Folder]
+    let documents: [Document]
+}
 
 public actor DocumentsEffectHandler: EffectHandler {
     public typealias S = DocumentsState
     
     private let documentService: DocumentServicing
+    private let cacheManager = CacheManager.shared
     
     public init(documentService: DocumentServicing) {
         self.documentService = documentService
@@ -34,16 +42,28 @@ public actor DocumentsEffectHandler: EffectHandler {
             do {
                 let folders = try await documentService.fetchFolders()
                 let documents = try await documentService.fetchRecentDocuments()
+                
+                try? await cacheManager.save(folders, forKey: CacheKey.documentsFolders)
+                try? await cacheManager.save(documents, forKey: CacheKey.documentsRecent)
+                
                 return .foldersAndDocumentsLoaded(folders, documents)
             } catch {
+                if let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self),
+                   let cachedDocuments = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self) {
+                    return .foldersAndDocumentsLoadedFromCache(cachedFolders, cachedDocuments)
+                }
                 return .loadingFailed(Self.message(for: error))
             }
             
         case .loadRecentDocuments:
             do {
                 let documents = try await documentService.fetchRecentDocuments()
+                try? await cacheManager.save(documents, forKey: CacheKey.documentsRecent)
                 return .recentDocumentsLoaded(documents)
             } catch {
+                if let cachedDocuments = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self) {
+                    return .recentDocumentsLoaded(cachedDocuments)
+                }
                 return .loadingFailed(Self.message(for: error))
             }
             
@@ -53,8 +73,23 @@ public actor DocumentsEffectHandler: EffectHandler {
                 try await documentService.createFolder(name: name, parentId: parentId)
                 let folders = try await documentService.fetchFolders()
                 let documents = try await documentService.fetchRecentDocuments()
+                
+                try? await cacheManager.save(folders, forKey: CacheKey.documentsFolders)
+                try? await cacheManager.save(documents, forKey: CacheKey.documentsRecent)
+                
                 return .foldersAndDocumentsLoaded(folders, documents)
             } catch {
+                if (error as? NetworkError)?.isConnectionError == true {
+                    let parentId = parentFolder.flatMap { $0.nodeId }.map { UInt32($0) }
+                    await MainActor.run {
+                        OfflineSyncManager.shared.addOperation(.createFolder(name: name, parentId: parentId))
+                    }
+                    
+                    if let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self),
+                       let cachedDocuments = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self) {
+                        return .foldersAndDocumentsLoaded(cachedFolders, cachedDocuments)
+                    }
+                }
                 return .loadingFailed(Self.message(for: error))
             }
 
@@ -64,8 +99,17 @@ public actor DocumentsEffectHandler: EffectHandler {
                     return .loadingFailed("Папка не найдена")
                 }
                 let (folders, documents) = try await documentService.fetchFolderContents(parentNodeId: nodeId)
+                
+                let cacheKey = CacheKey.documentFolderContents(folderId: folder.id.uuidString)
+                let cacheData = FolderContentsCache(folders: folders, documents: documents)
+                try? await cacheManager.save(cacheData, forKey: cacheKey)
+                
                 return .folderContentsLoaded(folders, documents)
             } catch {
+                let cacheKey = CacheKey.documentFolderContents(folderId: folder.id.uuidString)
+                if let cached = try? await cacheManager.load(forKey: cacheKey, as: FolderContentsCache.self) {
+                    return .folderContentsLoadedFromCache(cached.folders, cached.documents)
+                }
                 return .loadingFailed(Self.message(for: error))
             }
             
@@ -113,8 +157,26 @@ public actor DocumentsEffectHandler: EffectHandler {
                 try await documentService.deleteDocument(id: id)
                 let folders = try await documentService.fetchFolders()
                 let documents = try await documentService.fetchRecentDocuments()
+                
+                try? await cacheManager.save(folders, forKey: CacheKey.documentsFolders)
+                try? await cacheManager.save(documents, forKey: CacheKey.documentsRecent)
+                
                 return .foldersAndDocumentsLoaded(folders, documents)
             } catch {
+                if (error as? NetworkError)?.isConnectionError == true {
+                    await MainActor.run {
+                        OfflineSyncManager.shared.addOperation(.deleteDocument(id: id))
+                    }
+                    
+                    if var cachedDocuments = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self) {
+                        cachedDocuments.removeAll { $0.id == id }
+                        try? await cacheManager.save(cachedDocuments, forKey: CacheKey.documentsRecent)
+                        
+                        if let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self) {
+                            return .foldersAndDocumentsLoaded(cachedFolders, cachedDocuments)
+                        }
+                    }
+                }
                 return .loadingFailed(Self.message(for: error))
             }
 
@@ -162,6 +224,7 @@ public final actor DocumentServiceImpl: DocumentServicing {
     private var nodeIdByDocumentId: [UUID: UInt32] = [:]
     private var documentIdToMaterialId: [UUID: String] = [:]
     private var folderIdToNodeId: [UUID: UInt32] = [:]
+    private var documentSizeCache: [String: Int64] = [:]
     
     private static func uuidFromNodeId(_ nodeId: UInt32, folder: Bool) -> UUID {
         var bytes = [UInt8](repeating: 0, count: 16)
@@ -247,7 +310,10 @@ public final actor DocumentServiceImpl: DocumentServicing {
                         documentIdToMaterialId[documentId] = node.materialID
                     }
                     
-                    let size = node.hasFile ? node.file.size : 0
+                    var size = node.hasFile ? node.file.size : 0
+                    if size == 0, node.hasMaterialID, let cachedSize = documentSizeCache[node.materialID] {
+                        size = cachedSize
+                    }
                     let createdAt = Self.safeDate(timestamp: Int64(node.createdAt))
                     let updatedAt = Self.safeDate(timestamp: Int64(node.updatedAt))
                     
@@ -319,7 +385,10 @@ public final actor DocumentServiceImpl: DocumentServicing {
                     if node.hasMaterialID {
                         documentIdToMaterialId[documentId] = node.materialID
                     }
-                    let size = node.hasFile ? node.file.size : 0
+                    var size = node.hasFile ? node.file.size : 0
+                    if size == 0, node.hasMaterialID, let cachedSize = documentSizeCache[node.materialID] {
+                        size = cachedSize
+                    }
                     let parentFolderId = node.hasParentID ? Self.uuidFromNodeId(node.parentID, folder: true) : nil
                     return Document(
                         id: documentId,
@@ -394,7 +463,11 @@ public final actor DocumentServiceImpl: DocumentServicing {
         )
         
         switch result {
-        case .success:
+        case .success(let response):
+            if !response.materialID.isEmpty {
+                let actualSize = response.size > 0 ? response.size : Int64(data.count)
+                documentSizeCache[response.materialID] = actualSize
+            }
             return
         case .failure(let error):
             throw error
@@ -403,7 +476,7 @@ public final actor DocumentServiceImpl: DocumentServicing {
     
     public func createNote(title: String, content: String, parentId: UInt32?) async throws {
         let data = Data(content.utf8)
-        let filename = "\(title).txt"
+        let filename = title.hasSuffix(".txt") ? title : "\(title).txt"
         let result = await networkService.uploadFile(
             fileContent: data,
             filename: filename,
@@ -411,7 +484,11 @@ public final actor DocumentServiceImpl: DocumentServicing {
             name: title
         )
         switch result {
-        case .success:
+        case .success(let response):
+            if !response.materialID.isEmpty {
+                let actualSize = response.size > 0 ? response.size : Int64(data.count)
+                documentSizeCache[response.materialID] = actualSize
+            }
             return
         case .failure(let error):
             throw error
@@ -477,7 +554,11 @@ public final actor DocumentServiceImpl: DocumentServicing {
         )
 
         switch uploadResult {
-        case .success:
+        case .success(let response):
+            if !response.materialID.isEmpty {
+                let actualSize = response.size > 0 ? response.size : Int64(data.count)
+                documentSizeCache[response.materialID] = actualSize
+            }
             return
         case .failure(let error):
             throw error

@@ -11,9 +11,11 @@ import ArchitectureCore
 public struct DiscoveryContainer: View {
     @StateObject private var store: DiscoveryStore
     @State private var selectedVacancy: DiscoveryState.Vacancy?
+    var onNavigateToResumeUpload: (() -> Void)?
     
-    public init(store: @autoclosure @escaping () -> DiscoveryStore) {
+    public init(store: @autoclosure @escaping () -> DiscoveryStore, onNavigateToResumeUpload: (() -> Void)? = nil) {
         _store = StateObject(wrappedValue: store())
+        self.onNavigateToResumeUpload = onNavigateToResumeUpload
     }
     
     public var body: some View {
@@ -55,7 +57,7 @@ public struct DiscoveryContainer: View {
                 store.send(.filterChanged(filter))
             },
             onUploadResume: {
-                store.send(.uploadResumeTapped)
+                onNavigateToResumeUpload?()
             },
             onVacancyTap: { vacancy in
                 selectedVacancy = vacancy

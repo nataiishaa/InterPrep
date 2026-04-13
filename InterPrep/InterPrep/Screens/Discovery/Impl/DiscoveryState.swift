@@ -123,8 +123,12 @@ extension DiscoveryState: FeatureState {
             
         case let .feedback(.resumeCheckCompleted(hasResume)):
             state.hasResume = hasResume
-            state.isLoading = true
-            return .loadVacancies(state.selectedFilter, searchQuery: state.searchQuery)
+            if hasResume {
+                state.isLoading = true
+                return .loadVacancies(state.selectedFilter, searchQuery: state.searchQuery)
+            } else {
+                state.isLoading = false
+            }
             
         case let .feedback(.vacanciesLoaded(vacancies)):
             state.isLoading = false

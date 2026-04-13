@@ -13,6 +13,7 @@ extension CalendarView {
         let currentMonth: Date
         let events: [CalendarState.CalendarEvent]
         let isCreatingEvent: Bool
+        let isOfflineMode: Bool
         let onDateSelected: (Date) -> Void
         let onMonthChanged: (Date) -> Void
         let onCreateEventTapped: () -> Void
