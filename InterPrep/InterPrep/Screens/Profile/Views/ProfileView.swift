@@ -8,15 +8,18 @@
 import SwiftUI
 import DesignSystem
 import CalendarFeature
+import NotificationService
 
 struct ProfileView: View {
     let model: Model
+    @StateObject private var notificationManager = NotificationManager.shared
     @State private var showEditProfile = false
     @State private var showCalDAVSettings = false
     @State private var showContactDevelopers = false
     @State private var showLogoutAlert = false
     @State private var showDeleteAccountSheet = false
     @State private var deletePassword = ""
+    @State private var showNotificationAlert = false
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -71,6 +74,24 @@ struct ProfileView: View {
                 }
             )
         }
+        .alert("Разрешить уведомления?", isPresented: $showNotificationAlert) {
+            Button("Отмена", role: .cancel) {}
+            Button("Разрешить") {
+                Task {
+                    let granted = await notificationManager.requestAuthorization()
+                    if granted {
+                        model.onNotificationsToggled(true)
+                    }
+                }
+            }
+        } message: {
+            Text("Приложение будет напоминать вам о предстоящих событиях и собеседованиях.")
+        }
+        .onAppear {
+            Task {
+                await notificationManager.checkAuthorizationStatus()
+            }
+        }
     }
     
     // MARK: - Profile Header
@@ -78,7 +99,20 @@ struct ProfileView: View {
     @ViewBuilder
     private var profileHeader: some View {
         VStack(spacing: 16) {
-            // Avatar (кеш с диска или с сервера, иначе инициалы)
+            if model.isOfflineMode {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise.icloud")
+                        .font(.caption)
+                    Text("Данные из кеша")
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.secondary.opacity(0.1))
+                .cornerRadius(12)
+            }
+            
             ZStack(alignment: .bottomTrailing) {
                 if let localURL = model.cachedProfilePhotoURL {
                     avatarImageFromURL(localURL)
@@ -303,16 +337,47 @@ struct ProfileView: View {
                 .padding(.horizontal, 4)
             
             VStack(spacing: 0) {
-                SettingsRow(
-                    icon: "bell.fill",
-                    title: "Уведомления",
-                    color: .red
-                ) {
-                    Toggle("", isOn: Binding(
-                        get: { model.settings.notificationsEnabled },
-                        set: { model.onNotificationsToggled($0) }
-                    ))
-                    .tint(.brandPrimary)
+                VStack(spacing: 0) {
+                    SettingsRow(
+                        icon: "bell.fill",
+                        title: "Уведомления",
+                        color: .red
+                    ) {
+                        Toggle("", isOn: Binding(
+                            get: { model.settings.notificationsEnabled },
+                            set: { newValue in
+                                if newValue && !notificationManager.isAuthorized {
+                                    showNotificationAlert = true
+                                } else {
+                                    model.onNotificationsToggled(newValue)
+                                }
+                            }
+                        ))
+                        .tint(.brandPrimary)
+                    }
+                    
+                    if model.settings.notificationsEnabled && !notificationManager.isAuthorized {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                            
+                            Text("Разрешите уведомления в настройках iOS")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Button("Открыть") {
+                                notificationManager.openSettings()
+                            }
+                            .font(.caption)
+                            .foregroundColor(.brandPrimary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.orange.opacity(0.1))
+                    }
                 }
                 
                 Divider().padding(.leading, 52)
@@ -749,6 +814,7 @@ private struct ProfileContactDevelopersView: View {
         ],
         isLoadingInterviews: false,
         hasResumeData: true,
+        isOfflineMode: false,
         onNotificationsToggled: { _ in },
         onThemeChanged: { _ in },
         onChangeResume: {},

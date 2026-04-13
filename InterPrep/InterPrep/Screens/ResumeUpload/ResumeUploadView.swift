@@ -184,18 +184,6 @@ struct ResumeUploadView: View {
         .padding()
         .background(Color.white.opacity(0.15))
         .cornerRadius(12)
-        
-        // Progress bar
-        if model.uploadStatus == .uploading {
-            VStack(spacing: 8) {
-                ProgressView(value: model.uploadProgress)
-                    .tint(.white)
-                
-                Text("\(Int(model.uploadProgress * 100))%")
-                    .font(.caption)
-                    .foregroundColor(.textSecondary)
-            }
-        }
     }
     
     @ViewBuilder
@@ -341,20 +329,43 @@ struct DocumentPicker: UIViewControllerRepresentable {
         }
         
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            guard let url = urls.first else { return }
-            guard url.startAccessingSecurityScopedResource() else { return }
+            guard let url = urls.first else {
+                return
+            }
+            
+            guard url.startAccessingSecurityScopedResource() else {
+                return
+            }
             defer { url.stopAccessingSecurityScopedResource() }
 
             let tempDir = FileManager.default.temporaryDirectory
-            let tempURL = tempDir.appendingPathComponent(url.lastPathComponent)
+            let fileExtension = url.pathExtension
+            
+            let timestamp = Int(Date().timeIntervalSince1970)
+            let safeFileName = "resume_\(timestamp).\(fileExtension)"
+            let tempURL = tempDir.appendingPathComponent(safeFileName)
+            
             do {
+                guard FileManager.default.fileExists(atPath: url.path) else {
+                    let data = try Data(contentsOf: url)
+                    try data.write(to: tempURL)
+                    onFilePicked(tempURL)
+                    return
+                }
+                
                 if FileManager.default.fileExists(atPath: tempURL.path) {
                     try FileManager.default.removeItem(at: tempURL)
                 }
+                
                 try FileManager.default.copyItem(at: url, to: tempURL)
                 onFilePicked(tempURL)
             } catch {
-                onFilePicked(url)
+                do {
+                    let data = try Data(contentsOf: url)
+                    try data.write(to: tempURL)
+                    onFilePicked(tempURL)
+                } catch {
+                }
             }
         }
     }

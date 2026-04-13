@@ -424,44 +424,18 @@ struct ResumeProfileDetailView: View {
         isLoading = false
         switch result {
         case .success(let response):
-            print("🔍 DEBUG GetResumeProfile response:")
-            print("   - status: \(response.status)")
-            print("   - hasProfile: \(response.hasProfile)")
-            print("   - hasSourceMaterialID: \(response.hasSourceMaterialID)")
-            print("   - sourceMaterialID: '\(response.sourceMaterialID)'")
-            print("   - version: \(response.version)")
-            print("   - confirmedFields: \(response.confirmedFields)")
-            if response.hasProfile {
-                let p = response.profile
-                print("   - profile.targetRoles: \(p.targetRoles)")
-                print("   - profile.areas: \(p.areas.map { $0.name })")
-                print("   - profile.skillsTop: \(p.skillsTop)")
-                print("   - profile.workFormat: \(p.workFormat)")
-                print("   - profile.hasExperienceLevel: \(p.hasExperienceLevel)")
-                print("   - profile.hasSalaryMin: \(p.hasSalaryMin)")
-                print("   - profile.hasEducationLevel: \(p.hasEducationLevel)")
-            }
-            
             status = response.status
             sourceMaterialId = response.hasSourceMaterialID ? response.sourceMaterialID : nil
             
-            // Проверяем наличие профиля:
-            // 1. Если hasProfile = true - показываем профиль (даже если пустой)
-            // 2. Если hasProfile = false, но есть sourceMaterialID - показываем пустой профиль для заполнения
-            // 3. Иначе - показываем ошибку
             if response.hasProfile {
                 profile = response.profile
-                print("✅ Profile loaded successfully")
             } else if response.hasSourceMaterialID && !response.sourceMaterialID.isEmpty {
                 profile = User_ResumeProfile()
-                print("⚠️ Profile empty but has sourceMaterialID - showing empty form")
             } else {
                 profile = nil
                 errorMessage = "Резюме не найдено. Загрузите файл резюме или заполните данные вручную."
-                print("❌ No profile and no sourceMaterialID - showing error")
             }
         case .failure(let error):
-            print("🔍 DEBUG GetResumeProfile error: \(error)")
             errorMessage = error.localizedDescription
         }
     }

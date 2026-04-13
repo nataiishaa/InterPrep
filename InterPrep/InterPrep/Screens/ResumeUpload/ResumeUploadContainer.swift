@@ -7,9 +7,11 @@
 
 import SwiftUI
 import ArchitectureCore
+import DesignSystem
 
 public struct ResumeUploadContainer: View {
     @StateObject private var store: ResumeUploadStore
+    @State private var isClosing = false
     let onComplete: () -> Void
     let onCancel: () -> Void
     
@@ -24,14 +26,31 @@ public struct ResumeUploadContainer: View {
     }
     
     public var body: some View {
-        ResumeUploadView(model: makeModel())
-            .onChange(of: store.state.uploadStatus) { _, newStatus in
-                if newStatus == .success {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        onComplete()
-                    }
+        ZStack {
+            ResumeUploadView(model: makeModel())
+                .opacity(isClosing ? 0 : 1)
+            
+            if isClosing {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                        .tint(.white)
+                    Text("Загружаем вакансии...")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(LinearGradient.brandBackground)
+            }
+        }
+        .onChange(of: store.state.uploadStatus) { _, newStatus in
+            if newStatus == .success {
+                isClosing = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    onComplete()
                 }
             }
+        }
     }
     
     private func makeModel() -> ResumeUploadView.Model {

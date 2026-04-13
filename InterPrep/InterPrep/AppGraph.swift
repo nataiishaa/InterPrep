@@ -26,7 +26,9 @@ final class AppGraph {
     private lazy var authService: AuthService = AuthServiceImpl()
     private lazy var resumeService: ResumeService = ResumeServiceImpl()
     private lazy var vacancyService: VacancyService = VacancyServiceImpl()
-    private lazy var fileUploadService: FileUploadService = FileUploadServiceImpl()
+    private lazy var fileUploadService: FileUploadService = {
+        FileUploadServiceImpl(resumeService: self.resumeService)
+    }()
     private lazy var documentService: DocumentServicing = DocumentServiceImpl()
     private lazy var chatService: ChatServicing = ChatServiceImpl()
     private lazy var calendarService: CalendarServicing = CalendarServiceImpl()
@@ -73,15 +75,22 @@ final class AppGraph {
         )
     }
     
-    func makeDiscoveryContainer() -> some View {
+    func makeDiscoveryStore() -> DiscoveryStore {
         let effectHandler = DiscoveryEffectHandler(
             resumeService: self.resumeService,
             vacancyService: self.vacancyService
         )
-        return DiscoveryContainer(store: Store(
+        return Store(
             state: DiscoveryState(),
             effectHandler: effectHandler
-        ))
+        )
+    }
+    
+    func makeDiscoveryContainer(onNavigateToResumeUpload: (() -> Void)? = nil) -> some View {
+        return DiscoveryContainer(
+            store: self.makeDiscoveryStore(),
+            onNavigateToResumeUpload: onNavigateToResumeUpload
+        )
     }
     
     func makeResumeUploadContainer(

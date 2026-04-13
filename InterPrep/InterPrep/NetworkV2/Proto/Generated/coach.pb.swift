@@ -8,6 +8,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
+import Foundation
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -1585,6 +1586,117 @@ extension Coach_GetCoachChatHistoryResponse: SwiftProtobuf.Message, SwiftProtobu
   public static func ==(lhs: Coach_GetCoachChatHistoryResponse, rhs: Coach_GetCoachChatHistoryResponse) -> Bool {
     if lhs.entries != rhs.entries {return false}
     if lhs.totalCount != rhs.totalCount {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+// MARK: - UploadAndParseResume (Custom Addition)
+
+public struct Coach_UploadAndParseResumeRequest: Sendable {
+  public var fileContent: Data = Data()
+  public var filename: String = String()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+  
+  public init() {}
+}
+
+public struct Coach_UploadAndParseResumeResponse: Sendable {
+  public var sessionID: String = String()
+  public var status: String = String()
+  
+  public var draft: Coach_ResumeProfileDraft {
+    get {return _draft ?? Coach_ResumeProfileDraft()}
+    set {_draft = newValue}
+  }
+  public var hasDraft: Bool {return self._draft != nil}
+  public mutating func clearDraft() {self._draft = nil}
+  
+  public var questions: [Coach_Question] = []
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+  
+  public init() {}
+  
+  fileprivate var _draft: Coach_ResumeProfileDraft? = nil
+}
+
+extension Coach_UploadAndParseResumeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = "coach.UploadAndParseResumeRequest"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "file_content"),
+    2: .same(proto: "filename"),
+  ]
+  
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.fileContent) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.filename) }()
+      default: break
+      }
+    }
+  }
+  
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.fileContent.isEmpty {
+      try visitor.visitSingularBytesField(value: self.fileContent, fieldNumber: 1)
+    }
+    if !self.filename.isEmpty {
+      try visitor.visitSingularStringField(value: self.filename, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+  
+  public static func ==(lhs: Coach_UploadAndParseResumeRequest, rhs: Coach_UploadAndParseResumeRequest) -> Bool {
+    if lhs.fileContent != rhs.fileContent {return false}
+    if lhs.filename != rhs.filename {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Coach_UploadAndParseResumeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = "coach.UploadAndParseResumeResponse"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+    2: .same(proto: "status"),
+    3: .same(proto: "draft"),
+    4: .same(proto: "questions"),
+  ]
+  
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.status) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._draft) }()
+      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.questions) }()
+      default: break
+      }
+    }
+  }
+  
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.sessionID.isEmpty {
+      try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 1)
+    }
+    if !self.status.isEmpty {
+      try visitor.visitSingularStringField(value: self.status, fieldNumber: 2)
+    }
+    try { if let v = self._draft {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
+    if !self.questions.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.questions, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+  
+  public static func ==(lhs: Coach_UploadAndParseResumeResponse, rhs: Coach_UploadAndParseResumeResponse) -> Bool {
+    if lhs.sessionID != rhs.sessionID {return false}
+    if lhs.status != rhs.status {return false}
+    if lhs._draft != rhs._draft {return false}
+    if lhs.questions != rhs.questions {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -16,6 +16,7 @@ extension DocumentsView {
         let folderContentsDocuments: [Document]
         let isLoading: Bool
         let error: String?
+        let isOfflineMode: Bool
         let showingCreateFolderSheet: Bool
         let folderToRename: Folder?
         let folderToDelete: Folder?

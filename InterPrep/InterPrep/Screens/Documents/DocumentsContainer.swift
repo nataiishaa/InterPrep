@@ -31,6 +31,7 @@ public struct DocumentsContainer: View {
             folderContentsDocuments: store.state.folderContentsDocuments,
             isLoading: store.state.isLoading,
             error: store.state.error,
+            isOfflineMode: store.state.isOfflineMode,
             showingCreateFolderSheet: store.state.showingCreateFolderSheet,
             folderToRename: store.state.folderToRename,
             folderToDelete: store.state.folderToDelete,

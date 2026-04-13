@@ -7,9 +7,11 @@
 
 import SwiftUI
 import DesignSystem
+import NetworkService
 
 @main
 struct InterPrepApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appCoordinator = AppCoordinator()
     @StateObject private var themeManager = ThemeManager.shared
     
@@ -46,11 +48,25 @@ final class AppCoordinator: ObservableObject {
         } else {
             self.appState = .auth
         }
+        
+        Task {
+            await NetworkServiceV2.shared.setSessionDelegate(self)
+        }
     }
     
     private static func hasStoredSession() -> Bool {
         let ud = UserDefaults.standard
         return ud.string(forKey: accessTokenKey) != nil && ud.string(forKey: refreshTokenKey) != nil
+    }
+    
+    private func handleSessionInvalidation() {
+        Task {
+            await NetworkServiceV2.shared.clearTokens()
+            
+            withAnimation(.easeInOut(duration: 0.4)) {
+                self.appState = .auth
+            }
+        }
     }
     
     @ViewBuilder
@@ -81,5 +97,15 @@ final class AppCoordinator: ObservableObject {
         }
         .transition(.opacity)
         .animation(.easeInOut(duration: 0.4), value: appState)
+    }
+}
+
+extension AppCoordinator: @unchecked Sendable {}
+
+extension AppCoordinator: SessionInvalidationDelegate {
+    nonisolated func sessionDidInvalidate() {
+        Task { @MainActor in
+            handleSessionInvalidation()
+        }
     }
 }

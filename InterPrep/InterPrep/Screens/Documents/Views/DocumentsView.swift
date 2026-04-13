@@ -77,6 +77,8 @@ struct DocumentsView: View {
                         model.onDocumentDelete(note)
                     }
                 )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
         }
         .sheet(isPresented: Binding(get: { model.documentURLToOpen != nil }, set: { if !$0 { model.onClearDocumentToOpen() } })) {
@@ -111,6 +113,20 @@ struct DocumentsView: View {
     private var rootContentView: some View {
         ScrollView {
             VStack(spacing: 24) {
+                if model.isOfflineMode {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.clockwise.icloud")
+                            .font(.caption)
+                        Text("Данные из кеша")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.secondary.opacity(0.1))
+                    .cornerRadius(12)
+                }
+                
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Мои папки")
                         .font(.title2)
@@ -340,6 +356,7 @@ struct QuickLookPreview: UIViewControllerRepresentable {
             folderContentsDocuments: [],
             isLoading: false,
             error: nil,
+            isOfflineMode: false,
             showingCreateFolderSheet: false,
             folderToRename: nil,
             folderToDelete: nil,

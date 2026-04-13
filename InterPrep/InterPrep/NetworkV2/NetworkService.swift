@@ -11,16 +11,19 @@ public final class NetworkServiceV2: ObservableObject {
     private let networkService: AsyncNetworkService
     private let tokenStorage: TokenStorage
     private let grpcAuthClient: BackendGatewayGRPCClient?
+    private let sessionManager: SessionManager
     
     private init() {
-        self.tokenStorage = TokenStorage()
-        self.grpcAuthClient = try? BackendGatewayGRPCClient(host: "193.124.33.223", port: 9090)
+        let tokenStorage = TokenStorage()
+        self.tokenStorage = tokenStorage
+        self.grpcAuthClient = try? BackendGatewayGRPCClient(host: "api.interprep.ru", port: 443)
+        self.sessionManager = SessionManager()
         
         self.factory = URLRequestFactory(
             networkProvider: DefaultNetworkProvider(
-                scheme: "http",
-                host: "193.124.33.223",
-                port: 9090
+                scheme: "https",
+                host: "api.interprep.ru",
+                port: nil
             )
         )
         
@@ -32,12 +35,54 @@ public final class NetworkServiceV2: ObservableObject {
         
         let session = URLSession(configuration: sessionConfiguration)
         
-        let tokenProvider = DefaultTokenProvider(tokenStorage: tokenStorage)
+        let tokenProvider = RefreshingTokenProvider(
+            tokenStorage: tokenStorage,
+            refreshTokenHandler: { refreshToken in
+                var request = Auth_RefreshRequest()
+                request.refreshToken = refreshToken
+                
+                let factory = URLRequestFactory(
+                    networkProvider: DefaultNetworkProvider(
+                        scheme: "https",
+                        host: "api.interprep.ru",
+                        port: nil
+                    )
+                )
+                
+                let sessionConfig = URLSessionConfiguration.default
+                sessionConfig.timeoutIntervalForRequest = 60
+                let tempSession = URLSession(configuration: sessionConfig)
+                
+                let tempTokenProvider = DefaultTokenProvider(tokenStorage: tokenStorage)
+                let tempNetworkService = AsyncNetworkService(
+                    session: tempSession,
+                    tokenProvider: tempTokenProvider,
+                    responseObservers: []
+                )
+                
+                let result = await tempNetworkService.perform(factory.refresh(request))
+                
+                switch result {
+                case .success(let response):
+                    return .success((
+                        accessToken: response.accessToken,
+                        refreshToken: refreshToken
+                    ))
+                case .failure(let error):
+                    return .failure(error)
+                }
+            }
+        )
+        
         self.networkService = AsyncNetworkService(
             session: session,
             tokenProvider: tokenProvider,
-            responseObservers: [LoggingObserver()]
+            responseObservers: [LoggingObserver(), sessionManager]
         )
+    }
+    
+    public func setSessionDelegate(_ delegate: SessionInvalidationDelegate?) async {
+        await sessionManager.setDelegate(delegate)
     }
     
     // MARK: - Auth (gRPC)
@@ -531,6 +576,26 @@ public final class NetworkServiceV2: ObservableObject {
         return await networkService.perform(factory.parseResume(request))
     }
     
+    public func uploadAndParseResume(fileContent: Data, filename: String) async -> Result<Coach_UploadAndParseResumeResponse, NetworkError> {
+        var request = Coach_UploadAndParseResumeRequest()
+        request.fileContent = fileContent
+        request.filename = filename
+        
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.uploadAndParseResume(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) {
+                    return .failure(.apiError(api))
+                }
+                return .failure(.transportError(error))
+            }
+        }
+        
+        return .failure(.unauthorized)
+    }
+    
     func answerResume(sessionId: String, answers: [Coach_QuestionAnswer]) async -> Result<Coach_AnswerResumeResponse, NetworkError> {
         var request = Coach_AnswerResumeRequest()
         request.sessionID = sessionId
@@ -827,9 +892,10 @@ public final class BackendGatewayGRPCClient: Sendable {
     private let group: EventLoopGroup
     private let client: Gateway_BackendGatewayClient
 
-    public init(host: String = "193.124.33.223", port: Int = 9090) throws {
+    public init(host: String = "api.interprep.ru", port: Int = 443) throws {
         self.group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
-        self.connection = ClientConnection.insecure(group: group)
+        self.connection = ClientConnection
+            .usingTLSBackedByNIOSSL(on: group)
             .connect(host: host, port: port)
         self.client = Gateway_BackendGatewayClient(channel: connection)
     }
@@ -1089,6 +1155,17 @@ public final class BackendGatewayGRPCClient: Sendable {
         return try await eventLoopFutureToAsync(call.response)
     }
     
+    public func uploadAndParseResume(request: Coach_UploadAndParseResumeRequest, accessToken: String?) async throws -> Coach_UploadAndParseResumeResponse {
+        let options = callOptionsForLLM(with: accessToken)
+        let call: UnaryCall<Coach_UploadAndParseResumeRequest, Coach_UploadAndParseResumeResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/UploadAndParseResume",
+            request: request,
+            callOptions: options,
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
     public func getCoachChatHistory(request: Coach_GetCoachChatHistoryRequest, accessToken: String?) async throws -> Coach_GetCoachChatHistoryResponse {
         let options = callOptions(with: accessToken)
         let call: UnaryCall<Coach_GetCoachChatHistoryRequest, Coach_GetCoachChatHistoryResponse> = connection.makeUnaryCall(
@@ -1167,7 +1244,7 @@ public final class BackendGatewayGRPCClient: Sendable {
         )
         return try await eventLoopFutureToAsync(call.response)
     }
-
+    
     private func callOptions(with token: String?) -> CallOptions {
         var metadata = HPACKHeaders()
         if let token = token, !token.isEmpty {

@@ -45,18 +45,13 @@ let project = Project(
                         "UIApplicationSupportsMultipleScenes": false,
                         "UISceneConfigurations": [:]
                     ],
-                    "NSAppTransportSecurity": [
-                        "NSExceptionDomains": [
-                            "193.124.33.223": [
-                                "NSTemporaryExceptionAllowsInsecureHTTPLoads": true,
-                                "NSTemporaryExceptionMinimumTLSVersion": "TLSv1.0"
-                            ]
-                        ]
-                    ]
+                    "NSUserNotificationsUsageDescription": "Приложение использует уведомления для напоминаний о предстоящих собеседованиях и событиях в календаре",
+                    "NSPhotoLibraryUsageDescription": "Приложение использует доступ к фотогалерее для загрузки фотографии профиля"
                 ]
             ),
             sources: [
                 "InterPrep/InterPrepApp.swift",
+                "InterPrep/AppDelegate.swift",
                 "InterPrep/AppGraph.swift",
                 "InterPrep/ContentView.swift",
                 "InterPrep/Services/AuthServiceImpl.swift",
@@ -71,16 +66,21 @@ let project = Project(
                 "InterPrep/Components/Navigation/TabBarLayout.swift",
                 "InterPrep/Components/Navigation/TabBar+Colors.swift",
                 "InterPrep/Components/Navigation/TabBarPreview.swift",
-                "InterPrep/Components/Navigation/TabItem.swift"
+                "InterPrep/Components/Navigation/TabItem.swift",
+                "InterPrep/Components/OfflineBanner.swift"
             ],
             resources: [
                 "InterPrep/Assets.xcassets/**",
-                "InterPrep/Preview Content/**"
+                "InterPrep/Preview Content/**",
+                "InterPrep/PrivacyInfo.xcprivacy"
             ],
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
                 .target(name: "NetworkService"),
+                .target(name: "NotificationService"),
+                .target(name: "CacheService"),
+                .target(name: "NetworkMonitorService"),
                 .target(name: "DiscoveryModule"),
                 .target(name: "VacancyCardFeature"),
                 .target(name: "AuthFeature"),
@@ -116,7 +116,8 @@ let project = Project(
             product: .framework,
             bundleId: "com.interprep.network",
             sources: [
-                "InterPrep/NetworkV2/**/*.swift"
+                "InterPrep/NetworkV2/**/*.swift",
+                "InterPrep/Services/SessionManager.swift"
             ],
             dependencies: [
                 .package(product: "SwiftProtobuf"),
@@ -143,6 +144,48 @@ let project = Project(
                 "InterPrep/Assets.xcassets/**"
             ],
             dependencies: []
+        ),
+        
+        // MARK: - Notification Service
+        
+        .target(
+            name: "NotificationService",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.interprep.notification",
+            sources: [
+                "InterPrep/Services/NotificationManager.swift"
+            ],
+            dependencies: []
+        ),
+        
+        // MARK: - Cache Service
+        
+        .target(
+            name: "CacheService",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.interprep.cache",
+            sources: [
+                "InterPrep/Services/CacheManager.swift"
+            ],
+            dependencies: []
+        ),
+        
+        // MARK: - Network Monitor Service
+        
+        .target(
+            name: "NetworkMonitorService",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.interprep.networkmonitor",
+            sources: [
+                "InterPrep/Services/NetworkMonitor.swift",
+                "InterPrep/Services/OfflineSyncManager.swift"
+            ],
+            dependencies: [
+                .target(name: "CacheService")
+            ]
         ),
         
         // MARK: - Discovery Module (Base)
@@ -224,7 +267,8 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
-                .target(name: "NetworkService")
+                .target(name: "NetworkService"),
+                .target(name: "DiscoveryModule")
             ]
         ),
         
@@ -241,10 +285,13 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
-                .target(name: "NetworkService")
+                .target(name: "NetworkService"),
+                .target(name: "NotificationService"),
+                .target(name: "CacheService"),
+                .target(name: "NetworkMonitorService")
             ]
         ),
-        
+
         // MARK: - Profile Feature
         
         .target(
@@ -259,11 +306,13 @@ let project = Project(
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
                 .target(name: "CalendarFeature"),
-                .target(name: "NetworkService")
-                // SwiftProtobuf, GRPC, Logging, NIOCore, NIOHTTP2 приходят транзитивно через NetworkService
+                .target(name: "NetworkService"),
+                .target(name: "NotificationService"),
+                .target(name: "CacheService"),
+                .target(name: "NetworkMonitorService")
             ]
         ),
-        
+
         // MARK: - Documents Feature
         
         .target(
@@ -277,10 +326,12 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
-                .target(name: "NetworkService")
+                .target(name: "NetworkService"),
+                .target(name: "CacheService"),
+                .target(name: "NetworkMonitorService")
             ]
         ),
-        
+
         // MARK: - Chat Feature
         
         .target(

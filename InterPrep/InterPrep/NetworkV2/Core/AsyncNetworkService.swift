@@ -21,6 +21,58 @@ public actor DefaultTokenProvider: TokenProvider {
     }
 }
 
+public actor RefreshingTokenProvider: TokenProvider {
+    private let tokenStorage: TokenStorage
+    private let refreshTokenHandler: (String) async -> Result<(accessToken: String, refreshToken: String), Error>
+    private var isRefreshing = false
+    private var refreshTask: Task<Void, Never>?
+    
+    public init(
+        tokenStorage: TokenStorage,
+        refreshTokenHandler: @escaping (String) async -> Result<(accessToken: String, refreshToken: String), Error>
+    ) {
+        self.tokenStorage = tokenStorage
+        self.refreshTokenHandler = refreshTokenHandler
+    }
+    
+    public func provideToken() async -> String? {
+        await tokenStorage.getAccessToken()
+    }
+    
+    public func authenticateIfNeeded() async {
+        guard !isRefreshing else {
+            await refreshTask?.value
+            return
+        }
+        
+        guard let refreshToken = await tokenStorage.getRefreshToken() else {
+            await tokenStorage.clearTokens()
+            return
+        }
+        
+        isRefreshing = true
+        let task = Task {
+            let result = await refreshTokenHandler(refreshToken)
+            
+            switch result {
+            case .success(let tokens):
+                await tokenStorage.setTokens(
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken
+                )
+            case .failure:
+                await tokenStorage.clearTokens()
+            }
+            
+            isRefreshing = false
+            refreshTask = nil
+        }
+        
+        refreshTask = task
+        await task.value
+    }
+}
+
 public protocol NetworkResponseObserver: Sendable {
     func observe(request: URLRequest, response: HTTPURLResponse?, data: Data?, error: Error?) async
 }
@@ -130,10 +182,15 @@ public actor AsyncNetworkService {
             return .failure(.apiError(APIError.from(httpStatusCode: 400, body: data)))
             
         case 401:
-            await tokenProvider.authenticateIfNeeded()
             if tokenWasSet {
-                let deauthorizedRequest = protoRequest.deauthorized()
-                return await performInternal(request: deauthorizedRequest, tokenWasSet: false)
+                await tokenProvider.authenticateIfNeeded()
+                
+                if let newToken = await tokenProvider.provideToken() {
+                    let reauthorizedRequest = protoRequest.authorized(with: newToken)
+                    return await performInternal(request: reauthorizedRequest, tokenWasSet: false)
+                } else {
+                    return .failure(.unauthorized)
+                }
             } else {
                 return .failure(.unauthorized)
             }

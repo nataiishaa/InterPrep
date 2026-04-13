@@ -11,14 +11,24 @@ import DiscoveryModule
 
 public final actor ResumeServiceImpl: ResumeService {
     private let networkService: NetworkServiceV2
+    private var cachedHasResume: Bool?
+    private var lastCheckTime: Date?
+    private let cacheValidityDuration: TimeInterval = 60
     
     public init(networkService: NetworkServiceV2 = .shared) {
         self.networkService = networkService
     }
     
     public func hasResume() async -> Bool {
+        if let cached = cachedHasResume,
+           let lastCheck = lastCheckTime,
+           Date().timeIntervalSince(lastCheck) < cacheValidityDuration {
+            return cached
+        }
+        
         let result = await networkService.getUser_ResumeProfile()
         
+        let hasResumeValue: Bool
         switch result {
         case .success(let response):
             let profile = response.profile
@@ -29,9 +39,19 @@ public final actor ResumeServiceImpl: ResumeService {
             let hasExperience = profile.hasExperienceLevel
             let hasSalary = profile.hasSalaryMin
             
-            return hasTargetRoles || hasAreas || hasSkills || hasExperience || hasSalary
+            hasResumeValue = hasTargetRoles || hasAreas || hasSkills || hasExperience || hasSalary
         case .failure:
-            return false
+            hasResumeValue = false
         }
+        
+        cachedHasResume = hasResumeValue
+        lastCheckTime = Date()
+        
+        return hasResumeValue
+    }
+    
+    public func invalidateCache() {
+        cachedHasResume = nil
+        lastCheckTime = nil
     }
 }

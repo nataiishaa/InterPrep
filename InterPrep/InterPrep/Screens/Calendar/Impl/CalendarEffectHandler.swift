@@ -9,6 +9,9 @@ import Foundation
 import UserNotifications
 import ArchitectureCore
 import NetworkService
+import NotificationService
+import CacheService
+import NetworkMonitorService
 
 public enum CalendarEventType: Sendable {
     case unspecified
@@ -75,8 +78,8 @@ public struct CalendarEvent: Sendable {
 public actor CalendarEffectHandler: EffectHandler {
     public typealias S = CalendarState
     
-    private let notificationCenter = UNUserNotificationCenter.current()
     private let calendarService: CalendarServicing
+    private let cacheManager = CacheManager.shared
     
     public init(calendarService: CalendarServicing) {
         self.calendarService = calendarService
@@ -108,15 +111,24 @@ public actor CalendarEffectHandler: EffectHandler {
     // MARK: - Private Methods
     
     private func loadEvents(for month: Date) async -> CalendarState.Feedback {
+        let calendar = Calendar.current
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
+        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+        
+        let cacheKey = CacheKey.calendarEvents(month: month)
+        
         do {
-            let calendar = Calendar.current
-            let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
-            let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
-            
             let serviceEvents = try await calendarService.listEvents(fromTime: startOfMonth, toTime: endOfMonth)
             let events = serviceEvents.map { mapServiceToCalendarEvent($0) }
+            
+            try? await cacheManager.save(events, forKey: cacheKey)
+            
             return .eventsLoaded(events)
         } catch {
+            if let cachedEvents = try? await cacheManager.load(forKey: cacheKey, as: [CalendarState.CalendarEvent].self) {
+                return .eventsLoadedFromCache(cachedEvents)
+            }
+            
             let message = userFacingMessage(for: error)
             return .loadingFailed(message)
         }
@@ -151,8 +163,31 @@ public actor CalendarEffectHandler: EffectHandler {
             )
             
             let createdEvent = mapServiceToCalendarEvent(serviceEvent)
+            
+            let calendar = Calendar.current
+            let month = calendar.date(from: calendar.dateComponents([.year, .month], from: event.date))!
+            let cacheKey = CacheKey.calendarEvents(month: month)
+            if var cachedEvents = try? await cacheManager.load(forKey: cacheKey, as: [CalendarState.CalendarEvent].self) {
+                cachedEvents.append(createdEvent)
+                try? await cacheManager.save(cachedEvents, forKey: cacheKey)
+            }
+            
             return .eventCreated(createdEvent)
         } catch {
+            if (error as? NetworkError)?.isConnectionError == true {
+                await MainActor.run {
+                    OfflineSyncManager.shared.addOperation(.createCalendarEvent(
+                        title: event.title,
+                        description: event.description,
+                        startTime: event.date,
+                        endTime: event.endDate ?? event.date.addingTimeInterval(3600),
+                        eventType: event.type.rawValue,
+                        reminderEnabled: event.reminderEnabled,
+                        reminderMinutes: Int32(event.reminderMinutesBefore)
+                    ))
+                }
+                return .eventCreated(event)
+            }
             return .loadingFailed(userFacingMessage(for: error).replacingOccurrences(of: "загрузить события", with: "сохранить событие"))
         }
     }
@@ -174,8 +209,35 @@ public actor CalendarEffectHandler: EffectHandler {
             )
             
             let updatedEvent = mapServiceToCalendarEvent(serviceEvent)
+            
+            let calendar = Calendar.current
+            let month = calendar.date(from: calendar.dateComponents([.year, .month], from: event.date))!
+            let cacheKey = CacheKey.calendarEvents(month: month)
+            if var cachedEvents = try? await cacheManager.load(forKey: cacheKey, as: [CalendarState.CalendarEvent].self) {
+                if let index = cachedEvents.firstIndex(where: { $0.id == updatedEvent.id }) {
+                    cachedEvents[index] = updatedEvent
+                    try? await cacheManager.save(cachedEvents, forKey: cacheKey)
+                }
+            }
+            
             return .eventUpdated(updatedEvent)
         } catch {
+            if (error as? NetworkError)?.isConnectionError == true {
+                await MainActor.run {
+                    OfflineSyncManager.shared.addOperation(.updateCalendarEvent(
+                        id: event.id,
+                        title: event.title,
+                        description: event.description,
+                        startTime: event.date,
+                        endTime: event.endDate ?? event.date.addingTimeInterval(3600),
+                        eventType: event.type.rawValue,
+                        reminderEnabled: event.reminderEnabled,
+                        reminderMinutes: Int32(event.reminderMinutesBefore),
+                        completed: event.isCompleted
+                    ))
+                }
+                return .eventUpdated(event)
+            }
             return .loadingFailed(userFacingMessage(for: error).replacingOccurrences(of: "загрузить события", with: "обновить событие"))
         }
     }
@@ -184,11 +246,22 @@ public actor CalendarEffectHandler: EffectHandler {
         do {
             let success = try await calendarService.deleteEvent(id: id)
             if success {
+                if let allEvents = try? await cacheManager.load(forKey: CacheKey.allCalendarEvents, as: [CalendarState.CalendarEvent].self) {
+                    let filtered = allEvents.filter { $0.id != id }
+                    try? await cacheManager.save(filtered, forKey: CacheKey.allCalendarEvents)
+                }
+                
                 return .eventDeleted(id)
             } else {
                 return .loadingFailed("Не удалось удалить событие")
             }
         } catch {
+            if (error as? NetworkError)?.isConnectionError == true {
+                await MainActor.run {
+                    OfflineSyncManager.shared.addOperation(.deleteCalendarEvent(id: id))
+                }
+                return .eventDeleted(id)
+            }
             return .loadingFailed(userFacingMessage(for: error))
         }
     }
@@ -243,58 +316,42 @@ public actor CalendarEffectHandler: EffectHandler {
         }
     }
     
+    @MainActor
     private func scheduleReminder(for event: CalendarState.CalendarEvent) async -> CalendarState.Feedback {
-        // Request notification permission
-        let granted = await requestNotificationPermission()
-        guard granted else {
-            return .loadingFailed("Разрешите уведомления в настройках")
+        let manager = NotificationManager.shared
+        
+        guard manager.isEnabled else {
+            return .loadingFailed("Уведомления отключены в настройках приложения")
         }
         
-        // Create notification content
-        let content = UNMutableNotificationContent()
-        content.title = "Напоминание"
-        content.body = event.title
-        content.sound = .default
-        content.categoryIdentifier = "EVENT_REMINDER"
-        
-        if !event.description.isEmpty {
-            content.subtitle = event.description
+        if !manager.isAuthorized {
+            let granted = await manager.requestAuthorization()
+            guard granted else {
+                return .loadingFailed("Разрешите уведомления в настройках")
+            }
         }
         
-        // Calculate trigger date
-        let triggerDate = event.reminderDate
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: triggerDate
-        )
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        
-        // Create request
-        let request = UNNotificationRequest(
-            identifier: event.id,
-            content: content,
-            trigger: trigger
-        )
+        let subtitle = event.description.isEmpty ? nil : event.description
         
         do {
-            try await notificationCenter.add(request)
+            try await manager.scheduleLocalNotification(
+                id: event.id,
+                title: "Напоминание",
+                body: event.title,
+                subtitle: subtitle,
+                triggerDate: event.reminderDate,
+                categoryIdentifier: "EVENT_REMINDER",
+                userInfo: ["event_id": event.id, "type": "calendar_event"]
+            )
             return .reminderScheduled(event)
         } catch {
             return .loadingFailed("Не удалось создать напоминание")
         }
     }
     
+    @MainActor
     private func cancelReminder(for id: String) async {
-        notificationCenter.removePendingNotificationRequests(withIdentifiers: [id])
-    }
-    
-    private func requestNotificationPermission() async -> Bool {
-        do {
-            return try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
-        } catch {
-            return false
-        }
+        NotificationManager.shared.cancelLocalNotification(id: id)
     }
 }
 

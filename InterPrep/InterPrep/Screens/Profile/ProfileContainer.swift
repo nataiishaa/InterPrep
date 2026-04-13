@@ -7,9 +7,11 @@
 
 import SwiftUI
 import ArchitectureCore
+import NotificationService
 
 public struct ProfileContainer: View {
     @StateObject private var store: ProfileStore
+    @StateObject private var notificationManager = NotificationManager.shared
     @State private var showResumeDetailSheet = false
     private let onLogoutComplete: (() -> Void)?
     private let onNavigateToResumeUpload: (() -> Void)?
@@ -65,6 +67,7 @@ public struct ProfileContainer: View {
             completedInterviews: store.state.completedInterviews,
             isLoadingInterviews: store.state.isLoadingInterviews,
             hasResumeData: store.state.hasResumeData,
+            isOfflineMode: store.state.isOfflineMode,
             onNotificationsToggled: { enabled in
                 store.send(.notificationsToggled(enabled))
             },

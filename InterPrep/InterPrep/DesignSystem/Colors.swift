@@ -167,7 +167,6 @@ public extension Color {
 
 private extension Color {
     func fallback(light: Color, dark: Color) -> Color {
-        // SwiftUI автоматически выберет нужный цвет в зависимости от ColorScheme
         return Color(UIColor { traitCollection in
             switch traitCollection.userInterfaceStyle {
             case .dark:

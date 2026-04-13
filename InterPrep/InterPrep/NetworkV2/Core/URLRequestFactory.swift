@@ -28,7 +28,7 @@ public struct DefaultNetworkProvider: NetworkProvider, Sendable {
     public let host: String
     public let port: Int?
     
-    public init(scheme: String = "http", host: String = "193.124.33.223", port: Int? = 9090) {
+    public init(scheme: String = "https", host: String = "api.interprep.ru", port: Int? = nil) {
         self.scheme = scheme
         self.host = host
         self.port = port

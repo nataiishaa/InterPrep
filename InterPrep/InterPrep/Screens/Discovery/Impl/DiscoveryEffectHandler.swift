@@ -53,6 +53,7 @@ public actor DiscoveryEffectHandler: EffectHandler {
 
 public protocol ResumeService: Actor {
     func hasResume() async -> Bool
+    func invalidateCache() async
 }
 
 public protocol VacancyService: Actor {
@@ -66,6 +67,9 @@ public final actor ResumeServiceMock: ResumeService {
     public func hasResume() async -> Bool {
         try? await Task.sleep(nanoseconds: 500_000_000)
         return true
+    }
+    
+    public func invalidateCache() async {
     }
 }
 

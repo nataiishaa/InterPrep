@@ -16,6 +16,7 @@ public struct DocumentsState {
     public var folderContentsDocuments: [Document] = []
     public var isLoading: Bool = false
     public var error: String?
+    public var isOfflineMode: Bool = false
     public var showingCreateFolderSheet: Bool = false
     public var folderToRename: Folder?
     public var folderToDelete: Folder?
@@ -28,7 +29,7 @@ public struct DocumentsState {
     public init() {}
 }
 
-public struct Folder: Identifiable, Equatable, Sendable {
+public struct Folder: Identifiable, Equatable, Sendable, Codable {
     public let id: UUID
     public var nodeId: UInt32?
     public var name: String
@@ -53,7 +54,7 @@ public struct Folder: Identifiable, Equatable, Sendable {
     }
 }
 
-public enum FolderColor: String, CaseIterable, Sendable {
+public enum FolderColor: String, CaseIterable, Sendable, Codable {
     case blue
     case green
     case orange
@@ -62,7 +63,7 @@ public enum FolderColor: String, CaseIterable, Sendable {
     case gray
 }
 
-public struct Document: Identifiable, Equatable, Sendable {
+public struct Document: Identifiable, Equatable, Sendable, Codable {
     public let id: UUID
     public var name: String
     public var type: DocumentType
@@ -107,7 +108,7 @@ public struct Document: Identifiable, Equatable, Sendable {
     }
 }
 
-public enum DocumentType: String, CaseIterable, Sendable {
+public enum DocumentType: String, CaseIterable, Sendable, Codable {
     case pdf
     case doc
     case docx
@@ -169,7 +170,9 @@ extension DocumentsState: FeatureState {
         case foldersLoaded([Folder])
         case recentDocumentsLoaded([Document])
         case foldersAndDocumentsLoaded([Folder], [Document])
+        case foldersAndDocumentsLoadedFromCache([Folder], [Document])
         case folderContentsLoaded([Folder], [Document])
+        case folderContentsLoadedFromCache([Folder], [Document])
         case folderDeletedAndRefreshed(deletedFolderId: UUID, [Folder], [Document])
         case folderRenamedAndRefreshed(folderId: UUID, newName: String, [Folder], [Document])
         case noteUpdatedAndRefreshed([Folder], [Document])
@@ -313,6 +316,18 @@ extension DocumentsState: FeatureState {
             state.recentDocuments = documents
             state.isLoading = false
             state.error = nil
+            state.isOfflineMode = false
+            if state.selectedFolder != nil {
+                return .loadFolderContents(state.selectedFolder!)
+            }
+            return nil
+            
+        case .feedback(.foldersAndDocumentsLoadedFromCache(let folders, let documents)):
+            state.folders = folders
+            state.recentDocuments = documents
+            state.isLoading = false
+            state.error = nil
+            state.isOfflineMode = true
             if state.selectedFolder != nil {
                 return .loadFolderContents(state.selectedFolder!)
             }
@@ -323,6 +338,15 @@ extension DocumentsState: FeatureState {
             state.folderContentsDocuments = documents
             state.isLoading = false
             state.error = nil
+            state.isOfflineMode = false
+            return nil
+            
+        case .feedback(.folderContentsLoadedFromCache(let folders, let documents)):
+            state.folderContentsFolders = folders
+            state.folderContentsDocuments = documents
+            state.isLoading = false
+            state.error = nil
+            state.isOfflineMode = true
             return nil
 
         case .feedback(.noteUpdatedAndRefreshed(let folders, let documents)):
