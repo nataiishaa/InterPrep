@@ -1,2 +1,22 @@
 # Вложенный репозиторий — пушить отдельно или добавить как submodule
 InterPrep-shared/
+
+# SPM dependencies (managed by Tuist/Xcode, not as submodules)
+InterPrep/grpc-swift/
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+*.xcuserdata
+*.xcuserdatad
+DerivedData/
+.build/
+
+# Tuist
+.tuist/
+Tuist/Dependencies/
+
+# macOS
+.DS_Store

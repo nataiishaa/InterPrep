@@ -5,9 +5,9 @@
 //  Unit tests for CalendarState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import CalendarFeature
+import XCTest
 
 @MainActor
 final class CalendarStateTests: XCTestCase {

@@ -119,8 +119,6 @@ public struct VacancyCardView: View {
         .buttonStyle(PlainButtonStyle())
     }
     
-
-    
     private var employmentTypeIcon: String {
         switch vacancy.employmentType {
         case .fullTime: return "briefcase.fill"

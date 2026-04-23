@@ -5,9 +5,9 @@
 //  Profile feature container
 //
 
-import SwiftUI
 import ArchitectureCore
 import NotificationService
+import SwiftUI
 
 public struct ProfileContainer: View {
     @StateObject private var store: ProfileStore

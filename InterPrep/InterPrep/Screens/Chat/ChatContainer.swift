@@ -5,8 +5,8 @@
 //  Chat container
 //
 
-import SwiftUI
 import ArchitectureCore
+import SwiftUI
 
 public struct ChatContainer: View {
     @StateObject private var store: ChatStore
@@ -22,8 +22,6 @@ public struct ChatContainer: View {
             }
     }
     
-
-    
     private func makeModel() -> ChatView.Model {
         .init(
             messages: store.state.messages,
@@ -34,6 +32,10 @@ public struct ChatContainer: View {
             isConnected: store.state.isConnected,
             error: store.state.error,
             systemHints: ChatState.systemHints,
+            waitingForVacancyId: store.state.waitingForVacancyId,
+            showFavoritesPicker: store.state.showFavoritesPicker,
+            favoriteVacancies: store.state.favoriteVacancies,
+            isLoadingFavorites: store.state.isLoadingFavorites,
             onInputTextChanged: { text in
                 store.send(.inputTextChanged(text))
             },
@@ -51,12 +53,19 @@ public struct ChatContainer: View {
             },
             onClearHistory: {
                 store.send(.clearHistory)
+            },
+            onShowFavoritesPicker: {
+                store.send(.showFavoritesPicker)
+            },
+            onHideFavoritesPicker: {
+                store.send(.hideFavoritesPicker)
+            },
+            onSelectFavoriteVacancy: { vacancy in
+                store.send(.selectFavoriteVacancy(vacancy))
             }
         )
     }
 }
-
-
 
 #Preview {
     ChatContainer(store: Store(

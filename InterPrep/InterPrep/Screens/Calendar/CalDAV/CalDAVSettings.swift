@@ -67,8 +67,6 @@ public struct CalDAVPreset {
     }
 }
 
-
-
 public final class CalDAVSettingsManager {
     public static let shared = CalDAVSettingsManager()
     

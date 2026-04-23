@@ -5,9 +5,9 @@
 //  Unit tests for AuthState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import AuthFeature
+import XCTest
 
 @MainActor
 final class AuthStateTests: XCTestCase {

@@ -13,7 +13,7 @@ struct EditNoteSheet: View {
     @State private var noteContent: String
     let onDismiss: () -> Void
     let onSave: (Document, String, String) -> Void
-    var onDelete: (() -> Void)? = nil
+    var onDelete: (() -> Void)?
 
     init(document: Document, onDismiss: @escaping () -> Void, onSave: @escaping (Document, String, String) -> Void, onDelete: (() -> Void)? = nil) {
         self.document = document

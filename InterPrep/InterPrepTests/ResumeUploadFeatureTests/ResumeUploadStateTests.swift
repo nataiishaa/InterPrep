@@ -5,9 +5,9 @@
 //  Unit tests for ResumeUploadState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import ResumeUploadFeature
+import XCTest
 
 @MainActor
 final class ResumeUploadStateTests: XCTestCase {
@@ -20,11 +20,11 @@ final class ResumeUploadStateTests: XCTestCase {
         let effect = ResumeUploadState.reduce(state: &state, with: .input(.fileSelected(url)))
 
         XCTAssertNil(state.errorMessage)
-        guard case .validateFile(let u) = effect else {
+        guard case .validateFile(let fileURL) = effect else {
             XCTFail("Expected validateFile")
             return
         }
-        XCTAssertEqual(u, url)
+        XCTAssertEqual(fileURL, url)
     }
 
     func testUploadTapped_whenNoFile_returnsNil() {
@@ -51,11 +51,11 @@ final class ResumeUploadStateTests: XCTestCase {
 
         XCTAssertEqual(state.uploadStatus, .uploading)
         XCTAssertEqual(state.uploadProgress, 0.0)
-        guard case .uploadFile(let f) = effect else {
+        guard case .uploadFile(let uploadedFile) = effect else {
             XCTFail("Expected uploadFile")
             return
         }
-        XCTAssertEqual(f.name, "cv.pdf")
+        XCTAssertEqual(uploadedFile.name, "cv.pdf")
     }
 
     func testRemoveFileTapped_resetsState() {

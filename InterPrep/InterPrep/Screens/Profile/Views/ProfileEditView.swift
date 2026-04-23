@@ -5,8 +5,8 @@
 //  Редактирование профиля — фото, имя и фамилия
 //
 
-import SwiftUI
 import PhotosUI
+import SwiftUI
 
 struct ProfileEditView: View {
     let model: Model
@@ -106,15 +106,15 @@ extension ProfileEditView {
     private func imageToJPEGData(image: Image) -> Data? {
         let renderer = ImageRenderer(content: image)
         let scale: CGFloat = {
-            let s = UIScreen.main.scale
-            guard s > 0, s.isFinite else { return 2.0 }
-            return s
+            let screenScale = UIScreen.main.scale
+            guard screenScale > 0, screenScale.isFinite else { return 2.0 }
+            return screenScale
         }()
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(width: 1024, height: 1024)
         guard let uiImage = renderer.uiImage else { return nil }
-        let w = uiImage.size.width, h = uiImage.size.height
-        guard w > 0, h > 0, w.isFinite, h.isFinite else { return nil }
+        let width = uiImage.size.width, height = uiImage.size.height
+        guard width > 0, height > 0, width.isFinite, height.isFinite else { return nil }
         let maxBytes = 2 * 1024 * 1024
         var quality: CGFloat = 0.85
         repeat {

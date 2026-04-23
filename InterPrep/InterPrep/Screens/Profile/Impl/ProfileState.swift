@@ -5,8 +5,8 @@
 //  Profile feature state
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public struct ProfileState {
     public var user: User?
@@ -63,8 +63,8 @@ extension ProfileState {
         public var initials: String {
             let first = firstName.prefix(1)
             let last = lastName.prefix(1)
-            let s = "\(first)\(last)".uppercased()
-            return s.trimmingCharacters(in: .whitespaces).isEmpty ? "?" : s
+            let initials = "\(first)\(last)".uppercased()
+            return initials.trimmingCharacters(in: .whitespaces).isEmpty ? "?" : initials
         }
         
         public init(id: String, firstName: String, lastName: String, email: String, phone: String? = nil, avatarURL: String? = nil, position: String? = nil, experience: String? = nil, resumeUploaded: Bool = false, registeredDate: Date? = nil) {
@@ -81,19 +81,20 @@ extension ProfileState {
         }
         
         public init(from decoder: Decoder) throws {
-            let c = try decoder.container(keyedBy: CodingKeys.self)
-            id = try c.decode(String.self, forKey: .id)
-            firstName = try c.decode(String.self, forKey: .firstName)
-            lastName = try c.decode(String.self, forKey: .lastName)
-            email = try c.decode(String.self, forKey: .email)
-            phone = try c.decodeIfPresent(String.self, forKey: .phone)
-            avatarURL = try c.decodeIfPresent(String.self, forKey: .avatarURL)
-            position = try c.decodeIfPresent(String.self, forKey: .position)
-            experience = try c.decodeIfPresent(String.self, forKey: .experience)
-            resumeUploaded = try c.decodeIfPresent(Bool.self, forKey: .resumeUploaded) ?? false
-            registeredDate = try c.decodeIfPresent(Date.self, forKey: .registeredDate)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(String.self, forKey: .id)
+            firstName = try container.decode(String.self, forKey: .firstName)
+            lastName = try container.decode(String.self, forKey: .lastName)
+            email = try container.decode(String.self, forKey: .email)
+            phone = try container.decodeIfPresent(String.self, forKey: .phone)
+            avatarURL = try container.decodeIfPresent(String.self, forKey: .avatarURL)
+            position = try container.decodeIfPresent(String.self, forKey: .position)
+            experience = try container.decodeIfPresent(String.self, forKey: .experience)
+            resumeUploaded = try container.decodeIfPresent(Bool.self, forKey: .resumeUploaded) ?? false
+            registeredDate = try container.decodeIfPresent(Date.self, forKey: .registeredDate)
         }
         
+        // swiftlint:disable:next nesting
         private enum CodingKeys: String, CodingKey {
             case id, firstName, lastName, email, phone, avatarURL, position, experience, resumeUploaded, registeredDate
         }
@@ -169,12 +170,14 @@ extension ProfileState {
             self.calDAVEnabled = calDAVEnabled
         }
         
+        // swiftlint:disable:next nesting
         public enum Theme: String, Codable, CaseIterable, Sendable {
             case light = "Светлая"
             case dark = "Темная"
             case system = "Системная"
         }
         
+        // swiftlint:disable:next nesting
         public enum Language: String, Codable, CaseIterable, Sendable {
             case russian = "Русский"
             case english = "English"
@@ -256,133 +259,129 @@ extension ProfileState: FeatureState {
         with message: Message<Input, Feedback>
     ) -> Effect? {
         switch message {
-        case .input(.onAppear), .input(.refresh):
+        case .input(let input):
+            return handleInput(state: &state, input: input)
+        case .feedback(let feedback):
+            return handleFeedback(state: &state, feedback: feedback)
+        }
+    }
+    
+    @MainActor
+    private static func handleInput(state: inout Self, input: Input) -> Effect? {
+        switch input {
+        case .onAppear, .refresh:
             state.isLoading = true
             state.isLoadingInterviews = true
             return .loadUser
             
-        case .input(.startEditingProfile):
+        case .startEditingProfile:
             state.isEditingProfile = true
             if let user = state.user {
                 state.editedFirstName = user.firstName
                 state.editedLastName = user.lastName
             }
             
-        case .input(.cancelEditingProfile):
+        case .cancelEditingProfile:
             state.isEditingProfile = false
             state.errorMessage = nil
             
-        case let .input(.firstNameChanged(name)):
+        case let .firstNameChanged(name):
             state.editedFirstName = name
             state.errorMessage = nil
             
-        case let .input(.lastNameChanged(name)):
+        case let .lastNameChanged(name):
             state.editedLastName = name
             state.errorMessage = nil
             
-        case .input(.saveProfile):
-            guard !state.editedFirstName.isEmpty,
-                  !state.editedLastName.isEmpty else {
-                state.errorMessage = "Заполните имя и фамилию"
-                return nil
-            }
+        case .saveProfile:
+            return handleSaveProfile(state: &state)
             
-            guard let user = state.user else { return nil }
-            
-            let updatedUser = User(
-                id: user.id,
-                firstName: state.editedFirstName,
-                lastName: state.editedLastName,
-                email: user.email,
-                phone: user.phone,
-                avatarURL: user.avatarURL,
-                position: user.position,
-                experience: user.experience,
-                registeredDate: user.registeredDate ?? nil
-            )
-            
-            state.isLoading = true
-            return .updateProfile(updatedUser)
-            
-        case let .input(.notificationsToggled(enabled)):
+        case let .notificationsToggled(enabled):
             state.settings.notificationsEnabled = enabled
             return .saveSettings(state.settings)
             
-        case let .input(.reminderTimeChanged(minutes)):
+        case let .reminderTimeChanged(minutes):
             state.settings.reminderTime = minutes
             return .saveSettings(state.settings)
             
-        case let .input(.emailNotificationsToggled(enabled)):
+        case let .emailNotificationsToggled(enabled):
             state.settings.emailNotifications = enabled
             return .saveSettings(state.settings)
             
-        case let .input(.themeChanged(theme)):
+        case let .themeChanged(theme):
             state.settings.theme = theme
             return .saveSettings(state.settings)
             
-        case let .input(.languageChanged(language)):
+        case let .languageChanged(language):
             state.settings.language = language
             return .saveSettings(state.settings)
             
-        case let .input(.analyticsToggled(enabled)):
+        case let .analyticsToggled(enabled):
             state.settings.analyticsEnabled = enabled
             return .saveSettings(state.settings)
             
-        case let .input(.crashReportsToggled(enabled)):
+        case let .crashReportsToggled(enabled):
             state.settings.crashReportsEnabled = enabled
             return .saveSettings(state.settings)
             
-        case .input(.viewResume):
+        case .viewResume:
             state.isDownloadingResume = true
             state.errorMessage = nil
             return .downloadResume
             
-        case .input(.changeResume):
+        case .changeResume:
             return .navigateToResumeUpload
             
-        case .input(.logout):
+        case .logout:
             return .performLogout
             
-        case let .input(.deleteAccount(password)):
+        case let .deleteAccount(password):
             state.deleteAccountError = nil
             return .performDeleteAccount(password: password)
             
-        case .input(.clearAuthRequired):
+        case .clearAuthRequired:
             state.authRequired = false
             return nil
             
-        case .input(.clearDeleteAccountError):
+        case .clearDeleteAccountError:
             state.deleteAccountError = nil
             return nil
             
-        case .input(.openCalDAVSettings):
+        case .openCalDAVSettings:
             break
             
-        case let .input(.uploadProfilePhoto(data)):
+        case let .uploadProfilePhoto(data):
             guard let userId = state.user?.id else { return nil }
             return .uploadProfilePhoto(userId: userId, data: data)
             
-        case let .input(.interviewTabChanged(tab)):
+        case let .interviewTabChanged(tab):
             state.selectedInterviewTab = tab
             
-        case .input(.loadInterviews):
+        case .loadInterviews:
             state.isLoadingInterviews = true
             return .loadInterviews
             
-        case let .input(.interviewTapped(interview)):
+        case let .interviewTapped(interview):
             return .navigateToInterview(interview)
-            
-        case let .feedback(.userLoaded(user)):
+        }
+        
+        return nil
+    }
+    
+    @MainActor
+    private static func handleFeedback(state: inout Self, feedback: Feedback) -> Effect? {
+        switch feedback {
+        case let .userLoaded(user):
             state.isLoading = false
             state.user = user
             state.isLoadingInterviews = true
             return .loadStatistics
             
-        case let .feedback(.statisticsLoaded(statistics)):
+        case let .statisticsLoaded(statistics):
             state.statistics = statistics
             return .loadInterviews
             
-        case let .feedback(.profileLoaded(user, statistics, profilePhotoURL)):
+        case let .profileLoaded(user, statistics, profilePhotoURL):
             state.isLoading = false
             state.user = user
             state.statistics = statistics
@@ -390,7 +389,7 @@ extension ProfileState: FeatureState {
             state.isOfflineMode = false
             return .loadResumeInfo
             
-        case let .feedback(.profileLoadedFromCache(user, statistics, profilePhotoURL)):
+        case let .profileLoadedFromCache(user, statistics, profilePhotoURL):
             state.isLoading = false
             state.user = user
             state.statistics = statistics
@@ -398,65 +397,91 @@ extension ProfileState: FeatureState {
             state.isOfflineMode = true
             return .loadResumeInfo
             
-        case let .feedback(.profilePhotoUpdated(url)):
+        case let .profilePhotoUpdated(url):
             state.cachedProfilePhotoURL = url
             return nil
             
-        case let .feedback(.profileUpdated(user)):
+        case let .profileUpdated(user):
             state.isLoading = false
             state.isEditingProfile = false
             state.user = user
             
-        case .feedback(.settingsSaved):
+        case .settingsSaved:
             break
             
-        case let .feedback(.loadingFailed(error)):
+        case let .loadingFailed(error):
             state.isLoading = false
             state.errorMessage = error
             
-        case .feedback(.logoutCompleted):
+        case .logoutCompleted:
             state.user = nil
             state.statistics = Statistics()
             state.authRequired = true
             
-        case .feedback(.accountDeleted):
+        case .accountDeleted:
             state.user = nil
             state.statistics = Statistics()
             state.settings = AppSettings()
             state.authRequired = true
             
-        case let .feedback(.deleteAccountFailed(message)):
+        case let .deleteAccountFailed(message):
             state.deleteAccountError = message
             
-        case let .feedback(.resumeDownloaded(url)):
+        case let .resumeDownloaded(url):
             state.isDownloadingResume = false
             state.resumePDFURL = url
             
-        case let .feedback(.resumeDownloadFailed(error)):
+        case let .resumeDownloadFailed(error):
             state.isDownloadingResume = false
             state.errorMessage = error
             
-        case let .feedback(.resumeInfoLoaded(hasData, sourceMaterialId)):
+        case let .resumeInfoLoaded(hasData, sourceMaterialId):
             state.hasResumeData = hasData
             state.resumeSourceMaterialId = sourceMaterialId
             
-        case let .feedback(.interviewsLoaded(upcoming, completed)):
+        case let .interviewsLoaded(upcoming, completed):
             state.isLoadingInterviews = false
             state.upcomingInterviews = upcoming
             state.completedInterviews = completed
             state.isOfflineMode = false
             
-        case let .feedback(.interviewsLoadedFromCache(upcoming, completed)):
+        case let .interviewsLoadedFromCache(upcoming, completed):
             state.isLoadingInterviews = false
             state.upcomingInterviews = upcoming
             state.completedInterviews = completed
             state.isOfflineMode = true
             
-        case let .feedback(.interviewsLoadFailed(error)):
+        case let .interviewsLoadFailed(error):
             state.isLoadingInterviews = false
             state.errorMessage = error
         }
         
         return nil
+    }
+    
+    @MainActor
+    private static func handleSaveProfile(state: inout Self) -> Effect? {
+        guard !state.editedFirstName.isEmpty,
+              !state.editedLastName.isEmpty else {
+            state.errorMessage = "Заполните имя и фамилию"
+            return nil
+        }
+        
+        guard let user = state.user else { return nil }
+        
+        let updatedUser = User(
+            id: user.id,
+            firstName: state.editedFirstName,
+            lastName: state.editedLastName,
+            email: user.email,
+            phone: user.phone,
+            avatarURL: user.avatarURL,
+            position: user.position,
+            experience: user.experience,
+            registeredDate: user.registeredDate ?? nil
+        )
+        
+        state.isLoading = true
+        return .updateProfile(updatedUser)
     }
 }

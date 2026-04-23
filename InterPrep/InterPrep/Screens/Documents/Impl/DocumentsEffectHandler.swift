@@ -5,11 +5,13 @@
 //  Documents effect handler
 //
 
-import Foundation
 import ArchitectureCore
-import NetworkService
 import CacheService
+import Foundation
 import NetworkMonitorService
+import NetworkService
+
+// swiftlint:disable file_length
 
 private struct FolderContentsCache: Codable {
     let folders: [Folder]
@@ -17,7 +19,7 @@ private struct FolderContentsCache: Codable {
 }
 
 public actor DocumentsEffectHandler: EffectHandler {
-    public typealias S = DocumentsState
+    public typealias StateType = DocumentsState
     
     private let documentService: DocumentServicing
     private let cacheManager = CacheManager.shared
@@ -36,7 +38,8 @@ public actor DocumentsEffectHandler: EffectHandler {
         return error.localizedDescription
     }
     
-    public func handle(effect: S.Effect) async -> S.Feedback? {
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case .loadFolders:
             do {
@@ -237,10 +240,10 @@ public final actor DocumentServiceImpl: DocumentServicing {
     }
     
     private static func safeDate(timestamp: Int64) -> Date {
-        let t = TimeInterval(timestamp)
-        guard t.isFinite else { return Date() }
-        let d = Date(timeIntervalSince1970: t)
-        return d
+        let timeInterval = TimeInterval(timestamp)
+        guard timeInterval.isFinite else { return Date() }
+        let date = Date(timeIntervalSince1970: timeInterval)
+        return date
     }
     
     public init(networkService: NetworkServiceV2 = .shared) {
@@ -259,8 +262,8 @@ public final actor DocumentServiceImpl: DocumentServicing {
                     group.addTask {
                         let countResult = await self.networkService.listFolder(parentId: node.id)
                         let count: Int
-                        if case .success(let r) = countResult {
-                            count = r.nodes.filter { $0.type == "file" }.count
+                        if case .success(let response) = countResult {
+                            count = response.nodes.filter { $0.type == "file" }.count
                         } else {
                             count = 0
                         }
@@ -301,14 +304,21 @@ public final actor DocumentServiceImpl: DocumentServicing {
                 folderIdToNodeId[folderId] = node.id
             }
             
-            return allNodes
-                .filter { $0.type == "file" }
+            let fileNodes = allNodes.filter { $0.type == "file" }
+            let folderNodeIds = Set(folderNodes.map { $0.id })
+            
+            for node in fileNodes {
+                let documentId = Self.uuidFromNodeId(node.id, folder: false)
+                nodeIdByDocumentId[documentId] = node.id
+                if node.hasMaterialID {
+                    documentIdToMaterialId[documentId] = node.materialID
+                }
+            }
+            
+            return fileNodes
+                .filter { !$0.hasParentID || !folderNodeIds.contains($0.parentID) }
                 .map { node in
                     let documentId = Self.uuidFromNodeId(node.id, folder: false)
-                    nodeIdByDocumentId[documentId] = node.id
-                    if node.hasMaterialID {
-                        documentIdToMaterialId[documentId] = node.materialID
-                    }
                     
                     var size = node.hasFile ? node.file.size : 0
                     if size == 0, node.hasMaterialID, let cachedSize = documentSizeCache[node.materialID] {
@@ -319,11 +329,6 @@ public final actor DocumentServiceImpl: DocumentServicing {
                     
                     let docType = self.detectDocumentType(from: node.name)
                     
-                    var folderId: UUID?
-                    if node.hasParentID {
-                        folderId = Self.uuidFromNodeId(node.parentID, folder: true)
-                    }
-                    
                     return Document(
                         id: documentId,
                         name: node.name,
@@ -331,7 +336,7 @@ public final actor DocumentServiceImpl: DocumentServicing {
                         size: size,
                         createdAt: createdAt,
                         modifiedAt: updatedAt,
-                        folderId: folderId,
+                        folderId: nil,
                         url: nil
                     )
                 }

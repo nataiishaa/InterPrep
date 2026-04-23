@@ -120,13 +120,32 @@ public actor AsyncNetworkService {
             // Convert to URLRequest
             let urlRequest = try await protoRequest.makeURLRequest()
             
+            #if DEBUG
+            print("[Network] >>> \(urlRequest.httpMethod ?? "?") \(urlRequest.url?.absoluteString ?? "?")")
+            print("[Network] Content-Type: \(urlRequest.value(forHTTPHeaderField: "Content-Type") ?? "?")")
+            if let body = urlRequest.httpBody, let str = String(data: body, encoding: .utf8) {
+                print("[Network] Body: \(str.prefix(500))")
+            }
+            #endif
+            
             // Perform network request
             let (data, urlResponse) = try await session.data(for: urlRequest)
+            
+            #if DEBUG
+            print("[Network] <<< Response received, \(data.count) bytes")
+            #endif
             
             guard let httpResponse = urlResponse as? HTTPURLResponse else {
                 await notifyObservers(request: urlRequest, response: nil, data: data, error: NetworkError.unknown)
                 return .failure(.unknown)
             }
+            
+            #if DEBUG
+            print("[Network] <<< HTTP \(httpResponse.statusCode)")
+            if let str = String(data: data, encoding: .utf8) {
+                print("[Network] Response: \(str.prefix(500))")
+            }
+            #endif
             
             // Notify observers
             await notifyObservers(request: urlRequest, response: httpResponse, data: data, error: nil)
@@ -140,6 +159,9 @@ public actor AsyncNetworkService {
             )
             
         } catch {
+            #if DEBUG
+            print("[Network] !!! Error: \(error)")
+            #endif
             let nsError = error as NSError
             let isConnectionError = nsError.domain == NSURLErrorDomain && (
                 nsError.code == NSURLErrorNotConnectedToInternet ||
@@ -150,6 +172,9 @@ public actor AsyncNetworkService {
             if isConnectionError && protoRequest.shouldRetry {
                 let attempt = protoRequest.retryPolicy?.currentRetry ?? 0
                 let delaySec = 2.0 * pow(2.0, Double(attempt))
+                #if DEBUG
+                print("[Network] Retrying in \(delaySec)s (attempt \(attempt + 1))")
+                #endif
                 try? await Task.sleep(nanoseconds: UInt64(delaySec * 1_000_000_000))
                 return await performInternal(
                     request: protoRequest.withReducedRetries(),

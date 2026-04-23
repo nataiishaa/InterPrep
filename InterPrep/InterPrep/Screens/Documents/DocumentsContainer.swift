@@ -5,8 +5,8 @@
 //  Documents container
 //
 
-import SwiftUI
 import ArchitectureCore
+import SwiftUI
 
 public struct DocumentsContainer: View {
     @StateObject private var store: DocumentsStore
@@ -22,6 +22,7 @@ public struct DocumentsContainer: View {
             }
     }
     
+    // swiftlint:disable:next function_body_length
     private func makeModel() -> DocumentsView.Model {
         .init(
             folders: store.state.folders,

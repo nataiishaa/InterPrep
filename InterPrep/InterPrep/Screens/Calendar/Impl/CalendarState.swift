@@ -5,8 +5,8 @@
 //  Calendar feature state
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public struct CalendarState {
     public var selectedDate: Date = Date()
@@ -144,6 +144,7 @@ extension CalendarState: FeatureState {
     }
     
     @MainActor
+    // swiftlint:disable:next function_body_length
     public static func reduce(
         state: inout Self,
         with message: Message<Input, Feedback>
@@ -320,8 +321,6 @@ extension CalendarState: FeatureState {
         return nil
     }
 }
-
-
 
 extension Date {
     var startOfMonth: Date {

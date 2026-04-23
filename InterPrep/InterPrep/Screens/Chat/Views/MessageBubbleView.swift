@@ -5,14 +5,16 @@
 //  Message bubble component
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct MessageBubbleView: View {
     let message: ChatMessage
     let onButtonTap: ((MessageButton) -> Void)?
+    let isSending: Bool
     @Environment(\.colorScheme) var colorScheme
     @State private var showCopiedFeedback = false
+    @State private var tappedButtonId: UUID?
     
     private var isUser: Bool {
         message.sender == .user
@@ -65,24 +67,36 @@ struct MessageBubbleView: View {
                     VStack(spacing: 6) {
                         ForEach(message.buttons) { button in
                             Button {
+                                tappedButtonId = button.id
                                 onButtonTap(button)
                             } label: {
-                                Text(button.text)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.brandPrimary)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(Color.backgroundSecondary)
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.brandPrimary.opacity(0.3), lineWidth: 1)
-                                    )
+                                HStack(spacing: 8) {
+                                    if isSending && tappedButtonId == button.id {
+                                        ProgressView()
+                                            .scaleEffect(0.7)
+                                            .frame(width: 14, height: 14)
+                                    }
+                                    Text(button.text)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(isSending ? .secondary : .brandPrimary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.backgroundSecondary)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(
+                                            (isSending ? Color.secondary : Color.brandPrimary).opacity(0.3),
+                                            lineWidth: 1
+                                        )
+                                )
                             }
                             .buttonStyle(.plain)
+                            .disabled(isSending)
                         }
                     }
                     .frame(maxWidth: 280)
@@ -149,7 +163,8 @@ struct MessageBubbleView: View {
                     MessageButton(text: "Другое", action: .selectScenario(.other))
                 ]
             ),
-            onButtonTap: { _ in }
+            onButtonTap: { _ in },
+            isSending: false
         )
         
         MessageBubbleView(
@@ -158,7 +173,8 @@ struct MessageBubbleView: View {
                 sender: .user,
                 status: .read
             ),
-            onButtonTap: nil
+            onButtonTap: nil,
+            isSending: false
         )
         
         MessageBubbleView(
@@ -171,7 +187,8 @@ struct MessageBubbleView: View {
                     MessageButton(text: "Нет", action: .confirmNo)
                 ]
             ),
-            onButtonTap: { _ in }
+            onButtonTap: { _ in },
+            isSending: false
         )
     }
     .padding()

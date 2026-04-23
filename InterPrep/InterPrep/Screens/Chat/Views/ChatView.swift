@@ -5,8 +5,8 @@
 //  Chat main view
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct ChatView: View {
     let model: Model
@@ -40,26 +40,25 @@ struct ChatView: View {
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(spacing: 12) {
+                                if model.messages.count <= 1 {
+                                    ChatWelcomeView()
+                                }
+                                
                                 ForEach(model.messages) { message in
                                     MessageBubbleView(
                                         message: message,
-                                        onButtonTap: model.onButtonTapped
+                                        onButtonTap: model.onButtonTapped,
+                                        isSending: model.isSending
                                     )
                                     .id(message.id)
                                 }
                                 
-                                if model.isSending && model.messages.last?.sender == .user && model.messages.last?.status != .sent {
-                                    HStack {
-                                        ProgressView()
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 10)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color(.systemGray5))
-                                            )
+                                if model.isSending {
+                                    HStack(alignment: .bottom, spacing: 8) {
+                                        TypingIndicatorView()
+                                            .id("loading-indicator")
                                         Spacer(minLength: 60)
                                     }
-                                    .id("loading-indicator")
                                 }
                             }
                             .padding()
@@ -81,13 +80,25 @@ struct ChatView: View {
                     }
                 }
                 
+                if model.showFavoritesPicker {
+                    FavoriteVacancyPickerView(
+                        vacancies: model.favoriteVacancies,
+                        isLoading: model.isLoadingFavorites,
+                        onSelect: model.onSelectFavoriteVacancy,
+                        onDismiss: model.onHideFavoritesPicker
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                
                 ChatInputBar(
                     text: model.inputText,
                     isSending: model.isSending,
                     systemHints: model.systemHints,
+                    waitingForVacancyId: model.waitingForVacancyId,
                     onTextChanged: model.onInputTextChanged,
                     onSend: model.onSendMessage,
-                    onHintTapped: model.onHintTapped
+                    onHintTapped: model.onHintTapped,
+                    onFavoritesTapped: model.onShowFavoritesPicker
                 )
             }
             .background(Color.backgroundPrimary)

@@ -103,11 +103,11 @@ public enum EmploymentType: String, Codable, CaseIterable {
 }
 
 public enum ExperienceLevel: String, Codable, CaseIterable {
-    case intern = "intern"
-    case junior = "junior"
-    case middle = "middle"
-    case senior = "senior"
-    case lead = "lead"
+    case intern
+    case junior
+    case middle
+    case senior
+    case lead
     
     public var displayName: String {
         switch self {
@@ -121,9 +121,9 @@ public enum ExperienceLevel: String, Codable, CaseIterable {
 }
 
 public enum SalaryPeriod: String, Codable {
-    case hourly = "hourly"
-    case monthly = "monthly"
-    case yearly = "yearly"
+    case hourly
+    case monthly
+    case yearly
     
     public var displayName: String {
         switch self {

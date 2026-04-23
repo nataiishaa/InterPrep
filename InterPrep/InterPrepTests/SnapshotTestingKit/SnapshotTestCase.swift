@@ -5,8 +5,8 @@
 //  Base class for snapshot tests with environment configuration
 //
 
-import XCTest
 import SnapshotTesting
+import XCTest
 
 @MainActor
 open class SnapshotTestCase: XCTestCase {

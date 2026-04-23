@@ -5,8 +5,8 @@
 //  Simple resume upload view for auth flow
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct SimpleResumeUploadView: View {
     let model: Model

@@ -5,15 +5,19 @@
 //  Resume upload view - passive
 //
 
+import DesignSystem
 import SwiftUI
 import UniformTypeIdentifiers
-import DesignSystem
 
-struct ResumeUploadView: View {
+public struct ResumeUploadView: View {
     let model: Model
     @State private var showDocumentPicker = false
     
-    var body: some View {
+    public init(model: Model) {
+        self.model = model
+    }
+    
+    public var body: some View {
         VStack(spacing: 0) {
             header
             

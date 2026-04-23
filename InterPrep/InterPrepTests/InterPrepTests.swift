@@ -5,8 +5,8 @@
 //  Created by Наталья Захарова on 21.01.2026.
 //
 
-import XCTest
 @testable import InterPrep
+import XCTest
 
 final class InterPrepTests: XCTestCase {
 

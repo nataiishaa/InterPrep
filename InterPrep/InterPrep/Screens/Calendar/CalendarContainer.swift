@@ -5,8 +5,8 @@
 //  Calendar feature container
 //
 
-import SwiftUI
 import ArchitectureCore
+import SwiftUI
 
 public struct CalendarContainer: View {
     @StateObject private var store: CalendarStore

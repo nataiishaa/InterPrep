@@ -5,9 +5,9 @@
 //  Network connectivity monitor for offline mode
 //
 
+import Combine
 import Foundation
 import Network
-import Combine
 
 @MainActor
 public final class NetworkMonitor: ObservableObject {

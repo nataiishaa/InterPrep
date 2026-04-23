@@ -5,11 +5,13 @@
 //  Profile screen with settings and statistics
 //
 
-import SwiftUI
-import DesignSystem
 import CalendarFeature
+import DesignSystem
 import NotificationService
+import SwiftUI
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 struct ProfileView: View {
     let model: Model
     @StateObject private var notificationManager = NotificationManager.shared
@@ -116,6 +118,7 @@ struct ProfileView: View {
             ZStack(alignment: .bottomTrailing) {
                 if let localURL = model.cachedProfilePhotoURL {
                     avatarImageFromURL(localURL)
+                        .id(localURL)
                 } else if let urlString = model.user?.avatarURL, !urlString.isEmpty, let url = URL(string: urlString) {
                     AsyncImage(url: url) { phase in
                         switch phase {
@@ -178,21 +181,18 @@ struct ProfileView: View {
     
     @ViewBuilder
     private func avatarImageFromURL(_ url: URL) -> some View {
-        AsyncImage(url: url) { phase in
-            switch phase {
-            case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFill()
-            case .failure, .empty:
-                avatarPlaceholder
-            @unknown default:
-                avatarPlaceholder
-            }
+        // Strip query parameters for file path since they're only used for cache busting
+        let filePath = url.path
+        if let uiImage = UIImage(contentsOfFile: filePath) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 100, height: 100)
+                .clipped()
+                .clipShape(Circle())
+        } else {
+            avatarPlaceholder
         }
-        .frame(width: 100, height: 100)
-        .clipped()
-        .clipShape(Circle())
     }
     
     private var avatarPlaceholder: some View {

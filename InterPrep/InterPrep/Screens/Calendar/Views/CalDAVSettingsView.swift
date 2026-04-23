@@ -5,8 +5,8 @@
 //  CalDAV connection settings UI
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 public struct CalDAVSettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -165,7 +165,7 @@ public struct CalDAVSettingsView: View {
         !settings.password.isEmpty
     }
     
-    private func testConnection() {
+    func testConnection() {
         isTestingConnection = true
         connectionStatus = nil
         

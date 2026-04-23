@@ -5,8 +5,8 @@
 //  Discovery container
 //
 
-import SwiftUI
 import ArchitectureCore
+import SwiftUI
 
 public struct DiscoveryContainer: View {
     @StateObject private var store: DiscoveryStore

@@ -19,6 +19,7 @@ extension OnboardingView {
         let onGetStarted: () -> Void
         let onRegister: () -> Void
         
+        // swiftlint:disable:next nesting
         struct PageModel: Identifiable {
             let id: Int
             let imageName: String

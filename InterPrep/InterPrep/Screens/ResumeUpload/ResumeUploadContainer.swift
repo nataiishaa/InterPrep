@@ -5,9 +5,9 @@
 //  Resume upload container
 //
 
-import SwiftUI
 import ArchitectureCore
 import DesignSystem
+import SwiftUI
 
 public struct ResumeUploadContainer: View {
     @StateObject private var store: ResumeUploadStore

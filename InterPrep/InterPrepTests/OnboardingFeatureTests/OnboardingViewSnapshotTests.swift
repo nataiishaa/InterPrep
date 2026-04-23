@@ -5,10 +5,10 @@
 //  Snapshot tests for OnboardingView
 //
 
-import XCTest
-import SwiftUI
-import SnapshotTesting
 @testable import OnboardingFeature
+import SnapshotTesting
+import SwiftUI
+import XCTest
 
 final class OnboardingViewSnapshotTests: SnapshotTestCase {
 

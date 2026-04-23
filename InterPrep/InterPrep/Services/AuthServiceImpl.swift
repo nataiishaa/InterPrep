@@ -5,9 +5,9 @@
 //  Real implementation of AuthService using NetworkServiceV2
 //
 
+import AuthFeature
 import Foundation
 import NetworkService
-import AuthFeature
 
 public final class AuthServiceImpl: AuthService {
     private let networkService: NetworkServiceV2

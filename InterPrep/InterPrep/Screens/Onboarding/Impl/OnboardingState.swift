@@ -5,8 +5,8 @@
 //  Onboarding screen state
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public struct OnboardingState {
     public var currentPage: Int = 0

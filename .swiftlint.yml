@@ -1,0 +1,89 @@
+# SwiftLint базовая конфигурация для InterPrep
+
+# Отключаем слишком строгие правила
+disabled_rules:
+  - trailing_whitespace        # Пробелы в конце строк
+  - todo                        # TODO комментарии разрешены
+  - line_length                 # Длина строки (настроим ниже)
+  - force_cast                  # as! разрешен (осторожно используем)
+  - force_try                   # try! разрешен (для тестов)
+
+# Включаем полезные правила
+opt_in_rules:
+  - empty_count                 # Используй isEmpty вместо count == 0
+  - empty_string                # Используй isEmpty вместо == ""
+  - sorted_imports              # Сортировка импортов
+
+# Исключаем из проверки
+excluded:
+  - Pods
+  - .build
+  - InterPrep/InterPrep.xcodeproj
+  - InterPrep/InterPrep.xcworkspace
+  - InterPrep/InterPrep/NetworkV2/Proto/Generated  # Автогенерированный код
+  - InterPrep/build
+  - InterPrep/DerivedData
+  - InterPrep/**/__Snapshots__                      # Snapshot тесты
+
+# Длина строки - мягкие ограничения
+line_length:
+  warning: 120
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: true
+
+# Длина файла
+file_length:
+  warning: 500
+  error: 1200
+  ignore_comment_only_lines: true
+
+# Длина типа (класс/структура)
+type_body_length:
+  warning: 400
+  error: 600
+
+# Длина функции
+function_body_length:
+  warning: 80
+  error: 150
+
+# Сложность функции
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+  ignores_case_statements: true
+
+# Именование переменных
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 60
+    error: 80
+  excluded:
+    - id
+    - ID
+    - URL
+    - url
+    - db
+    - x
+    - y
+    - z
+    - i
+    - j
+    - k
+
+# Именование типов
+type_name:
+  min_length: 3
+  max_length:
+    warning: 50
+    error: 70
+  excluded:
+    - ID
+
+# Формат вывода
+reporter: "xcode"

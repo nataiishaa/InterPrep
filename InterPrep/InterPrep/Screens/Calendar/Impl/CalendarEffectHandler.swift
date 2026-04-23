@@ -5,13 +5,13 @@
 //  Calendar effect handler with notifications and gRPC integration
 //
 
-import Foundation
-import UserNotifications
 import ArchitectureCore
+import CacheService
+import Foundation
+import NetworkMonitorService
 import NetworkService
 import NotificationService
-import CacheService
-import NetworkMonitorService
+import UserNotifications
 
 public enum CalendarEventType: Sendable {
     case unspecified
@@ -76,7 +76,7 @@ public struct CalendarEvent: Sendable {
 // MARK: - Effect Handler
 
 public actor CalendarEffectHandler: EffectHandler {
-    public typealias S = CalendarState
+    public typealias StateType = CalendarState
     
     private let calendarService: CalendarServicing
     private let cacheManager = CacheManager.shared
@@ -360,7 +360,36 @@ public actor CalendarEffectHandler: EffectHandler {
 public final actor MockCalendarService: CalendarServicing {
     public init() {}
     
-    public func createEvent(title: String, description: String, startTime: Date, endTime: Date, eventType: CalendarEventType, location: String?, reminderEnabled: Bool, reminderMinutes: Int32) async throws -> CalendarEvent {
+    public func createEvent(
+        title: String,
+        description: String,
+        startTime: Date,
+        endTime: Date,
+        eventType: CalendarEventType
+    ) async throws -> CalendarEvent {
+        try await createEvent(
+            title: title,
+            description: description,
+            startTime: startTime,
+            endTime: endTime,
+            eventType: eventType,
+            location: nil,
+            reminderEnabled: false,
+            reminderMinutes: 15
+        )
+    }
+    
+    // swiftlint:disable:next function_parameter_count
+    public func createEvent(
+        title: String,
+        description: String,
+        startTime: Date,
+        endTime: Date,
+        eventType: CalendarEventType,
+        location: String?,
+        reminderEnabled: Bool,
+        reminderMinutes: Int32
+    ) async throws -> CalendarEvent {
         CalendarEvent(
             id: UUID().uuidString,
             title: title,
@@ -385,7 +414,40 @@ public final actor MockCalendarService: CalendarServicing {
         []
     }
     
-    public func updateEvent(id: String, title: String?, description: String?, startTime: Date?, endTime: Date?, eventType: CalendarEventType?, location: String?, reminderEnabled: Bool?, reminderMinutes: Int32?, completed: Bool?) async throws -> CalendarEvent {
+    public func updateEvent(
+        id: String,
+        title: String?,
+        description: String?,
+        startTime: Date?,
+        endTime: Date?
+    ) async throws -> CalendarEvent {
+        try await updateEvent(
+            id: id,
+            title: title,
+            description: description,
+            startTime: startTime,
+            endTime: endTime,
+            eventType: nil,
+            location: nil,
+            reminderEnabled: nil,
+            reminderMinutes: nil,
+            completed: nil
+        )
+    }
+    
+    // swiftlint:disable:next function_parameter_count
+    public func updateEvent(
+        id: String,
+        title: String?,
+        description: String?,
+        startTime: Date?,
+        endTime: Date?,
+        eventType: CalendarEventType?,
+        location: String?,
+        reminderEnabled: Bool?,
+        reminderMinutes: Int32?,
+        completed: Bool?
+    ) async throws -> CalendarEvent {
         CalendarEvent(
             id: id,
             title: title ?? "Updated Event",

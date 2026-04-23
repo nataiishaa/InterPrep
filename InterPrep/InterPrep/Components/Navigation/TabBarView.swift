@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct TabBarView: View {
     @Binding var selectedTab: TabItem
@@ -16,12 +16,19 @@ struct TabBarView: View {
             }
         }
         .frame(height: TabBarLayout.barHeight)
-        .background(tabBarBackground)
-        .shadow(
-            color: shadowColor,
-            radius: TabBarLayout.shadowRadius,
-            x: TabBarLayout.shadowX,
-            y: TabBarLayout.shadowY
+        .background(
+            tabBarBackground
+                .clipShape(.rect(
+                    topLeadingRadius: TabBarLayout.topCornerRadius,
+                    topTrailingRadius: TabBarLayout.topCornerRadius
+                ))
+                .ignoresSafeArea(edges: .bottom)
+                .shadow(
+                    color: shadowColor,
+                    radius: TabBarLayout.shadowRadius,
+                    x: TabBarLayout.shadowX,
+                    y: TabBarLayout.shadowY
+                )
         )
     }
 

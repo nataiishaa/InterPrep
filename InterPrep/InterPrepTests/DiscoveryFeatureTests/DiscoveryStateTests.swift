@@ -5,9 +5,9 @@
 //  Unit tests for DiscoveryState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import DiscoveryModule
+import XCTest
 
 @MainActor
 final class DiscoveryStateTests: XCTestCase {
@@ -85,11 +85,11 @@ final class DiscoveryStateTests: XCTestCase {
         let effect = DiscoveryState.reduce(state: &state, with: .input(.vacancyTapped(vacancy)))
 
         XCTAssertEqual(state.selectedVacancy?.id, "1")
-        guard case .navigateToVacancyDetail(let v) = effect else {
+        guard case .navigateToVacancyDetail(let detail) = effect else {
             XCTFail("Expected navigateToVacancyDetail")
             return
         }
-        XCTAssertEqual(v.id, "1")
+        XCTAssertEqual(detail.id, "1")
     }
 
     func testToggleFavorite_returnsEffect() {

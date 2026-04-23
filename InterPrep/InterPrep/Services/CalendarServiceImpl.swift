@@ -5,9 +5,9 @@
 //  Calendar service implementation using gRPC
 //
 
+import CalendarFeature
 import Foundation
 import NetworkService
-import CalendarFeature
 
 public final actor CalendarServiceImpl: CalendarServicing {
     private let networkService: NetworkServiceV2
@@ -16,6 +16,26 @@ public final actor CalendarServiceImpl: CalendarServicing {
         self.networkService = networkService
     }
     
+    public func createEvent(
+        title: String,
+        description: String,
+        startTime: Date,
+        endTime: Date,
+        eventType: CalendarEventType
+    ) async throws -> CalendarEvent {
+        try await createEvent(
+            title: title,
+            description: description,
+            startTime: startTime,
+            endTime: endTime,
+            eventType: eventType,
+            location: nil,
+            reminderEnabled: false,
+            reminderMinutes: 15
+        )
+    }
+    
+    // swiftlint:disable:next function_parameter_count
     public func createEvent(
         title: String,
         description: String,
@@ -76,6 +96,28 @@ public final actor CalendarServiceImpl: CalendarServicing {
         }
     }
     
+    public func updateEvent(
+        id: String,
+        title: String?,
+        description: String?,
+        startTime: Date?,
+        endTime: Date?
+    ) async throws -> CalendarEvent {
+        try await updateEvent(
+            id: id,
+            title: title,
+            description: description,
+            startTime: startTime,
+            endTime: endTime,
+            eventType: nil,
+            location: nil,
+            reminderEnabled: nil,
+            reminderMinutes: nil,
+            completed: nil
+        )
+    }
+    
+    // swiftlint:disable:next function_parameter_count
     public func updateEvent(
         id: String,
         title: String?,

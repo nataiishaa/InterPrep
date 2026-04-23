@@ -5,8 +5,8 @@
 //  Offline mode indicator banner
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct OfflineBanner: View {
     let hasPendingSync: Bool
