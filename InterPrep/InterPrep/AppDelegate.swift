@@ -1,6 +1,6 @@
+import NotificationService
 import UIKit
 import UserNotifications
-import NotificationService
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(

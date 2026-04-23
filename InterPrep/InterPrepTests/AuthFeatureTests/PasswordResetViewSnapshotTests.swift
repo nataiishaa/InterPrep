@@ -5,10 +5,10 @@
 //  Snapshot tests for PasswordResetView
 //
 
-import XCTest
-import SwiftUI
-import SnapshotTesting
 @testable import AuthFeature
+import SnapshotTesting
+import SwiftUI
+import XCTest
 
 final class PasswordResetViewSnapshotTests: SnapshotTestCase {
 

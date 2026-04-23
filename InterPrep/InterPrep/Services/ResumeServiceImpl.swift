@@ -5,9 +5,9 @@
 //  Real implementation of ResumeService using NetworkServiceV2
 //
 
+import DiscoveryModule
 import Foundation
 import NetworkService
-import DiscoveryModule
 
 public final actor ResumeServiceImpl: ResumeService {
     private let networkService: NetworkServiceV2

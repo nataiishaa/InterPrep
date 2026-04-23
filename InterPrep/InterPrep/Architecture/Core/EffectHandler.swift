@@ -7,15 +7,15 @@
 
 import Foundation
 
-public protocol EffectHandler<S>: Actor {
-    associatedtype S: FeatureState
-    func handle(effect: S.Effect) async -> S.Feedback?
+public protocol EffectHandler<StateType>: Actor {
+    associatedtype StateType: FeatureState
+    func handle(effect: StateType.Effect) async -> StateType.Feedback?
 }
 
-public final actor DummyEffectHandler<S: FeatureState>: EffectHandler {
+public final actor DummyEffectHandler<StateType: FeatureState>: EffectHandler {
     public init() {}
     
-    public func handle(effect: S.Effect) async -> S.Feedback? {
+    public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         return nil
     }
 }

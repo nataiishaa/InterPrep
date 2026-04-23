@@ -5,8 +5,8 @@
 //  Folder card component
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct FolderCardView: View {
     let folder: Folder

@@ -16,12 +16,8 @@ let project = Project(
             requirement: .upToNextMajor(from: "1.5.0")
         ),
         .remote(
-            url: "https://github.com/apple/swift-nio.git",
-            requirement: .upToNextMinor(from: "2.64.0")  // совместимо с grpc-swift 1.23; CNIOLLHTTP в 2.62+
-        ),
-        .remote(
             url: "https://github.com/grpc/grpc-swift.git",
-            requirement: .exact("1.23.0")  // 1.26+ требует Swift Tools 6.1; при 6.0.3 используем 1.23
+            requirement: .upToNextMajor(from: "1.21.0")
         )
     ],
     settings: .settings(
@@ -71,7 +67,6 @@ let project = Project(
             ],
             resources: [
                 "InterPrep/Assets.xcassets/**",
-                "InterPrep/Preview Content/**",
                 "InterPrep/PrivacyInfo.xcprivacy"
             ],
             dependencies: [
@@ -107,7 +102,6 @@ let project = Project(
             dependencies: []
         ),
         
-        
         // MARK: - Network Service
         
         .target(
@@ -121,10 +115,7 @@ let project = Project(
             ],
             dependencies: [
                 .package(product: "SwiftProtobuf"),
-                .package(product: "GRPC"),
-                .package(product: "Logging"),
-                .package(product: "NIOCore"),
-                .package(product: "NIOHTTP2")
+                .package(product: "GRPC")
             ]
         ),
         
@@ -217,7 +208,9 @@ let project = Project(
             ],
             dependencies: [
                 .target(name: "ArchitectureCore"),
-                .target(name: "DesignSystem")
+                .target(name: "DesignSystem"),
+                .target(name: "NetworkService"),
+                .target(name: "ResumeUploadFeature")
             ]
         ),
         
@@ -344,7 +337,8 @@ let project = Project(
             ],
             dependencies: [
                 .target(name: "ArchitectureCore"),
-                .target(name: "DesignSystem")
+                .target(name: "DesignSystem"),
+                .target(name: "DiscoveryModule")
             ]
         ),
         
@@ -466,6 +460,7 @@ let project = Project(
                 .target(name: "ChatFeature"),
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
+                .target(name: "DiscoveryModule"),
                 .package(product: "SnapshotTesting")
             ]
         )

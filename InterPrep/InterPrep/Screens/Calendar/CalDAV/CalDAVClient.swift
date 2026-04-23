@@ -355,7 +355,7 @@ private class PrincipalParserDelegate: NSObject, XMLParserDelegate {
     private var currentElement = ""
     private var currentValue = ""
     
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
         currentElement = elementName
         currentValue = ""
     }
@@ -376,7 +376,7 @@ private class CalendarHomeParserDelegate: NSObject, XMLParserDelegate {
     private var currentElement = ""
     private var currentValue = ""
     
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
         currentElement = elementName
         currentValue = ""
     }
@@ -404,7 +404,7 @@ private class CalendarsParserDelegate: NSObject, XMLParserDelegate {
     private var currentElement = ""
     private var currentValue = ""
     
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
         currentElement = elementName
         currentValue = ""
     }
@@ -446,7 +446,7 @@ private class EventsParserDelegate: NSObject, XMLParserDelegate {
     private var currentElement = ""
     private var currentValue = ""
     
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
         currentElement = elementName
         currentValue = ""
     }

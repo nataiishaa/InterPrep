@@ -5,8 +5,8 @@
 //  Login screen view
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct LoginView: View {
     let model: Model
@@ -167,7 +167,7 @@ private extension LoginView {
     }
 }
 
-struct LoginView_Previews: SwiftUI.PreviewProvider {
+struct LoginViewPreviews: SwiftUI.PreviewProvider {
     static var previews: some View {
         Group {
             LoginView(model: .fixture())

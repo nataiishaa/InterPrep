@@ -27,8 +27,6 @@ struct ChatListView: View {
     }
 }
 
-
-
 struct ChatPreview: Identifiable {
     let id: UUID
     let consultant: Consultant
@@ -50,8 +48,6 @@ struct ChatPreview: Identifiable {
         self.unreadCount = unreadCount
     }
 }
-
-
 
 struct ChatPreviewRow: View {
     let chat: ChatPreview
@@ -110,8 +106,6 @@ struct ChatPreviewRow: View {
         .padding(.vertical, 4)
     }
 }
-
-
 
 #Preview {
     ChatListView(

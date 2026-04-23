@@ -36,7 +36,6 @@ struct ThemePreviewView: View {
                 .background(Color.backgroundSecondary)
                 .cornerRadius(12)
                 
-                // Text Styles
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Стили текста")
                         .font(.headline)

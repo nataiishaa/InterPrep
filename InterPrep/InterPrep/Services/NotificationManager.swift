@@ -1,6 +1,6 @@
 import Foundation
-import UserNotifications
 import UIKit
+import UserNotifications
 
 @MainActor
 public final class NotificationManager: NSObject, ObservableObject {

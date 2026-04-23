@@ -5,6 +5,7 @@
 //  Chat view model
 //
 
+import DiscoveryModule
 import Foundation
 
 extension ChatView {
@@ -17,17 +18,46 @@ extension ChatView {
         let isConnected: Bool
         let error: String?
         let systemHints: [String]
+        let waitingForVacancyId: Bool
+        let showFavoritesPicker: Bool
+        let favoriteVacancies: [DiscoveryState.Vacancy]
+        let isLoadingFavorites: Bool
         let onInputTextChanged: (String) -> Void
         let onSendMessage: () -> Void
         let onHintTapped: (String) -> Void
         let onButtonTapped: (MessageButton) -> Void
         let onDismissError: () -> Void
         let onClearHistory: () -> Void
+        let onShowFavoritesPicker: () -> Void
+        let onHideFavoritesPicker: () -> Void
+        let onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void
     }
 }
 
 #if DEBUG
 extension ChatView.Model {
+    private static let noopCallbacks: (
+        onInputTextChanged: (String) -> Void,
+        onSendMessage: () -> Void,
+        onHintTapped: (String) -> Void,
+        onButtonTapped: (MessageButton) -> Void,
+        onDismissError: () -> Void,
+        onClearHistory: () -> Void,
+        onShowFavoritesPicker: () -> Void,
+        onHideFavoritesPicker: () -> Void,
+        onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void
+    ) = (
+        onInputTextChanged: { _ in },
+        onSendMessage: {},
+        onHintTapped: { _ in },
+        onButtonTapped: { _ in },
+        onDismissError: {},
+        onClearHistory: {},
+        onShowFavoritesPicker: {},
+        onHideFavoritesPicker: {},
+        onSelectFavoriteVacancy: { _ in }
+    )
+
     static var fixtureWelcome: Self {
         .init(
             messages: [
@@ -48,12 +78,19 @@ extension ChatView.Model {
             isConnected: true,
             error: nil,
             systemHints: ChatState.systemHints,
-            onInputTextChanged: { _ in },
-            onSendMessage: {},
-            onHintTapped: { _ in },
-            onButtonTapped: { _ in },
-            onDismissError: {},
-            onClearHistory: {}
+            waitingForVacancyId: false,
+            showFavoritesPicker: false,
+            favoriteVacancies: [],
+            isLoadingFavorites: false,
+            onInputTextChanged: noopCallbacks.onInputTextChanged,
+            onSendMessage: noopCallbacks.onSendMessage,
+            onHintTapped: noopCallbacks.onHintTapped,
+            onButtonTapped: noopCallbacks.onButtonTapped,
+            onDismissError: noopCallbacks.onDismissError,
+            onClearHistory: noopCallbacks.onClearHistory,
+            onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
+            onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
         )
     }
     
@@ -72,12 +109,19 @@ extension ChatView.Model {
             isConnected: true,
             error: nil,
             systemHints: ChatState.systemHints,
-            onInputTextChanged: { _ in },
-            onSendMessage: {},
-            onHintTapped: { _ in },
-            onButtonTapped: { _ in },
-            onDismissError: {},
-            onClearHistory: {}
+            waitingForVacancyId: false,
+            showFavoritesPicker: false,
+            favoriteVacancies: [],
+            isLoadingFavorites: false,
+            onInputTextChanged: noopCallbacks.onInputTextChanged,
+            onSendMessage: noopCallbacks.onSendMessage,
+            onHintTapped: noopCallbacks.onHintTapped,
+            onButtonTapped: noopCallbacks.onButtonTapped,
+            onDismissError: noopCallbacks.onDismissError,
+            onClearHistory: noopCallbacks.onClearHistory,
+            onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
+            onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
         )
     }
     
@@ -101,12 +145,19 @@ extension ChatView.Model {
             isConnected: true,
             error: nil,
             systemHints: ChatState.systemHints,
-            onInputTextChanged: { _ in },
-            onSendMessage: {},
-            onHintTapped: { _ in },
-            onButtonTapped: { _ in },
-            onDismissError: {},
-            onClearHistory: {}
+            waitingForVacancyId: false,
+            showFavoritesPicker: false,
+            favoriteVacancies: [],
+            isLoadingFavorites: false,
+            onInputTextChanged: noopCallbacks.onInputTextChanged,
+            onSendMessage: noopCallbacks.onSendMessage,
+            onHintTapped: noopCallbacks.onHintTapped,
+            onButtonTapped: noopCallbacks.onButtonTapped,
+            onDismissError: noopCallbacks.onDismissError,
+            onClearHistory: noopCallbacks.onClearHistory,
+            onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
+            onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
         )
     }
     
@@ -120,12 +171,19 @@ extension ChatView.Model {
             isConnected: true,
             error: nil,
             systemHints: ChatState.systemHints,
-            onInputTextChanged: { _ in },
-            onSendMessage: {},
-            onHintTapped: { _ in },
-            onButtonTapped: { _ in },
-            onDismissError: {},
-            onClearHistory: {}
+            waitingForVacancyId: false,
+            showFavoritesPicker: false,
+            favoriteVacancies: [],
+            isLoadingFavorites: false,
+            onInputTextChanged: noopCallbacks.onInputTextChanged,
+            onSendMessage: noopCallbacks.onSendMessage,
+            onHintTapped: noopCallbacks.onHintTapped,
+            onButtonTapped: noopCallbacks.onButtonTapped,
+            onDismissError: noopCallbacks.onDismissError,
+            onClearHistory: noopCallbacks.onClearHistory,
+            onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
+            onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
         )
     }
     
@@ -142,12 +200,19 @@ extension ChatView.Model {
             isConnected: true,
             error: nil,
             systemHints: ChatState.systemHints,
-            onInputTextChanged: { _ in },
-            onSendMessage: {},
-            onHintTapped: { _ in },
-            onButtonTapped: { _ in },
-            onDismissError: {},
-            onClearHistory: {}
+            waitingForVacancyId: false,
+            showFavoritesPicker: false,
+            favoriteVacancies: [],
+            isLoadingFavorites: false,
+            onInputTextChanged: noopCallbacks.onInputTextChanged,
+            onSendMessage: noopCallbacks.onSendMessage,
+            onHintTapped: noopCallbacks.onHintTapped,
+            onButtonTapped: noopCallbacks.onButtonTapped,
+            onDismissError: noopCallbacks.onDismissError,
+            onClearHistory: noopCallbacks.onClearHistory,
+            onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
+            onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
         )
     }
 }

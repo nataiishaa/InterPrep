@@ -5,11 +5,11 @@
 //  Snapshot tests for ChatView
 //
 
-import XCTest
-import SwiftUI
-import SnapshotTesting
 import ArchitectureCore
 @testable import ChatFeature
+import SnapshotTesting
+import SwiftUI
+import XCTest
 
 final class ChatViewSnapshotTests: SnapshotTestCase {
     

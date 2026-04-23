@@ -6,8 +6,8 @@
 //  Сохраняет conversation_id для продолжения диалога; таймаут запроса 120 с.
 //
 
-import Foundation
 import ChatFeature
+import Foundation
 import NetworkService
 
 public final actor ChatServiceImpl: ChatServicing {

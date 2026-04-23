@@ -8,16 +8,38 @@
 import Foundation
 
 extension ResumeUploadView {
-    struct Model {
-        let uploadStatus: ResumeUploadState.UploadStatus
-        let selectedFile: ResumeUploadState.SelectedFile?
-        let uploadProgress: Double
-        let errorMessage: String?
-        let onFileSelected: (URL) -> Void
-        let onUpload: () -> Void
-        let onCancel: () -> Void
-        let onSkip: () -> Void
-        let onRemoveFile: () -> Void
+    public struct Model {
+        public let uploadStatus: ResumeUploadState.UploadStatus
+        public let selectedFile: ResumeUploadState.SelectedFile?
+        public let uploadProgress: Double
+        public let errorMessage: String?
+        public let onFileSelected: (URL) -> Void
+        public let onUpload: () -> Void
+        public let onCancel: () -> Void
+        public let onSkip: () -> Void
+        public let onRemoveFile: () -> Void
+        
+        public init(
+            uploadStatus: ResumeUploadState.UploadStatus,
+            selectedFile: ResumeUploadState.SelectedFile?,
+            uploadProgress: Double,
+            errorMessage: String?,
+            onFileSelected: @escaping (URL) -> Void,
+            onUpload: @escaping () -> Void,
+            onCancel: @escaping () -> Void,
+            onSkip: @escaping () -> Void,
+            onRemoveFile: @escaping () -> Void
+        ) {
+            self.uploadStatus = uploadStatus
+            self.selectedFile = selectedFile
+            self.uploadProgress = uploadProgress
+            self.errorMessage = errorMessage
+            self.onFileSelected = onFileSelected
+            self.onUpload = onUpload
+            self.onCancel = onCancel
+            self.onSkip = onSkip
+            self.onRemoveFile = onRemoveFile
+        }
     }
 }
 

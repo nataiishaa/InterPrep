@@ -5,6 +5,7 @@ enum TabBarLayout {
     static let shadowRadius: CGFloat = 8
     static let shadowX: CGFloat = 0
     static let shadowY: CGFloat = -2
+    static let topCornerRadius: CGFloat = 20
 
     static let buttonStackSpacing: CGFloat = 4
     /// Круг выделения; iconStackHeight и barHeight подобраны так, чтобы круг не выходил за панель

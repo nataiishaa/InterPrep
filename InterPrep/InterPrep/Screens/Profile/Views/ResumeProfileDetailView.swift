@@ -5,10 +5,11 @@
 //  Просмотр и редактирование резюме (профиль из API)
 //
 
-import SwiftUI
 import DesignSystem
 import NetworkService
+import SwiftUI
 
+// swiftlint:disable:next type_body_length
 struct ResumeProfileDetailView: View {
     var userId: String?
     var onUploadNewResume: (() -> Void)?
@@ -345,20 +346,20 @@ struct ResumeProfileDetailView: View {
     }
     
     private func copyProfileToEditState() {
-        guard let p = profile else { return }
-        targetRolesText = p.targetRoles.joined(separator: ", ")
-        experienceLevel = p.hasExperienceLevel ? p.experienceLevel : ""
-        areasText = p.areas.map { $0.name }.joined(separator: "\n")
-        if p.hasSalaryMin && p.salaryMin > 0 {
-            salaryMinText = String(Int(p.salaryMin))
+        guard let currentProfile = profile else { return }
+        targetRolesText = currentProfile.targetRoles.joined(separator: ", ")
+        experienceLevel = currentProfile.hasExperienceLevel ? currentProfile.experienceLevel : ""
+        areasText = currentProfile.areas.map { $0.name }.joined(separator: "\n")
+        if currentProfile.hasSalaryMin && currentProfile.salaryMin > 0 {
+            salaryMinText = String(Int(currentProfile.salaryMin))
         } else {
             salaryMinText = ""
         }
-        currencyText = p.hasCurrency && !p.currency.isEmpty ? p.currency : "₽"
-        workFormatText = p.workFormat.joined(separator: ", ")
-        skillsTopText = p.skillsTop.joined(separator: ", ")
-        educationLevel = p.hasEducationLevel ? p.educationLevel : ""
-        notesText = p.hasNotes ? p.notes : ""
+        currencyText = currentProfile.hasCurrency && !currentProfile.currency.isEmpty ? currentProfile.currency : "₽"
+        workFormatText = currentProfile.workFormat.joined(separator: ", ")
+        skillsTopText = currentProfile.skillsTop.joined(separator: ", ")
+        educationLevel = currentProfile.hasEducationLevel ? currentProfile.educationLevel : ""
+        notesText = currentProfile.hasNotes ? currentProfile.notes : ""
     }
     
     private func saveProfile() async {
@@ -382,37 +383,37 @@ struct ResumeProfileDetailView: View {
     }
     
     private func buildProfileFromEditState() -> User_ResumeProfile {
-        var p = User_ResumeProfile()
-        p.targetRoles = splitTrim(targetRolesText)
+        var profile = User_ResumeProfile()
+        profile.targetRoles = splitTrim(targetRolesText)
         if !experienceLevel.isEmpty {
-            p.experienceLevel = experienceLevel.trimmingCharacters(in: .whitespacesAndNewlines)
+            profile.experienceLevel = experienceLevel.trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        p.areas = areasText
+        profile.areas = areasText
             .split(separator: "\n", omittingEmptySubsequences: true)
             .map { line in
-                var a = User_Area()
-                a.name = String(line).trimmingCharacters(in: .whitespaces)
-                return a
+                var area = User_Area()
+                area.name = String(line).trimmingCharacters(in: .whitespaces)
+                return area
             }
         if let salary = Double(salaryMinText.trimmingCharacters(in: .whitespaces)), salary > 0 {
-            p.salaryMin = salary
+            profile.salaryMin = salary
         }
         if !currencyText.isEmpty {
-            p.currency = currencyText.trimmingCharacters(in: .whitespaces)
+            profile.currency = currencyText.trimmingCharacters(in: .whitespaces)
         }
-        p.workFormat = splitTrim(workFormatText)
-        p.skillsTop = splitTrim(skillsTopText)
+        profile.workFormat = splitTrim(workFormatText)
+        profile.skillsTop = splitTrim(skillsTopText)
         if !educationLevel.isEmpty {
-            p.educationLevel = educationLevel.trimmingCharacters(in: .whitespacesAndNewlines)
+            profile.educationLevel = educationLevel.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         if !notesText.isEmpty {
-            p.notes = notesText.trimmingCharacters(in: .whitespacesAndNewlines)
+            profile.notes = notesText.trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        return p
+        return profile
     }
     
-    private func splitTrim(_ s: String) -> [String] {
-        s.components(separatedBy: CharacterSet(charactersIn: ",\n"))
+    private func splitTrim(_ text: String) -> [String] {
+        text.components(separatedBy: CharacterSet(charactersIn: ",\n"))
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
     }

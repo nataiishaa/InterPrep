@@ -5,19 +5,21 @@
 //  Chat effect handler
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public actor ChatEffectHandler: EffectHandler {
-    public typealias S = ChatState
+    public typealias StateType = ChatState
     
     private let chatService: ChatServicing
+    private let favoritesProvider: FavoritesProviding?
     
-    public init(chatService: ChatServicing) {
+    public init(chatService: ChatServicing, favoritesProvider: FavoritesProviding? = nil) {
         self.chatService = chatService
+        self.favoritesProvider = favoritesProvider
     }
     
-    public func handle(effect: S.Effect) async -> S.Feedback? {
+    public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case .loadMessages:
             do {
@@ -88,6 +90,15 @@ public actor ChatEffectHandler: EffectHandler {
                 return .messagesLoaded(messages)
             } catch {
                 return .loadingFailed(error.localizedDescription)
+            }
+            
+        case .loadFavorites:
+            guard let provider = favoritesProvider else { return .favoritesLoadFailed }
+            do {
+                let vacancies = try await provider.fetchFavorites()
+                return .favoritesLoaded(vacancies)
+            } catch {
+                return .favoritesLoadFailed
             }
         }
     }

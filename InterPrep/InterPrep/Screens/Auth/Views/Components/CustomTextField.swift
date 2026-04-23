@@ -44,10 +44,10 @@ struct CustomTextField: View {
             if isSecure {
                 Button(action: {
                     isSecureVisible.toggle()
-                }) {
+                }, label: {
                     Image(systemName: isSecureVisible ? "eye.slash.fill" : "eye.fill")
                         .foregroundColor(.iconTint)
-                }
+                })
             }
         }
         .padding()

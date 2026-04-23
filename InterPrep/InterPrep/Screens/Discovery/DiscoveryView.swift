@@ -5,8 +5,8 @@
 //  Discovery screen - passive view
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 public struct DiscoveryView: View {
     let model: Model

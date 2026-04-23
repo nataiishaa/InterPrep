@@ -5,8 +5,8 @@
 //  Manages pending operations for sync when connection is restored
 //
 
-import Foundation
 import Combine
+import Foundation
 
 public enum PendingOperation: Codable, Sendable {
     case createCalendarEvent(title: String, description: String, startTime: Date, endTime: Date, eventType: String, reminderEnabled: Bool, reminderMinutes: Int32)

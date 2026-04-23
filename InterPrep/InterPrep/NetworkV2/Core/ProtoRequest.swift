@@ -138,22 +138,20 @@ public struct ProtoRequest<Response: Message>: Sendable {
         request.cachePolicy = cachePolicy
         request.timeoutInterval = timeout
         
-        // Headers for protobuf over HTTP
         request.setValue("InterPrep/1.0 (iOS)", forHTTPHeaderField: "User-Agent")
-        request.setValue("application/x-protobuf", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/x-protobuf", forHTTPHeaderField: "Accept")
         
-        // Add headers
         for header in headers {
             request.setValue(header.value, forHTTPHeaderField: header.name)
         }
         
-        // Add authorization if present
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         
-        // Encode body if present
+        // После цикла: иначе Content-Type из фабрики остаётся последним и перезаписывает protobuf
+        request.setValue("application/x-protobuf", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/x-protobuf", forHTTPHeaderField: "Accept")
+        
         if let message = messageToEncode {
             request.httpBody = try await encodingStrategy(message)
         }

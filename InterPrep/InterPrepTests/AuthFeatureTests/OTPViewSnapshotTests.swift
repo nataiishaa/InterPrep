@@ -5,10 +5,10 @@
 //  Snapshot tests for OTPView
 //
 
-import XCTest
-import SwiftUI
-import SnapshotTesting
 @testable import AuthFeature
+import SnapshotTesting
+import SwiftUI
+import XCTest
 
 final class OTPViewSnapshotTests: SnapshotTestCase {
 

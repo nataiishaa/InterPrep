@@ -5,8 +5,8 @@
 //  Documents state management
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public struct DocumentsState {
     public var folders: [Folder] = []
@@ -198,6 +198,7 @@ extension DocumentsState: FeatureState {
     }
     
     @MainActor
+    // swiftlint:disable:next function_body_length
     public static func reduce(
         state: inout Self,
         with message: Message<Input, Feedback>

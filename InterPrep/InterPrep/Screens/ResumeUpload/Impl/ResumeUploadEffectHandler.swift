@@ -5,14 +5,14 @@
 //  Resume upload effect handler
 //
 
-import Foundation
-import UniformTypeIdentifiers
 import ArchitectureCore
-import NetworkService
 import DiscoveryModule
+import Foundation
+import NetworkService
+import UniformTypeIdentifiers
 
 public actor ResumeUploadEffectHandler: EffectHandler {
-    public typealias S = ResumeUploadState
+    public typealias StateType = ResumeUploadState
     
     private let fileService: FileUploadService
     private var uploadTask: Task<Void, Never>?
@@ -21,7 +21,7 @@ public actor ResumeUploadEffectHandler: EffectHandler {
         self.fileService = fileService
     }
     
-    public func handle(effect: S.Effect) async -> S.Feedback? {
+    public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case let .validateFile(url):
             do {
@@ -109,6 +109,7 @@ public final actor FileUploadServiceImpl: FileUploadService {
         )
     }
     
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func uploadFile(_ file: ResumeUploadState.SelectedFile) async throws {
         guard FileManager.default.fileExists(atPath: file.url.path) else {
             throw FileUploadError.fileNotFound

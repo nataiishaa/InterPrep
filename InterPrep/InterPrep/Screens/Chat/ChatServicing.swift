@@ -5,6 +5,7 @@
 //  Chat service protocol (messages, consultant, connection)
 //
 
+import DiscoveryModule
 import Foundation
 
 public protocol ChatServicing: Actor {
@@ -19,4 +20,8 @@ public protocol ChatServicing: Actor {
     func reviewResume() async throws -> (score: Double, recommendations: String)
     func clearChatHistory(conversationId: String?) async throws -> (ok: Bool, deletedConversations: Int)
     func getCoachChatHistory(pageSize: Int, pageOffset: Int) async throws -> [ChatMessage]
+}
+
+public protocol FavoritesProviding: Actor {
+    func fetchFavorites() async throws -> [DiscoveryState.Vacancy]
 }

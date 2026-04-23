@@ -5,8 +5,8 @@
 //  Document row component
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct DocumentRowView: View {
     let document: Document

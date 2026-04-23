@@ -5,10 +5,10 @@
 //  Snapshot tests for DiscoveryView
 //
 
-import XCTest
-import SwiftUI
-import SnapshotTesting
 @testable import DiscoveryModule
+import SnapshotTesting
+import SwiftUI
+import XCTest
 
 final class DiscoveryViewSnapshotTests: SnapshotTestCase {
 

@@ -5,27 +5,25 @@
 //  Main dependency injection graph
 //
 
-import SwiftUI
 import ArchitectureCore
+import AuthFeature
+import CalendarFeature
+import ChatFeature
+import DiscoveryModule
+import DocumentsFeature
 import NetworkService
 import OnboardingFeature
-import AuthFeature
-import DiscoveryModule
-import ResumeUploadFeature
-import DocumentsFeature
-import ChatFeature
 import ProfileFeature
-import CalendarFeature
+import ResumeUploadFeature
+import SwiftUI
 
 @MainActor
 final class AppGraph {
     
-
-    
     private lazy var onboardingStorageService: OnboardingStorageService = OnboardingStorageServiceImpl()
     private lazy var authService: AuthService = AuthServiceImpl()
     private lazy var resumeService: ResumeService = ResumeServiceImpl()
-    private lazy var vacancyService: VacancyService = VacancyServiceImpl()
+    private lazy var vacancyService: VacancyServiceImpl = VacancyServiceImpl()
     private lazy var fileUploadService: FileUploadService = {
         FileUploadServiceImpl(resumeService: self.resumeService)
     }()
@@ -33,13 +31,9 @@ final class AppGraph {
     private lazy var chatService: ChatServicing = ChatServiceImpl()
     private lazy var calendarService: CalendarServicing = CalendarServiceImpl()
     
-
-    
     func shouldShowOnboarding() -> Bool {
         return !onboardingStorageService.isOnboardingCompleted()
     }
-    
-
     
     func makeOnboardingContainer(onComplete: @escaping () -> Void) -> some View {
         let effectHandler = OnboardingEffectHandler(
@@ -56,7 +50,8 @@ final class AppGraph {
     
     func makeAuthContainer(onComplete: @escaping () -> Void) -> some View {
         let effectHandler = AuthEffectHandler(
-            authService: authService
+            authService: authService,
+            fileUploadService: fileUploadService
         )
         
         let store = Store(
@@ -136,7 +131,8 @@ final class AppGraph {
     
     func makeChatStore() -> ChatStore {
         let effectHandler = ChatEffectHandler(
-            chatService: self.chatService
+            chatService: self.chatService,
+            favoritesProvider: self.vacancyService
         )
         return Store(
             state: ChatState(),

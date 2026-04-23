@@ -5,8 +5,8 @@
 //  Extensions for snapshot testing SwiftUI views
 //
 
-import SwiftUI
 import SnapshotTesting
+import SwiftUI
 import XCTest
 
 private let kSnapshotTimeout: TimeInterval = 10.0

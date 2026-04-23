@@ -5,11 +5,12 @@
 //  Real implementation of VacancyService using NetworkServiceV2
 //
 
+import ChatFeature
+import DiscoveryModule
 import Foundation
 import NetworkService
-import DiscoveryModule
 
-public final actor VacancyServiceImpl: VacancyService {
+public final actor VacancyServiceImpl: VacancyService, FavoritesProviding {
     private let networkService: NetworkServiceV2
     
     public init(networkService: NetworkServiceV2 = .shared) {
@@ -24,11 +25,11 @@ public final actor VacancyServiceImpl: VacancyService {
             case .success(let response):
                 var list = response.vacancies.map { mapVacancy($0, isFavorite: true) }
                 if !searchQuery.isEmpty {
-                    let q = searchQuery.lowercased()
+                    let query = searchQuery.lowercased()
                     list = list.filter {
-                        $0.title.lowercased().contains(q) ||
-                        $0.company.lowercased().contains(q) ||
-                        $0.description.lowercased().contains(q)
+                        $0.title.lowercased().contains(query) ||
+                        $0.company.lowercased().contains(query) ||
+                        $0.description.lowercased().contains(query)
                     }
                 }
                 return list
@@ -65,14 +66,18 @@ public final actor VacancyServiceImpl: VacancyService {
     
     private static func salaryString(from vacancy: Jobs_Vacancy) -> String? {
         guard vacancy.hasSalary else { return nil }
-        let s = vacancy.salary
-        let currency = s.currency.isEmpty ? "₽" : s.currency
-        if s.hasFrom && s.hasTo {
-            return "\(s.from) - \(s.to) \(currency)"
+        let salary = vacancy.salary
+        let currency = salary.currency.isEmpty ? "₽" : salary.currency
+        if salary.hasFrom && salary.hasTo {
+            return "\(salary.from) - \(salary.to) \(currency)"
         }
-        if s.hasFrom { return "от \(s.from) \(currency)" }
-        if s.hasTo { return "до \(s.to) \(currency)" }
+        if salary.hasFrom { return "от \(salary.from) \(currency)" }
+        if salary.hasTo { return "до \(salary.to) \(currency)" }
         return nil
+    }
+    
+    public func fetchFavorites() async throws -> [DiscoveryState.Vacancy] {
+        try await fetchVacancies(filter: .favorites, searchQuery: "")
     }
     
     public func toggleFavorite(id: String) async throws -> Bool {

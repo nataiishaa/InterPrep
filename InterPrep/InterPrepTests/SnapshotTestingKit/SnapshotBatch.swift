@@ -19,22 +19,22 @@ public enum SnapshotBatch {
         case .regularFullscreen:
             [
                 .defaultTestingDevice(.iPhone13Pro, scheme: .light),
-                .defaultTestingDevice(.iPhone13Pro, scheme: .dark),
+                .defaultTestingDevice(.iPhone13Pro, scheme: .dark)
             ]
         case .extendedFullscreen:
             [
                 .defaultTestingDevice(.iPhone13Pro, scheme: .light),
                 .defaultTestingDevice(.iPhone13Pro, scheme: .dark),
-                .defaultTestingDevice(.iPhoneSe, scheme: .light),
+                .defaultTestingDevice(.iPhoneSe, scheme: .light)
             ]
         case .component:
             [
                 .sizeThatFits(scheme: .light),
-                .sizeThatFits(scheme: .dark),
+                .sizeThatFits(scheme: .dark)
             ]
         case .shape:
             [
-                .sizeThatFits(scheme: .light),
+                .sizeThatFits(scheme: .light)
             ]
         }
     }

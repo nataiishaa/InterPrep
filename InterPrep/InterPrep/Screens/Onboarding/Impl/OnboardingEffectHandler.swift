@@ -5,11 +5,11 @@
 //  Effect handler for Onboarding screen
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public actor OnboardingEffectHandler: EffectHandler {
-    public typealias S = OnboardingState
+    public typealias StateType = OnboardingState
     
     private let storageService: OnboardingStorageService
     
@@ -17,7 +17,7 @@ public actor OnboardingEffectHandler: EffectHandler {
         self.storageService = storageService
     }
     
-    public func handle(effect: S.Effect) async -> S.Feedback? {
+    public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case .completeOnboarding:
             storageService.markOnboardingCompleted()

@@ -5,11 +5,11 @@
 //  Discovery effect handler
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public actor DiscoveryEffectHandler: EffectHandler {
-    public typealias S = DiscoveryState
+    public typealias StateType = DiscoveryState
     
     private let resumeService: ResumeService
     private let vacancyService: VacancyService
@@ -22,7 +22,7 @@ public actor DiscoveryEffectHandler: EffectHandler {
         self.vacancyService = vacancyService
     }
     
-    public func handle(effect: S.Effect) async -> S.Feedback? {
+    public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case .checkResume:
             let hasResume = await resumeService.hasResume()

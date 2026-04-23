@@ -60,8 +60,6 @@ public actor GRPCClient {
     }
 }
 
-
-
 public enum APIError: Error, LocalizedError {
     case networkError(Error)
     case invalidResponse
@@ -87,8 +85,6 @@ public enum APIError: Error, LocalizedError {
         }
     }
 }
-
-
 
 public actor TokenStorage {
     private var accessToken: String?

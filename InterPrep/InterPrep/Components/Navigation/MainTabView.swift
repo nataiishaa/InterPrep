@@ -5,15 +5,15 @@
 //  Main container with tab bar navigation
 //
 
-import SwiftUI
-import DesignSystem
-import CalendarFeature
-import DiscoveryModule
-import ProfileFeature
-import DocumentsFeature
-import ChatFeature
 import ArchitectureCore
+import CalendarFeature
+import ChatFeature
+import DesignSystem
+import DiscoveryModule
+import DocumentsFeature
 import NetworkMonitorService
+import ProfileFeature
+import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab: TabItem = .search

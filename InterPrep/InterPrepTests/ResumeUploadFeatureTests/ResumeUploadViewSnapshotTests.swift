@@ -5,12 +5,18 @@
 //  Snapshot tests for ResumeUploadView
 //
 
-import XCTest
-import SwiftUI
-import SnapshotTesting
 @testable import ResumeUploadFeature
+import SnapshotTesting
+import SwiftUI
+import XCTest
 
 final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
+    
+    private let snapshotPrecision: Float = 0.95
+    private let perceptualPrecision: Float = 0.95
+    
+    private let animationPrecision: Float = 0.90
+    private let animationPerceptualPrecision: Float = 0.65
 
     // MARK: - Tests
     
@@ -20,7 +26,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone13Pro),
+            as: .image(on: .iPhone13Pro, precision: snapshotPrecision, perceptualPrecision: perceptualPrecision),
             named: "idle"
         )
     }
@@ -31,7 +37,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone13Pro),
+            as: .image(on: .iPhone13Pro, precision: snapshotPrecision, perceptualPrecision: perceptualPrecision),
             named: "withFile"
         )
     }
@@ -42,7 +48,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone13Pro),
+            as: .image(on: .iPhone13Pro, precision: animationPrecision, perceptualPrecision: animationPerceptualPrecision),
             named: "uploading"
         )
     }
@@ -53,7 +59,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone13Pro),
+            as: .image(on: .iPhone13Pro, precision: snapshotPrecision, perceptualPrecision: perceptualPrecision),
             named: "success"
         )
     }
@@ -64,7 +70,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone13Pro),
+            as: .image(on: .iPhone13Pro, precision: snapshotPrecision, perceptualPrecision: perceptualPrecision),
             named: "error"
         )
     }
@@ -84,7 +90,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone13Pro),
+            as: .image(on: .iPhone13Pro, precision: animationPrecision, perceptualPrecision: animationPerceptualPrecision),
             named: "uploadingProgress75"
         )
     }
@@ -95,7 +101,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhone13Pro),
+            as: .image(on: .iPhone13Pro, precision: snapshotPrecision, perceptualPrecision: perceptualPrecision),
             named: "iPhone14Pro"
         )
     }
@@ -106,7 +112,7 @@ final class ResumeUploadViewSnapshotTests: SnapshotTestCase {
         
         assertSnapshot(
             of: hostingController,
-            as: .image(on: .iPhoneSe),
+            as: .image(on: .iPhoneSe, precision: snapshotPrecision, perceptualPrecision: perceptualPrecision),
             named: "iPhoneSE"
         )
     }

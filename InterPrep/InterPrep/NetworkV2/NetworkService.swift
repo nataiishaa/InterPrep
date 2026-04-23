@@ -1,9 +1,11 @@
 import Foundation
-import SwiftProtobuf
 import GRPC
 import NIOCore
 import NIOHPACK
+import SwiftProtobuf
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 public final class NetworkServiceV2: ObservableObject {
     public static let shared = NetworkServiceV2()
     
@@ -20,6 +22,7 @@ public final class NetworkServiceV2: ObservableObject {
         self.sessionManager = SessionManager()
         
         self.factory = URLRequestFactory(
+            contentTypeProvider: DefaultContentTypeProvider(contentType: .protobuf),
             networkProvider: DefaultNetworkProvider(
                 scheme: "https",
                 host: "api.interprep.ru",
@@ -42,6 +45,7 @@ public final class NetworkServiceV2: ObservableObject {
                 request.refreshToken = refreshToken
                 
                 let factory = URLRequestFactory(
+                    contentTypeProvider: DefaultContentTypeProvider(contentType: .protobuf),
                     networkProvider: DefaultNetworkProvider(
                         scheme: "https",
                         host: "api.interprep.ru",
@@ -79,13 +83,21 @@ public final class NetworkServiceV2: ObservableObject {
             tokenProvider: tokenProvider,
             responseObservers: [LoggingObserver(), sessionManager]
         )
+        
+        #if DEBUG
+        if grpcAuthClient != nil {
+            print("InterPrep API: Register/Login → gRPC (grpc-swift); остальное → HTTPS + protobuf")
+        } else {
+            print("InterPrep API: gRPC client init failed — только HTTPS")
+        }
+        #endif
     }
     
     public func setSessionDelegate(_ delegate: SessionInvalidationDelegate?) async {
         await sessionManager.setDelegate(delegate)
     }
     
-    // MARK: - Auth (gRPC)
+    // MARK: - Auth (нативный gRPC — как grpcurl; nginx на api.interprep.ru не принимает gRPC-Web → 415)
     
     public func register(firstName: String, lastName: String, email: String, password: String, deviceId: String? = nil) async -> Result<Auth_RegisterResponse, NetworkError> {
         var request = Auth_RegisterRequest()
@@ -98,14 +110,23 @@ public final class NetworkServiceV2: ObservableObject {
         }
         
         if let client = grpcAuthClient {
+            #if DEBUG
+            print("[gRPC] register: sending...")
+            #endif
             do {
                 let response = try await client.register(request: request)
+                #if DEBUG
+                print("[gRPC] register: ok userId=\(response.user.id)")
+                #endif
                 await tokenStorage.setTokens(
                     accessToken: response.accessToken,
                     refreshToken: response.refreshToken
                 )
                 return .success(response)
             } catch {
+                #if DEBUG
+                print("[gRPC] register: error \(error)")
+                #endif
                 if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
@@ -130,14 +151,23 @@ public final class NetworkServiceV2: ObservableObject {
         }
         
         if let client = grpcAuthClient {
+            #if DEBUG
+            print("[gRPC] login: sending...")
+            #endif
             do {
                 let response = try await client.login(request: request)
+                #if DEBUG
+                print("[gRPC] login: ok userId=\(response.user.id)")
+                #endif
                 await tokenStorage.setTokens(
                     accessToken: response.accessToken,
                     refreshToken: response.refreshToken
                 )
                 return .success(response)
             } catch {
+                #if DEBUG
+                print("[gRPC] login: error \(error)")
+                #endif
                 if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
             }
@@ -673,33 +703,92 @@ public final class NetworkServiceV2: ObservableObject {
     
     // MARK: - Calendar
     
+    public struct CreateEventParams {
+        public let title: String
+        public let description: String
+        public let startTime: Date
+        public let endTime: Date
+        public let eventType: Calendar_EventType
+        public let location: String?
+        public let reminderEnabled: Bool
+        public let reminderMinutes: Int32
+        
+        public init(
+            title: String,
+            description: String,
+            startTime: Date,
+            endTime: Date,
+            eventType: Calendar_EventType,
+            location: String? = nil,
+            reminderEnabled: Bool = false,
+            reminderMinutes: Int32 = 15
+        ) {
+            self.title = title
+            self.description = description
+            self.startTime = startTime
+            self.endTime = endTime
+            self.eventType = eventType
+            self.location = location
+            self.reminderEnabled = reminderEnabled
+            self.reminderMinutes = reminderMinutes
+        }
+    }
+    
+    public struct UpdateEventParams {
+        public let id: String
+        public let title: String?
+        public let description: String?
+        public let startTime: Date?
+        public let endTime: Date?
+        public let eventType: Calendar_EventType?
+        public let location: String?
+        public let reminderEnabled: Bool?
+        public let reminderMinutes: Int32?
+        public let completed: Bool?
+        
+        public init(
+            id: String,
+            title: String? = nil,
+            description: String? = nil,
+            startTime: Date? = nil,
+            endTime: Date? = nil,
+            eventType: Calendar_EventType? = nil,
+            location: String? = nil,
+            reminderEnabled: Bool? = nil,
+            reminderMinutes: Int32? = nil,
+            completed: Bool? = nil
+        ) {
+            self.id = id
+            self.title = title
+            self.description = description
+            self.startTime = startTime
+            self.endTime = endTime
+            self.eventType = eventType
+            self.location = location
+            self.reminderEnabled = reminderEnabled
+            self.reminderMinutes = reminderMinutes
+            self.completed = completed
+        }
+    }
+    
     func createCalendar_Event(event: Calendar_Event) async -> Result<Calendar_CreateEventResponse, NetworkError> {
         var request = Calendar_CreateEventRequest()
         request.event = event
         return await networkService.perform(factory.createEvent(request))
     }
     
-    public func createEvent(
-        title: String,
-        description: String,
-        startTime: Date,
-        endTime: Date,
-        eventType: Calendar_EventType,
-        location: String?,
-        reminderEnabled: Bool,
-        reminderMinutes: Int32
-    ) async -> Result<Calendar_CreateEventResponse, NetworkError> {
+    public func createEvent(params: CreateEventParams) async -> Result<Calendar_CreateEventResponse, NetworkError> {
         var event = Calendar_Event()
-        event.title = title
-        event.description_p = description
-        event.eventType = eventType
-        event.startTime = startTime.toProtoTimestamp()
-        event.endTime = endTime.toProtoTimestamp()
-        if let location = location {
+        event.title = params.title
+        event.description_p = params.description
+        event.eventType = params.eventType
+        event.startTime = params.startTime.toProtoTimestamp()
+        event.endTime = params.endTime.toProtoTimestamp()
+        if let location = params.location {
             event.location = location
         }
-        event.reminderEnabled = reminderEnabled
-        event.reminderMinutes = reminderMinutes
+        event.reminderEnabled = params.reminderEnabled
+        event.reminderMinutes = params.reminderMinutes
         
         var request = Calendar_CreateEventRequest()
         request.event = event
@@ -713,6 +802,29 @@ public final class NetworkServiceV2: ObservableObject {
             }
         }
         return await networkService.perform(factory.createEvent(request))
+    }
+    
+    // swiftlint:disable:next function_parameter_count
+    public func createEvent(
+        title: String,
+        description: String,
+        startTime: Date,
+        endTime: Date,
+        eventType: Calendar_EventType,
+        location: String?,
+        reminderEnabled: Bool,
+        reminderMinutes: Int32
+    ) async -> Result<Calendar_CreateEventResponse, NetworkError> {
+        await createEvent(params: CreateEventParams(
+            title: title,
+            description: description,
+            startTime: startTime,
+            endTime: endTime,
+            eventType: eventType,
+            location: location,
+            reminderEnabled: reminderEnabled,
+            reminderMinutes: reminderMinutes
+        ))
     }
     
     public func getCalendar_Event(id: String) async -> Result<Calendar_GetEventResponse, NetworkError> {
@@ -737,6 +849,53 @@ public final class NetworkServiceV2: ObservableObject {
         return await networkService.perform(factory.updateEvent(request))
     }
     
+    // swiftlint:disable:next cyclomatic_complexity
+    public func updateEvent(params: UpdateEventParams) async -> Result<Calendar_UpdateEventResponse, NetworkError> {
+        var patch = Calendar_EventPatch()
+        if let title = params.title {
+            patch.title = title
+        }
+        if let description = params.description {
+            patch.description_p = description
+        }
+        if let startTime = params.startTime {
+            patch.startTime = startTime.toProtoTimestamp()
+        }
+        if let endTime = params.endTime {
+            patch.endTime = endTime.toProtoTimestamp()
+        }
+        if let eventType = params.eventType {
+            patch.eventType = eventType
+        }
+        if let location = params.location {
+            patch.location = location
+        }
+        if let reminderEnabled = params.reminderEnabled {
+            patch.reminderEnabled = reminderEnabled
+        }
+        if let reminderMinutes = params.reminderMinutes {
+            patch.reminderMinutes = reminderMinutes
+        }
+        if let completed = params.completed {
+            patch.completed = completed
+        }
+        
+        var request = Calendar_UpdateEventRequest()
+        request.id = params.id
+        request.patch = patch
+        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
+            do {
+                let response = try await client.updateEvent(request: request, accessToken: token)
+                return .success(response)
+            } catch {
+                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
+                return .failure(.transportError(error))
+            }
+        }
+        return await networkService.perform(factory.updateEvent(request))
+    }
+    
+    // swiftlint:disable:next function_parameter_count
     public func updateEvent(
         id: String,
         title: String?,
@@ -749,48 +908,18 @@ public final class NetworkServiceV2: ObservableObject {
         reminderMinutes: Int32?,
         completed: Bool? = nil
     ) async -> Result<Calendar_UpdateEventResponse, NetworkError> {
-        var patch = Calendar_EventPatch()
-        if let title = title {
-            patch.title = title
-        }
-        if let description = description {
-            patch.description_p = description
-        }
-        if let startTime = startTime {
-            patch.startTime = startTime.toProtoTimestamp()
-        }
-        if let endTime = endTime {
-            patch.endTime = endTime.toProtoTimestamp()
-        }
-        if let eventType = eventType {
-            patch.eventType = eventType
-        }
-        if let location = location {
-            patch.location = location
-        }
-        if let reminderEnabled = reminderEnabled {
-            patch.reminderEnabled = reminderEnabled
-        }
-        if let reminderMinutes = reminderMinutes {
-            patch.reminderMinutes = reminderMinutes
-        }
-        if let completed = completed {
-            patch.completed = completed
-        }
-        
-        var request = Calendar_UpdateEventRequest()
-        request.id = id
-        request.patch = patch
-        if let client = grpcAuthClient, let token = await tokenStorage.getAccessToken() {
-            do {
-                let response = try await client.updateEvent(request: request, accessToken: token)
-                return .success(response)
-            } catch {
-                if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
-                return .failure(.transportError(error))
-            }
-        }
-        return await networkService.perform(factory.updateEvent(request))
+        await updateEvent(params: UpdateEventParams(
+            id: id,
+            title: title,
+            description: description,
+            startTime: startTime,
+            endTime: endTime,
+            eventType: eventType,
+            location: location,
+            reminderEnabled: reminderEnabled,
+            reminderMinutes: reminderMinutes,
+            completed: completed
+        ))
     }
     
     public func deleteEvent(id: String) async -> Result<Calendar_DeleteEventResponse, NetworkError> {
@@ -892,6 +1021,9 @@ public final class BackendGatewayGRPCClient: Sendable {
     private let group: EventLoopGroup
     private let client: Gateway_BackendGatewayClient
 
+    /// Таймаут 15 секунд — если gRPC не отвечает, лучше быстро показать ошибку
+    private static let authUnaryCallOptions = CallOptions(timeLimit: .timeout(.seconds(15)))
+
     public init(host: String = "api.interprep.ru", port: Int = 443) throws {
         self.group = PlatformSupport.makeEventLoopGroup(loopCount: 1)
         self.connection = ClientConnection
@@ -905,22 +1037,22 @@ public final class BackendGatewayGRPCClient: Sendable {
     }
 
     public func register(request: Auth_RegisterRequest) async throws -> Auth_RegisterResponse {
-        let call = client.register(request, callOptions: nil)
+        let call = client.register(request, callOptions: Self.authUnaryCallOptions)
         return try await eventLoopFutureToAsync(call.response)
     }
 
     public func login(request: Auth_LoginRequest) async throws -> Auth_LoginResponse {
-        let call = client.login(request, callOptions: nil)
+        let call = client.login(request, callOptions: Self.authUnaryCallOptions)
         return try await eventLoopFutureToAsync(call.response)
     }
 
     public func sendPasswordResetCode(request: Auth_PasswordResetSendCodeRequest) async throws -> Auth_PasswordResetSendCodeResponse {
-        let call = client.sendPasswordResetCode(request, callOptions: nil)
+        let call = client.sendPasswordResetCode(request, callOptions: Self.authUnaryCallOptions)
         return try await eventLoopFutureToAsync(call.response)
     }
 
     public func verifyPasswordReset(request: Auth_PasswordResetVerifyRequest) async throws -> Auth_PasswordResetVerifyResponse {
-        let call = client.verifyPasswordReset(request, callOptions: nil)
+        let call = client.verifyPasswordReset(request, callOptions: Self.authUnaryCallOptions)
         return try await eventLoopFutureToAsync(call.response)
     }
 

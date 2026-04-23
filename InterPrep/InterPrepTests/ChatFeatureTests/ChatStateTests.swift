@@ -5,9 +5,9 @@
 //  Unit tests for ChatState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import ChatFeature
+import XCTest
 
 @MainActor
 final class ChatStateTests: XCTestCase {

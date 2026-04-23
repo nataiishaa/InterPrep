@@ -5,9 +5,9 @@
 //  Unit tests for DocumentsState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import DocumentsFeature
+import XCTest
 
 @MainActor
 final class DocumentsStateTests: XCTestCase {

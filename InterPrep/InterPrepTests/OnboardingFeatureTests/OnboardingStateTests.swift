@@ -5,9 +5,9 @@
 //  Unit tests for OnboardingState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import OnboardingFeature
+import XCTest
 
 @MainActor
 final class OnboardingStateTests: XCTestCase {

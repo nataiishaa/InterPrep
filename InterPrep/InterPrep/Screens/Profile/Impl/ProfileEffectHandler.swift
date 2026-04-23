@@ -5,14 +5,14 @@
 //  Profile effect handler
 //
 
-import Foundation
-import SwiftUI
 import ArchitectureCore
+import CacheService
 import DesignSystem
+import Foundation
+import NetworkMonitorService
 import NetworkService
 import NotificationService
-import CacheService
-import NetworkMonitorService
+import SwiftUI
 
 public struct ProfileSessionError: Error, Sendable, LocalizedError {
     public let message: String
@@ -26,7 +26,7 @@ public protocol ProfileSessionService: Sendable {
 }
 
 public actor ProfileEffectHandler: EffectHandler {
-    public typealias S = ProfileState
+    public typealias StateType = ProfileState
     
     private let userDefaults = UserDefaults.standard
     private let cacheManager = CacheManager.shared
@@ -119,23 +119,23 @@ public actor ProfileEffectHandler: EffectHandler {
         let result = await NetworkServiceV2.shared.getMe()
         switch result {
         case .success(let response):
-            let u = response.user
+            let userProto = response.user
             let user = ProfileState.User(
-                id: String(u.id),
-                firstName: u.firstName,
-                lastName: u.lastName,
-                email: u.email,
+                id: String(userProto.id),
+                firstName: userProto.firstName,
+                lastName: userProto.lastName,
+                email: userProto.email,
                 phone: nil,
                 avatarURL: nil,
                 position: nil,
                 experience: nil,
-                resumeUploaded: u.resumeUploaded,
+                resumeUploaded: userProto.resumeUploaded,
                 registeredDate: nil
             )
             let statistics = ProfileState.Statistics(
-                totalInterviews: Int(u.totalInterviews),
-                completedInterviews: Int(u.completedInterviews),
-                upcomingInterviews: Int(u.upcomingInterviews),
+                totalInterviews: Int(userProto.totalInterviews),
+                completedInterviews: Int(userProto.completedInterviews),
+                upcomingInterviews: Int(userProto.upcomingInterviews),
                 totalApplications: 0,
                 responseRate: 0,
                 averagePreparationTime: 0
@@ -211,7 +211,11 @@ public actor ProfileEffectHandler: EffectHandler {
         switch result {
         case .success:
             Self.profilePhotoSaveSync(userId: userId, data: data)
-            if let url = Self.profilePhotoCacheFileURL(userId: userId) {
+            if let baseURL = Self.profilePhotoCacheFileURL(userId: userId) {
+                // Add timestamp query to bust AsyncImage cache
+                var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
+                components?.queryItems = [URLQueryItem(name: "t", value: String(Date().timeIntervalSince1970))]
+                let url = components?.url ?? baseURL
                 return .profilePhotoUpdated(url)
             }
             return nil

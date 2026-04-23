@@ -5,9 +5,9 @@
 //  Unit tests for ProfileState reducer (Store state logic)
 //
 
-import XCTest
 import ArchitectureCore
 @testable import ProfileFeature
+import XCTest
 
 @MainActor
 final class ProfileStateTests: XCTestCase {

@@ -5,15 +5,15 @@
 //  Discovery screen state
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
 
 public struct DiscoveryState {
     public var selectedFilter: FilterType = .all
     public var isLoading = false
     public var hasResume = false 
     public var vacancies: [Vacancy] = []
-    public var selectedVacancy: Vacancy? = nil
+    public var selectedVacancy: Vacancy?
     public var searchQuery: String = ""
     
     public init() {}
@@ -139,18 +139,18 @@ extension DiscoveryState: FeatureState {
             
         case let .feedback(.favoriteToggled(id, isFavorite)):
             if let index = state.vacancies.firstIndex(where: { $0.id == id }) {
-                let v = state.vacancies[index]
+                let vacancy = state.vacancies[index]
                 state.vacancies[index] = Vacancy(
-                    id: v.id,
-                    title: v.title,
-                    company: v.company,
-                    description: v.description,
+                    id: vacancy.id,
+                    title: vacancy.title,
+                    company: vacancy.company,
+                    description: vacancy.description,
                     isFavorite: isFavorite,
-                    url: v.url,
-                    location: v.location,
-                    salaryText: v.salaryText,
-                    experienceText: v.experienceText,
-                    companyLogoURL: v.companyLogoURL
+                    url: vacancy.url,
+                    location: vacancy.location,
+                    salaryText: vacancy.salaryText,
+                    experienceText: vacancy.experienceText,
+                    companyLogoURL: vacancy.companyLogoURL
                 )
             }
             

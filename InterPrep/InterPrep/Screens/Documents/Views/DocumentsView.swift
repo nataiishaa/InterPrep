@@ -5,9 +5,9 @@
 //  Documents main view
 //
 
-import SwiftUI
-import QuickLook
 import DesignSystem
+import QuickLook
+import SwiftUI
 
 struct DocumentsView: View {
     let model: Model
@@ -140,8 +140,8 @@ struct DocumentsView: View {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                             ForEach(model.folders) { folder in
                                 FolderCardView(folder: folder)
-                                    .onTapGesture { model.onFolderTap(folder) }
                                     .onTapGesture(count: 2) { model.onRenameFolderTap(folder) }
+                                    .onTapGesture(count: 1) { model.onFolderTap(folder) }
                                     .contextMenu {
                                     Button { model.onRenameFolderTap(folder) } label: {
                                         Label("Переименовать", systemImage: "pencil")
@@ -157,15 +157,23 @@ struct DocumentsView: View {
                 .padding(.horizontal)
 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Недавнее")
+                    Text("Документы")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.textOnBackground)
                     if model.recentDocuments.isEmpty {
-                        Text("Нет недавних документов")
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding()
+                        VStack(spacing: 12) {
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 36))
+                                .foregroundColor(.secondary.opacity(0.5))
+                            Text("Нет документов")
+                                .foregroundColor(.secondary)
+                            Text("Загрузите файл или создайте заметку")
+                                .font(.caption)
+                                .foregroundColor(.secondary.opacity(0.7))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
                     } else {
                         VStack(spacing: 12) {
                             ForEach(model.recentDocuments) { document in
@@ -195,15 +203,15 @@ struct DocumentsView: View {
                                 .fontWeight(.bold)
                                 .foregroundColor(.textOnBackground)
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                                ForEach(model.folderContentsFolders) { f in
-                                    FolderCardView(folder: f)
-                                        .onTapGesture { model.onFolderTap(f) }
-                                        .onTapGesture(count: 2) { model.onRenameFolderTap(f) }
+                                ForEach(model.folderContentsFolders) { folder in
+                                    FolderCardView(folder: folder)
+                                        .onTapGesture(count: 2) { model.onRenameFolderTap(folder) }
+                                        .onTapGesture(count: 1) { model.onFolderTap(folder) }
                                         .contextMenu {
-                                        Button { model.onRenameFolderTap(f) } label: {
+                                        Button { model.onRenameFolderTap(folder) } label: {
                                             Label("Переименовать", systemImage: "pencil")
                                         }
-                                        Button(role: .destructive) { model.onDeleteFolderTap(f) } label: {
+                                        Button(role: .destructive) { model.onDeleteFolderTap(folder) } label: {
                                             Label("Удалить папку", systemImage: "trash")
                                         }
                                     }

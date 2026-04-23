@@ -5,9 +5,10 @@
 //  Calendar screen with swipeable calendar
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
+// swiftlint:disable file_length
 struct CalendarView: View {
     let model: Model
     @State private var showCalDAVSettings = false
@@ -53,7 +54,7 @@ struct CalendarView: View {
         .sheet(isPresented: $showCalDAVSettings, onDismiss: {
             // Reset so next open works; avoids double presentation when Menu fires twice
             lastCalDAVOpenTime = .distantPast
-        }) {
+        }, content: {
             CalDAVSettingsView(
                 settings: CalDAVSettingsManager.shared.loadSettings(),
                 onSave: { settings in
@@ -63,7 +64,7 @@ struct CalendarView: View {
                     }
                 }
             )
-        }
+        })
     }
     
     // MARK: - Header
@@ -518,7 +519,7 @@ struct CalendarDayCell: View {
 struct EventCard: View {
     let event: CalendarState.CalendarEvent
     let model: CalendarView.Model
-    var onTap: (() -> Void)? = nil
+    var onTap: (() -> Void)?
     
     var body: some View {
         HStack(spacing: 12) {
@@ -613,17 +614,17 @@ private struct EventDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     private static var dateFormatter: DateFormatter {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "ru_RU")
-        f.dateFormat = "EEEE, d MMMM yyyy 'г.'"
-        return f
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "EEEE, d MMMM yyyy 'г.'"
+        return formatter
     }
     
     private static var timeFormatter: DateFormatter {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "ru_RU")
-        f.timeStyle = .short
-        return f
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.timeStyle = .short
+        return formatter
     }
     
     private var dateTimeText: String {

@@ -5,19 +5,23 @@
 //  Effect handler for Auth module
 //
 
-import Foundation
 import ArchitectureCore
+import Foundation
+import ResumeUploadFeature
 
 public actor AuthEffectHandler: EffectHandler {
-    public typealias S = AuthState
+    public typealias StateType = AuthState
     
     private let authService: AuthService
+    private let fileUploadService: FileUploadService?
+    private var uploadTask: Task<Void, Never>?
     
-    public init(authService: AuthService) {
+    public init(authService: AuthService, fileUploadService: FileUploadService? = nil) {
         self.authService = authService
+        self.fileUploadService = fileUploadService
     }
     
-    public func handle(effect: S.Effect) async -> S.Feedback? {
+    public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case let .performLogin(email, password):
             do {
@@ -71,6 +75,37 @@ public actor AuthEffectHandler: EffectHandler {
             } catch {
                 return .loginFailed("Не удалось изменить пароль")
             }
+            
+        case let .validateResumeFile(url):
+            guard let fileService = fileUploadService else {
+                return .resumeFileValidationFailed("Сервис загрузки недоступен")
+            }
+            do {
+                let file = try await fileService.validateFile(url)
+                return .resumeFileValidated(file)
+            } catch {
+                return .resumeFileValidationFailed(error.localizedDescription)
+            }
+            
+        case let .uploadResumeFile(file):
+            guard let fileService = fileUploadService else {
+                return .resumeUploadFailed("Сервис загрузки недоступен")
+            }
+            uploadTask?.cancel()
+            
+            do {
+                try await fileService.uploadFile(file)
+                return .resumeUploadCompleted
+            } catch is CancellationError {
+                return .resumeUploadFailed("Загрузка отменена")
+            } catch {
+                return .resumeUploadFailed(error.localizedDescription)
+            }
+            
+        case .cancelResumeUpload:
+            uploadTask?.cancel()
+            uploadTask = nil
+            return nil
         }
     }
 }

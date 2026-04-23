@@ -5,8 +5,8 @@
 //  Inline buttons under messages (Telegram style)
 //
 
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct MessageButtonsView: View {
     let buttons: [MessageButton]

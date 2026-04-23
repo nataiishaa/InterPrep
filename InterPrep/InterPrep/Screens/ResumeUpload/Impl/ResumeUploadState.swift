@@ -5,9 +5,9 @@
 //  Resume upload state
 //
 
+import ArchitectureCore
 import Foundation
 import UniformTypeIdentifiers
-import ArchitectureCore
 
 public struct ResumeUploadState: FeatureState {
     public var uploadStatus: UploadStatus = .idle
@@ -38,6 +38,7 @@ public struct ResumeUploadState: FeatureState {
             self.type = type
         }
         
+        // swiftlint:disable:next nesting
         public enum FileType: String, Sendable {
             case pdf = "PDF"
             case doc = "DOC"

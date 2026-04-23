@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: macos-15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Select Xcode version
+      run: |
+        if [ -d "/Applications/Xcode_16.4.app" ]; then
+          sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+        elif [ -d "/Applications/Xcode_16.3.app" ]; then
+          sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
+        else
+          sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+        fi
+      
+    - name: Show Xcode version
+      run: xcodebuild -version
+      
+    - name: Disable Xcode macro/plugin fingerprint validation
+      run: |
+        defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+        defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
+
+    - name: Find simulator
+      run: |
+        xcrun simctl list devices available iPhone
+        SIMULATOR_UUID=$(xcrun simctl list devices available \
+          | grep -E "iPhone.*\([A-F0-9-]+\)" \
+          | head -1 \
+          | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
+        echo "Using simulator UUID: $SIMULATOR_UUID"
+        echo "SIMULATOR_UUID=$SIMULATOR_UUID" >> $GITHUB_ENV
+
+    - name: Install mise
+      run: |
+        curl -sSf https://mise.run | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install Tuist via mise
+      working-directory: InterPrep
+      run: |
+        ~/.local/bin/mise install
+        echo "Tuist version: $(~/.local/bin/mise exec -- tuist version)"
+        
+    - name: Cache SPM dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/org.swift.swiftpm
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Project.swift', '**/.package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+    
+    - name: Generate Xcode project
+      working-directory: InterPrep
+      run: ~/.local/bin/mise exec -- tuist generate --no-open
+      
+    - name: Build for testing
+      working-directory: InterPrep
+      run: |
+        xcodebuild build-for-testing \
+          -workspace InterPrep.xcworkspace \
+          -scheme InterPrep-Workspace \
+          -destination "platform=iOS Simulator,id=$SIMULATOR_UUID" \
+          -skipMacroValidation \
+          -skipPackagePluginValidation \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          ONLY_ACTIVE_ARCH=YES \
+          COMPILER_INDEX_STORE_ENABLE=NO
+          
+    - name: Run Unit Tests
+      working-directory: InterPrep
+      run: |
+        xcodebuild test-without-building \
+          -workspace InterPrep.xcworkspace \
+          -scheme InterPrep-Workspace \
+          -destination "platform=iOS Simulator,id=$SIMULATOR_UUID" \
+          -only-testing:AuthFeatureTests \
+          -only-testing:ChatFeatureTests \
+          -only-testing:DiscoveryModuleTests \
+          -only-testing:OnboardingFeatureTests \
+          -only-testing:ResumeUploadFeatureTests \
+          -only-testing:InterPrepTests/CalendarStateTests \
+          -only-testing:InterPrepTests/DocumentsStateTests \
+          -only-testing:InterPrepTests/ProfileStateTests \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+          
+    - name: Run UI Tests
+      working-directory: InterPrep
+      run: |
+        xcodebuild test-without-building \
+          -workspace InterPrep.xcworkspace \
+          -scheme InterPrep-Workspace \
+          -destination "platform=iOS Simulator,id=$SIMULATOR_UUID" \
+          -only-testing:InterPrepUITests \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+      continue-on-error: true
+
+  lint:
+    name: SwiftLint
+    runs-on: macos-15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install SwiftLint
+      run: brew install swiftlint
+      
+    - name: Run SwiftLint
+      run: swiftlint lint
+      continue-on-error: true

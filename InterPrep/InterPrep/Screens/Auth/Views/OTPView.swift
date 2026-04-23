@@ -165,10 +165,8 @@ struct OTPView: View {
         // Если вставили несколько символов (например, из буфера обмена)
         if newValue.count > 1 {
             let digits = Array(newValue.prefix(6))
-            for (i, char) in digits.enumerated() {
-                if i < 6 {
-                    otpDigits[i] = String(char)
-                }
+            for (i, char) in digits.enumerated() where i < 6 {
+                otpDigits[i] = String(char)
             }
             updateFullCode()
             // Фокус на последнее заполненное поле или на первое пустое
@@ -222,7 +220,7 @@ struct OTPDigitField: View {
                 .frame(width: 50, height: 56)
                 .opacity(0.01)
                 .focused($focusedField, equals: index)
-                .onChange(of: digit) { oldValue, newValue in
+                .onChange(of: digit) { _, newValue in
                     // Ограничиваем ввод одним символом
                     if newValue.count > 1 {
                         digit = String(newValue.prefix(1))

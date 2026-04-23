@@ -5,15 +5,18 @@
 //  Created by Architecture Core
 //
 
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
-public final class Store<S: FeatureState, EH: EffectHandler>: ObservableObject where EH.S == S {
+public final class Store<S: FeatureState, EH: EffectHandler>: ObservableObject where EH.StateType == S {
     @Published public private(set) var state: S
     
     private let effectHandler: EH
     private var effectTask: Task<Void, Never>?
+    /// Счётчик «поколения» эффекта: после `await` нельзя полагаться только на `Task.isCancelled` — отмена предыдущей задачи
+    /// помечает её cancelled даже если сеть уже успела вернуть ответ, и фидбек теряется → вечный `isLoading`.
+    private var effectGeneration = 0
     
     public init(
         state: S,
@@ -36,15 +39,18 @@ public final class Store<S: FeatureState, EH: EffectHandler>: ObservableObject w
         
         guard let effect = effect else { return }
         
+        effectGeneration += 1
+        let generation = effectGeneration
         effectTask?.cancel()
         effectTask = Task { [weak self] in
             guard let self = self else { return }
             
             let feedback = await self.effectHandler.handle(effect: effect)
+            guard let feedback else { return }
             
-            guard !Task.isCancelled, let feedback = feedback else { return }
-            
-            await MainActor.run {
+            await MainActor.run { [weak self] in
+                guard let self else { return }
+                guard generation == self.effectGeneration else { return }
                 self.process(message: .feedback(feedback))
             }
         }

@@ -5,9 +5,9 @@
 //  Created by Наталья Захарова on 21.01.2026.
 //
 
-import SwiftUI
 import DesignSystem
 import NetworkService
+import SwiftUI
 
 @main
 struct InterPrepApp: App {
@@ -22,8 +22,6 @@ struct InterPrepApp: App {
         }
     }
 }
-
-
 
 @MainActor
 final class AppCoordinator: ObservableObject {

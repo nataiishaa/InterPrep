@@ -5,8 +5,8 @@
 //  Container for Onboarding screen
 //
 
-import SwiftUI
 import ArchitectureCore
+import SwiftUI
 
 public struct OnboardingContainer: View {
     @StateObject private var store: OnboardingStore
