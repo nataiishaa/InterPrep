@@ -207,9 +207,11 @@ public actor ProfileEffectHandler: EffectHandler {
         guard !data.isEmpty else {
             return .loadingFailed("Выберите изображение")
         }
+        print("[ProfilePhoto] uploading \(data.count) bytes for userId=\(userId)")
         let result = await NetworkServiceV2.shared.uploadProfilePhoto(imageData: data, filename: "photo.jpg", mimeType: "image/jpeg")
         switch result {
         case .success(let response):
+            print("[ProfilePhoto] upload success, ok=\(response.ok)")
             guard response.ok else {
                 return .loadingFailed("Сервер отклонил фото. Попробуйте другое изображение")
             }
@@ -222,8 +224,15 @@ public actor ProfileEffectHandler: EffectHandler {
             }
             return nil
         case .failure(let error):
+            print("[ProfilePhoto] upload FAILED: type=\(type(of: error)) error=\(error)")
+            if case .transportError(let underlying) = error {
+                print("[ProfilePhoto] transport underlying: type=\(type(of: underlying)) desc=\(String(describing: underlying))")
+            }
+            if case .apiError(let apiErr) = error {
+                print("[ProfilePhoto] apiError: code=\(apiErr.code) msg=\(apiErr.serverMessage)")
+            }
             if error.isConnectionError {
-                return .loadingFailed("Нет соединения с сервером. Проверьте интернет и попробуйте снова")
+                return .loadingFailed("Ошибка соединения. Проверьте интернет и попробуйте снова")
             }
             let desc = error.localizedDescription
             let message = desc.isEmpty ? "Не удалось загрузить фото" : "Не удалось загрузить фото: \(desc)"

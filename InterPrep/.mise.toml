@@ -1,4 +1,4 @@
-# Tuist 4.155.6: built for Swift 6.0 (compatible with Xcode 16.0).
-# Newer Tuist from Homebrew (4.158.x) requires Swift 6.2.
+# Tuist CLI 4.154.0: compatible with Swift 6.0 / Xcode 16.x.
+# Must be a real CLI release with tuist.zip on GitHub Releases.
 [tools]
-tuist = "4.155.6"
+tuist = "4.154.0"
