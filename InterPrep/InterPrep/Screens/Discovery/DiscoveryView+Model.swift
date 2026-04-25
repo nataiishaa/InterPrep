@@ -14,12 +14,15 @@ extension DiscoveryView {
         public let isLoading: Bool
         public let vacancies: [DiscoveryState.Vacancy]
         public let searchQuery: String
+        public let errorMessage: String?
+        public let isOfflineMode: Bool
         public let onFilterChanged: (DiscoveryState.FilterType) -> Void
         public let onUploadResume: () -> Void
         public let onVacancyTap: (DiscoveryState.Vacancy) -> Void
         public let onToggleFavorite: (String) -> Void
         public let onSearchQueryChanged: (String) -> Void
         public let onSearchSubmitted: () -> Void
+        public let onRetry: () -> Void
         
         public init(
             selectedFilter: DiscoveryState.FilterType,
@@ -27,24 +30,30 @@ extension DiscoveryView {
             isLoading: Bool,
             vacancies: [DiscoveryState.Vacancy],
             searchQuery: String,
+            errorMessage: String? = nil,
+            isOfflineMode: Bool = false,
             onFilterChanged: @escaping (DiscoveryState.FilterType) -> Void,
             onUploadResume: @escaping () -> Void,
             onVacancyTap: @escaping (DiscoveryState.Vacancy) -> Void,
             onToggleFavorite: @escaping (String) -> Void,
             onSearchQueryChanged: @escaping (String) -> Void,
-            onSearchSubmitted: @escaping () -> Void
+            onSearchSubmitted: @escaping () -> Void,
+            onRetry: @escaping () -> Void = {}
         ) {
             self.selectedFilter = selectedFilter
             self.hasResume = hasResume
             self.isLoading = isLoading
             self.vacancies = vacancies
             self.searchQuery = searchQuery
+            self.errorMessage = errorMessage
+            self.isOfflineMode = isOfflineMode
             self.onFilterChanged = onFilterChanged
             self.onUploadResume = onUploadResume
             self.onVacancyTap = onVacancyTap
             self.onToggleFavorite = onToggleFavorite
             self.onSearchQueryChanged = onSearchQueryChanged
             self.onSearchSubmitted = onSearchSubmitted
+            self.onRetry = onRetry
         }
     }
 }
@@ -57,12 +66,15 @@ extension DiscoveryView.Model {
         isLoading: Bool = false,
         vacancies: [DiscoveryState.Vacancy] = [],
         searchQuery: String = "",
+        errorMessage: String? = nil,
+        isOfflineMode: Bool = false,
         onFilterChanged: @escaping (DiscoveryState.FilterType) -> Void = { _ in },
         onUploadResume: @escaping () -> Void = {},
         onVacancyTap: @escaping (DiscoveryState.Vacancy) -> Void = { _ in },
         onToggleFavorite: @escaping (String) -> Void = { _ in },
         onSearchQueryChanged: @escaping (String) -> Void = { _ in },
-        onSearchSubmitted: @escaping () -> Void = {}
+        onSearchSubmitted: @escaping () -> Void = {},
+        onRetry: @escaping () -> Void = {}
     ) -> Self {
         .init(
             selectedFilter: selectedFilter,
@@ -70,12 +82,15 @@ extension DiscoveryView.Model {
             isLoading: isLoading,
             vacancies: vacancies,
             searchQuery: searchQuery,
+            errorMessage: errorMessage,
+            isOfflineMode: isOfflineMode,
             onFilterChanged: onFilterChanged,
             onUploadResume: onUploadResume,
             onVacancyTap: onVacancyTap,
             onToggleFavorite: onToggleFavorite,
             onSearchQueryChanged: onSearchQueryChanged,
-            onSearchSubmitted: onSearchSubmitted
+            onSearchSubmitted: onSearchSubmitted,
+            onRetry: onRetry
         )
     }
     

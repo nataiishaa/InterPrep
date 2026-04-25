@@ -62,8 +62,7 @@ let project = Project(
                 "InterPrep/Components/Navigation/TabBarLayout.swift",
                 "InterPrep/Components/Navigation/TabBar+Colors.swift",
                 "InterPrep/Components/Navigation/TabBarPreview.swift",
-                "InterPrep/Components/Navigation/TabItem.swift",
-                "InterPrep/Components/OfflineBanner.swift"
+                "InterPrep/Components/Navigation/TabItem.swift"
             ],
             resources: [
                 "InterPrep/Assets.xcassets/**",
@@ -129,7 +128,9 @@ let project = Project(
             sources: [
                 "InterPrep/DesignSystem/Colors.swift",
                 "InterPrep/DesignSystem/ThemeManager.swift",
-                "InterPrep/DesignSystem/ThemePreview.swift"
+                "InterPrep/DesignSystem/ThemePreview.swift",
+                "InterPrep/DesignSystem/NoConnectionView.swift",
+                "InterPrep/DesignSystem/OfflineBanner.swift"
             ],
             resources: [
                 "InterPrep/Assets.xcassets/**"
@@ -192,6 +193,9 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
+                .target(name: "CacheService"),
+                .target(name: "NetworkService"),
+                .target(name: "NetworkMonitorService"),
                 .sdk(name: "WebKit", type: .framework)
             ]
         ),
@@ -338,7 +342,8 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
-                .target(name: "DiscoveryModule")
+                .target(name: "DiscoveryModule"),
+                .target(name: "NetworkMonitorService")
             ]
         ),
         

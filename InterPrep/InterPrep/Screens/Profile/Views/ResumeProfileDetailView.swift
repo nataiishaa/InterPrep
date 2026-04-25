@@ -15,7 +15,6 @@ struct ResumeProfileDetailView: View {
     var onUploadNewResume: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var profile: User_ResumeProfile?
-    @State private var status: User_ResumeProfileStatus = .unspecified
     @State private var sourceMaterialId: String?
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -192,8 +191,6 @@ struct ResumeProfileDetailView: View {
     private func readOnlyContent(profile: User_ResumeProfile) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                statusBanner
-                
                 if !profile.targetRoles.isEmpty {
                     section(title: "Целевые роли", items: profile.targetRoles)
                 }
@@ -227,31 +224,6 @@ struct ResumeProfileDetailView: View {
             }
             .padding()
         }
-    }
-    
-    @ViewBuilder
-    private var statusBanner: some View {
-        HStack(spacing: 12) {
-            Image(systemName: statusIcon)
-                .font(.title3)
-                .foregroundColor(statusColor)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(statusTitle)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                
-                Text(statusDescription)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-        }
-        .padding()
-        .background(statusColor.opacity(0.1))
-        .cornerRadius(12)
     }
     
     @ViewBuilder
@@ -301,50 +273,6 @@ struct ResumeProfileDetailView: View {
         .background(Color(.systemBackground))
     }
     
-    private var statusIcon: String {
-        switch status {
-        case .confirmed:
-            return "checkmark.circle.fill"
-        case .draft:
-            return "pencil.circle.fill"
-        case .unspecified, .UNRECOGNIZED:
-            return "doc.circle.fill"
-        }
-    }
-    
-    private var statusColor: Color {
-        switch status {
-        case .confirmed:
-            return .green
-        case .draft:
-            return .orange
-        case .unspecified, .UNRECOGNIZED:
-            return .gray
-        }
-    }
-    
-    private var statusTitle: String {
-        switch status {
-        case .confirmed:
-            return "Резюме подтверждено"
-        case .draft:
-            return "Резюме в черновике"
-        case .unspecified, .UNRECOGNIZED:
-            return "Статус неизвестен"
-        }
-    }
-    
-    private var statusDescription: String {
-        switch status {
-        case .confirmed:
-            return "Данные проверены и используются для подбора вакансий"
-        case .draft:
-            return "Данные распознаны автоматически, рекомендуем проверить и подтвердить"
-        case .unspecified, .UNRECOGNIZED:
-            return "Загрузите резюме или заполните данные вручную"
-        }
-    }
-    
     private func copyProfileToEditState() {
         guard let currentProfile = profile else { return }
         targetRolesText = currentProfile.targetRoles.joined(separator: ", ")
@@ -375,7 +303,6 @@ struct ResumeProfileDetailView: View {
         switch result {
         case .success:
             profile = updated
-            status = .confirmed
             isEditing = false
         case .failure(let error):
             saveError = error.localizedDescription
@@ -425,7 +352,6 @@ struct ResumeProfileDetailView: View {
         isLoading = false
         switch result {
         case .success(let response):
-            status = response.status
             sourceMaterialId = response.hasSourceMaterialID ? response.sourceMaterialID : nil
             
             if response.hasProfile {

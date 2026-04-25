@@ -190,6 +190,7 @@ extension ChatState: FeatureState {
     ) -> Effect? {
         switch message {
         case .input(.onAppear):
+            state.error = nil
             state.isLoading = true
             return .loadMessages
             
@@ -209,22 +210,15 @@ extension ChatState: FeatureState {
             let message = ChatMessage(
                 text: state.inputText,
                 sender: .user,
-                status: .sending
+                status: .sent
             )
             
             state.messages.append(message)
-            let text = state.inputText
             state.inputText = ""
             state.isSending = true
             
             if state.waitingForVacancyId {
                 state.waitingForVacancyId = false
-                let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                if trimmedText.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil && !trimmedText.isEmpty {
-                    return .prepareForVacancy(trimmedText)
-                } else {
-                    return .sendMessage(message)
-                }
             }
             
             return .sendMessage(message)
@@ -235,6 +229,13 @@ extension ChatState: FeatureState {
             
         case .input(.buttonTapped(let button)):
             state.isSending = true
+            if case .selectScenario(.interviewPrep) = button.action {
+                state.currentScenario = .interviewPrep
+                state.waitingForVacancyId = true
+                if state.favoriteVacancies.isEmpty {
+                    state.isLoadingFavorites = true
+                }
+            }
             return .handleButtonAction(button.action)
             
         case .input(.sendVacancyId(let vacancyId)):
@@ -259,7 +260,8 @@ extension ChatState: FeatureState {
         case .feedback(.consultantResponded(let message)):
             state.messages.append(message)
             state.isSending = false
-            if message.text.contains("ID вакансии") {
+            let isVacancyRequest = message.text.contains("из избранного") || state.currentScenario == .interviewPrep
+            if isVacancyRequest {
                 state.waitingForVacancyId = true
                 state.showFavoritesPicker = true
                 if state.favoriteVacancies.isEmpty {
@@ -385,10 +387,17 @@ extension ChatState: FeatureState {
             
         case .input(.selectFavoriteVacancy(let vacancy)):
             state.showFavoritesPicker = false
+            var parts = ["\(vacancy.title) — \(vacancy.company)"]
+            if let salary = vacancy.salaryText, !salary.isEmpty {
+                parts.append(salary)
+            }
+            if !vacancy.location.isEmpty {
+                parts.append(vacancy.location)
+            }
             let message = ChatMessage(
-                text: "\(vacancy.title) — \(vacancy.company) (ID: \(vacancy.id))",
+                text: "Подготовиться к вакансии:\n\(parts.joined(separator: "\n"))",
                 sender: .user,
-                status: .sending
+                status: .sent
             )
             state.messages.append(message)
             state.isSending = true

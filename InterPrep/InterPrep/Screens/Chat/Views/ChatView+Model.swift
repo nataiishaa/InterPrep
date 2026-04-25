@@ -31,6 +31,8 @@ extension ChatView {
         let onShowFavoritesPicker: () -> Void
         let onHideFavoritesPicker: () -> Void
         let onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void
+        let onRetry: () -> Void
+        let onClose: (() -> Void)?
     }
 }
 
@@ -45,7 +47,9 @@ extension ChatView.Model {
         onClearHistory: () -> Void,
         onShowFavoritesPicker: () -> Void,
         onHideFavoritesPicker: () -> Void,
-        onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void
+        onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void,
+        onRetry: () -> Void,
+        onClose: (() -> Void)?
     ) = (
         onInputTextChanged: { _ in },
         onSendMessage: {},
@@ -55,7 +59,9 @@ extension ChatView.Model {
         onClearHistory: {},
         onShowFavoritesPicker: {},
         onHideFavoritesPicker: {},
-        onSelectFavoriteVacancy: { _ in }
+        onSelectFavoriteVacancy: { _ in },
+        onRetry: {},
+        onClose: nil
     )
 
     static var fixtureWelcome: Self {
@@ -90,7 +96,9 @@ extension ChatView.Model {
             onClearHistory: noopCallbacks.onClearHistory,
             onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
             onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
-            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy,
+            onRetry: noopCallbacks.onRetry,
+            onClose: noopCallbacks.onClose
         )
     }
     
@@ -121,7 +129,9 @@ extension ChatView.Model {
             onClearHistory: noopCallbacks.onClearHistory,
             onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
             onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
-            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy,
+            onRetry: noopCallbacks.onRetry,
+            onClose: noopCallbacks.onClose
         )
     }
     
@@ -157,7 +167,9 @@ extension ChatView.Model {
             onClearHistory: noopCallbacks.onClearHistory,
             onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
             onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
-            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy,
+            onRetry: noopCallbacks.onRetry,
+            onClose: noopCallbacks.onClose
         )
     }
     
@@ -183,7 +195,9 @@ extension ChatView.Model {
             onClearHistory: noopCallbacks.onClearHistory,
             onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
             onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
-            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy,
+            onRetry: noopCallbacks.onRetry,
+            onClose: noopCallbacks.onClose
         )
     }
     
@@ -212,7 +226,9 @@ extension ChatView.Model {
             onClearHistory: noopCallbacks.onClearHistory,
             onShowFavoritesPicker: noopCallbacks.onShowFavoritesPicker,
             onHideFavoritesPicker: noopCallbacks.onHideFavoritesPicker,
-            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy
+            onSelectFavoriteVacancy: noopCallbacks.onSelectFavoriteVacancy,
+            onRetry: noopCallbacks.onRetry,
+            onClose: noopCallbacks.onClose
         )
     }
 }

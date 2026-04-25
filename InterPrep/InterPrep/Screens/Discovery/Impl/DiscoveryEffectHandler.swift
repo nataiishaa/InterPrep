@@ -6,13 +6,16 @@
 //
 
 import ArchitectureCore
+import CacheService
 import Foundation
+import NetworkService
 
 public actor DiscoveryEffectHandler: EffectHandler {
     public typealias StateType = DiscoveryState
     
     private let resumeService: ResumeService
     private let vacancyService: VacancyService
+    private let cacheManager = CacheManager.shared
     
     public init(
         resumeService: ResumeService,
@@ -31,8 +34,18 @@ public actor DiscoveryEffectHandler: EffectHandler {
         case let .loadVacancies(filter, searchQuery):
             do {
                 let vacancies = try await vacancyService.fetchVacancies(filter: filter, searchQuery: searchQuery)
+                try? await cacheManager.save(vacancies, forKey: CacheKey.discoveryVacancies)
                 return .vacanciesLoaded(vacancies)
             } catch {
+                if let cached = try? await cacheManager.load(
+                    forKey: CacheKey.discoveryVacancies,
+                    as: [DiscoveryState.Vacancy].self
+                ) {
+                    return .vacanciesLoadedFromCache(cached)
+                }
+                if let ne = error as? NetworkError, ne.isConnectionError {
+                    return .loadingFailed("Нет подключения к интернету")
+                }
                 return .loadingFailed(error.localizedDescription)
             }
             

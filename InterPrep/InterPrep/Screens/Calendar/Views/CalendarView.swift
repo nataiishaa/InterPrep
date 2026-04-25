@@ -6,6 +6,7 @@
 //
 
 import DesignSystem
+import NetworkMonitorService
 import SwiftUI
 
 // swiftlint:disable file_length
@@ -16,18 +17,45 @@ struct CalendarView: View {
     @State private var showMonthYearPicker = false
     @State private var selectedEventForDetail: CalendarState.CalendarEvent?
     @State private var isSyncing = false
+    @State private var showOfflineToast = false
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     @Environment(\.colorScheme) var colorScheme
+    
+    private var isOffline: Bool {
+        !networkMonitor.isConnected || model.isOfflineMode
+    }
     
     var body: some View {
         VStack(spacing: 0) {
-            header
-            calendarGrid
-            eventsList
+            if model.errorMessage != nil && model.events.isEmpty {
+                NoConnectionView(onRetry: model.onRetry)
+            } else {
+                if model.isOfflineMode {
+                    OfflineBanner(showCachedHint: true)
+                }
+                header
+                calendarGrid
+                eventsList
+            }
         }
         .background(Color.backgroundPrimary)
         .safeAreaInset(edge: .bottom) {
             Color.clear.frame(height: 60)
         }
+        .overlay(alignment: .bottom) {
+            if showOfflineToast {
+                Text("Нет интернета — действие недоступно")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(12)
+                    .padding(.bottom, 80)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: showOfflineToast)
         .sheet(isPresented: Binding(
             get: { model.isCreatingEvent },
             set: { if !$0 { model.onCancelEventCreation() } }
@@ -71,21 +99,7 @@ struct CalendarView: View {
     
     @ViewBuilder
     private var header: some View {
-        VStack(spacing: 16) {
-            if model.isOfflineMode {
-                HStack(spacing: 8) {
-                    Image(systemName: "arrow.clockwise.icloud")
-                        .font(.caption)
-                    Text("Данные из кеша")
-                        .font(.caption)
-                }
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.secondary.opacity(0.1))
-                .cornerRadius(12)
-            }
-            
+        VStack(spacing: 0) {
             HStack {
                 Button {
                     model.onMonthChanged(previousMonth)
@@ -192,7 +206,15 @@ struct CalendarView: View {
                 Spacer()
                 
                 Button {
-                    model.onCreateEventTapped()
+                    if isOffline {
+                        showOfflineToast = true
+                        Task {
+                            try? await Task.sleep(nanoseconds: 2_500_000_000)
+                            showOfflineToast = false
+                        }
+                    } else {
+                        model.onCreateEventTapped()
+                    }
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "plus.circle.fill")
@@ -200,7 +222,7 @@ struct CalendarView: View {
                     }
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.brandPrimary)
+                    .foregroundColor(isOffline ? .secondary : .brandPrimary)
                 }
             }
             .padding()
@@ -567,7 +589,6 @@ struct EventCard: View {
                 onTap?()
             }
             
-            // Actions
             Menu {
                 Button(role: .destructive) {
                     model.onDeleteEvent(event.id)
@@ -580,6 +601,7 @@ struct EventCard: View {
                     .foregroundColor(.secondary)
                     .frame(width: 44, height: 44)
             }
+            .disabled(!NetworkMonitor.shared.isConnected)
         }
         .padding()
         .background(Color(.systemBackground))
@@ -600,6 +622,7 @@ struct EventCard: View {
     
     private var timeString: String {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
         formatter.timeStyle = .short
         return formatter.string(from: event.date)
     }
@@ -779,6 +802,7 @@ private struct EventDetailSheet: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
+                    .disabled(!NetworkMonitor.shared.isConnected)
                 }
             }
         }
@@ -818,6 +842,7 @@ private struct EventDetailSheet: View {
         ],
         isCreatingEvent: false,
         isOfflineMode: false,
+        errorMessage: nil,
         onDateSelected: { _ in },
         onMonthChanged: { _ in },
         onCreateEventTapped: {},
@@ -825,6 +850,7 @@ private struct EventDetailSheet: View {
         onDeleteEvent: { _ in },
         onEditEvent: { _ in },
         onSyncCompleted: { _ in },
+        onRetry: {},
         eventCreationModel: .init(
             isEditing: false,
             title: "",

@@ -54,11 +54,13 @@ struct EventCreationView: View {
                         get: { model.startDateTime },
                         set: { model.onStartDateTimeChanged($0) }
                     ), displayedComponents: [.date, .hourAndMinute])
+                    .environment(\.locale, Locale(identifier: "ru_RU"))
                     
                     DatePicker("Конец", selection: Binding(
                         get: { model.endDate },
                         set: { model.onEndDateChanged($0) }
                     ), displayedComponents: [.date, .hourAndMinute])
+                    .environment(\.locale, Locale(identifier: "ru_RU"))
                 }
                 
                 Section {
@@ -96,7 +98,7 @@ struct EventCreationView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
-            .navigationTitle(model.isEditing ? "Редактировать" : "Создать")
+            .navigationTitle(model.isEditing ? "Редактировать" : "Событие")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

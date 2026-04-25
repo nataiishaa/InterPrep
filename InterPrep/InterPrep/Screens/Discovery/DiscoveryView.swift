@@ -20,8 +20,14 @@ public struct DiscoveryView: View {
         VStack(spacing: 0) {
             header
             
-            if model.hasResume {
-                if model.isLoading {
+            if model.isOfflineMode {
+                OfflineBanner(showCachedHint: true)
+            }
+            
+            if model.errorMessage != nil && model.vacancies.isEmpty {
+                NoConnectionView(onRetry: model.onRetry)
+            } else if model.hasResume {
+                if model.isLoading && model.vacancies.isEmpty {
                     loadingView
                 } else if model.vacancies.isEmpty {
                     emptyStateView
@@ -362,6 +368,7 @@ public struct DiscoveryView: View {
                             model.onVacancyTap(vacancy)
                         }
                     }
+                    .opacity(model.isOfflineMode ? 0.7 : 1.0)
                     .background(Color.cardBackground)
                     .cornerRadius(16)
                     .shadow(color: shadowColor, radius: 12, x: 0, y: 4)

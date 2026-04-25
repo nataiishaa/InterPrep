@@ -1,164 +1,5 @@
 import Foundation
-import SwiftProtobuf
-
-// MARK: - HTTP Method
-
-public enum HTTPMethod: String, Sendable {
-    case get = "GET"
-    case post = "POST"
-    case put = "PUT"
-    case delete = "DELETE"
-    case patch = "PATCH"
-}
-
-// MARK: - HTTP Header
-
-public struct HTTPHeader: Sendable {
-    public let name: String
-    public let value: String
-    
-    public init(name: String, value: String) {
-        self.name = name
-        self.value = value
-    }
-    
-    public static func authorization(_ token: String) -> HTTPHeader {
-        HTTPHeader(name: "Authorization", value: "Bearer \(token)")
-    }
-    
-    public static func contentType(_ type: ContentType) -> HTTPHeader {
-        HTTPHeader(name: "Content-Type", value: type.rawValue)
-    }
-}
-
-// MARK: - Content Type
-
-public enum ContentType: String, Sendable {
-    case protobuf = "application/x-protobuf"
-    case json = "application/json"
-}
-
-// MARK: - Retry Policy
-
-public struct RetryPolicy: Sendable {
-    public let maxRetries: Int
-    public var currentRetry: Int
-    
-    public init(maxRetries: Int) {
-        self.maxRetries = maxRetries
-        self.currentRetry = 0
-    }
-    
-    public var shouldRetry: Bool {
-        currentRetry < maxRetries
-    }
-    
-    public mutating func incrementRetry() {
-        currentRetry += 1
-    }
-}
-
-// MARK: - Proto Request
-
-public struct ProtoRequest<Response: Message>: Sendable {
-    public typealias DecodingStrategy = (Data) async throws -> Response
-    public typealias EncodingStrategy = (any Message) async throws -> Data
-    
-    public let urlComponents: URLComponents
-    public let messageToEncode: (any Message)?
-    public let decodingStrategy: DecodingStrategy
-    public let encodingStrategy: EncodingStrategy
-    public let method: HTTPMethod
-    public let headers: [HTTPHeader]
-    public let cachePolicy: URLRequest.CachePolicy
-    public let timeout: TimeInterval
-    public var retryPolicy: RetryPolicy?
-    public var token: String?
-    
-    init(
-        urlComponents: URLComponents,
-        messageToEncode: (any Message)?,
-        decodingStrategy: @escaping DecodingStrategy,
-        encodingStrategy: @escaping EncodingStrategy,
-        method: HTTPMethod,
-        headers: [HTTPHeader],
-        cachePolicy: URLRequest.CachePolicy,
-        timeout: TimeInterval,
-        retryPolicy: RetryPolicy?
-    ) {
-        self.urlComponents = urlComponents
-        self.messageToEncode = messageToEncode
-        self.decodingStrategy = decodingStrategy
-        self.encodingStrategy = encodingStrategy
-        self.method = method
-        self.headers = headers
-        self.cachePolicy = cachePolicy
-        self.timeout = timeout
-        self.retryPolicy = retryPolicy
-    }
-    
-    // MARK: - Authorization
-    
-    public func authorized(with token: String) -> Self {
-        var copy = self
-        copy.token = token
-        return copy
-    }
-    
-    public func deauthorized() -> Self {
-        var copy = self
-        copy.token = nil
-        return copy
-    }
-    
-    // MARK: - Retry
-    
-    public var shouldRetry: Bool {
-        retryPolicy?.shouldRetry ?? false
-    }
-    
-    public func withReducedRetries() -> Self {
-        var copy = self
-        if var policy = copy.retryPolicy {
-            policy.incrementRetry()
-            copy.retryPolicy = policy
-        }
-        return copy
-    }
-    
-    // MARK: - URLRequest Conversion
-    
-    public func makeURLRequest() async throws -> URLRequest {
-        guard let url = urlComponents.url else {
-            throw NetworkError.invalidURL
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = method.rawValue
-        request.cachePolicy = cachePolicy
-        request.timeoutInterval = timeout
-        
-        request.setValue("InterPrep/1.0 (iOS)", forHTTPHeaderField: "User-Agent")
-        
-        for header in headers {
-            request.setValue(header.value, forHTTPHeaderField: header.name)
-        }
-        
-        if let token = token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        
-        // После цикла: иначе Content-Type из фабрики остаётся последним и перезаписывает protobuf
-        request.setValue("application/x-protobuf", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/x-protobuf", forHTTPHeaderField: "Accept")
-        
-        if let message = messageToEncode {
-            request.httpBody = try await encodingStrategy(message)
-        }
-        
-        return request
-    }
-}
+import GRPC
 
 // MARK: - Network Error
 
@@ -196,16 +37,60 @@ public enum NetworkError: Error, LocalizedError {
         }
     }
     
-    /// True if this is a connection/transport failure (e.g. connection lost, timeout, no network).
+    /// True when failure is likely due to no connectivity, DNS, TLS handshake, or server unreachable.
     public var isConnectionError: Bool {
         if case .transportError(let error) = self {
-            let ns = error as NSError
-            return ns.domain == NSURLErrorDomain && (
-                ns.code == NSURLErrorNotConnectedToInternet ||
-                ns.code == NSURLErrorNetworkConnectionLost ||
-                ns.code == NSURLErrorTimedOut ||
-                ns.code == NSURLErrorCannotConnectToHost
-            )
+            return Self.isTransportLikelyConnectionFailure(error)
+        }
+        return false
+    }
+
+    /// Shared so call sites (e.g. chat) can classify underlying transport errors without wrapping in `NetworkError`.
+    public static func isTransportLikelyConnectionFailure(_ error: Error) -> Bool {
+        if let status = error as? GRPCStatus {
+            switch status.code {
+            case .unavailable, .deadlineExceeded, .cancelled:
+                return true
+            case .unknown, .aborted:
+                let m = (status.message ?? "").lowercased()
+                if m.contains("connection") || m.contains("network") || m.contains("reset") || m.contains("refused") {
+                    return true
+                }
+                return false
+            default:
+                break
+            }
+        }
+        let ns = error as NSError
+        if ns.domain == NSURLErrorDomain {
+            switch ns.code {
+            case NSURLErrorNotConnectedToInternet,
+                 NSURLErrorNetworkConnectionLost,
+                 NSURLErrorTimedOut,
+                 NSURLErrorCannotConnectToHost,
+                 NSURLErrorCannotFindHost,
+                 NSURLErrorDNSLookupFailed,
+                 NSURLErrorSecureConnectionFailed,
+                 NSURLErrorServerCertificateUntrusted,
+                 NSURLErrorCannotLoadFromNetwork,
+                 NSURLErrorInternationalRoamingOff,
+                 NSURLErrorDataNotAllowed:
+                return true
+            default:
+                break
+            }
+        }
+        if ns.domain == NSPOSIXErrorDomain {
+            // ECONNREFUSED, ENETUNREACH, EHOSTUNREACH, EPIPE (typical on Apple platforms)
+            if [32, 50, 51, 54, 61, 64, 65].contains(ns.code) { return true }
+        }
+        let low = ns.localizedDescription.lowercased()
+        if low.contains("connection refused")
+            || low.contains("connection reset")
+            || low.contains("network is unreachable")
+            || low.contains("could not connect")
+            || low.contains("broken pipe") {
+            return true
         }
         return false
     }
@@ -227,10 +112,8 @@ public enum APIErrorCode: String, Sendable {
 
 // MARK: - API Error
 
-/// Ошибка API с кодом и сообщением сервера. Соответствует каталогу gRPC-ошибок api-gateway.
 public struct APIError: Error, LocalizedError, Sendable {
     public let code: APIErrorCode
-    /// Сообщение от сервера (англ., как в каталоге).
     public let serverMessage: String
 
     public init(code: APIErrorCode, serverMessage: String = "") {
@@ -238,7 +121,7 @@ public struct APIError: Error, LocalizedError, Sendable {
         self.serverMessage = serverMessage
     }
 
-    /// Пользовательское сообщение для показа в UI (по коду и известным serverMessage).
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public var userMessage: String {
         let msg = serverMessage.lowercased()
         switch code {
@@ -349,10 +232,9 @@ public struct APIError: Error, LocalizedError, Sendable {
     }
 }
 
-// MARK: - Parse from HTTP (status code + optional body)
+// MARK: - Parse from HTTP status (backward compat for .httpError case)
 
 extension APIError {
-    /// Парсит ошибку из HTTP-ответа (статус + тело). Для запросов через URLSession/AsyncNetworkService.
     public static func from(httpStatusCode: Int, body: Data?) -> APIError {
         let message: String
         if let data = body,
@@ -383,10 +265,9 @@ extension APIError {
     }
 }
 
-// MARK: - NetworkError integration
+// MARK: - NetworkError → APIError
 
 extension NetworkError {
-    /// Если ошибка — HTTP или уже API, возвращает APIError для показа пользователю.
     public var asAPIError: APIError? {
         switch self {
         case .unauthorized:

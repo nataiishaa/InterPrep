@@ -53,6 +53,8 @@ final class AppCoordinator: ObservableObject {
     }
     
     private static func hasStoredSession() -> Bool {
+        if TokenStorage.hasStoredTokensInKeychain() { return true }
+        // Pre-migration fallback: tokens may still be in UserDefaults before TokenStorage.init() runs
         let ud = UserDefaults.standard
         return ud.string(forKey: accessTokenKey) != nil && ud.string(forKey: refreshTokenKey) != nil
     }

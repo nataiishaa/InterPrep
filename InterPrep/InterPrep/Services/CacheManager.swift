@@ -134,4 +134,7 @@ public enum CacheKey {
     
     // Discovery
     public static let discoveryVacancies = "discovery_vacancies"
+    
+    /// Last successful coach chat history (user/assistant text only; for offline read).
+    public static let coachChatHistory = "coach_chat_history"
 }

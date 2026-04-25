@@ -158,6 +158,7 @@ extension DocumentsState: FeatureState {
         case clearDocumentToOpen
         case editNoteTapped(Document)
         case clearError
+        case retryTapped
         case renameFolderTapped(Folder)
         case commitFolderRename(String)
         case cancelFolderRename
@@ -300,6 +301,11 @@ extension DocumentsState: FeatureState {
         case .input(.clearError):
             state.error = nil
             return nil
+            
+        case .input(.retryTapped):
+            state.error = nil
+            state.isLoading = true
+            return .loadFolders
             
         case .feedback(.foldersLoaded(let folders)):
             state.folders = folders

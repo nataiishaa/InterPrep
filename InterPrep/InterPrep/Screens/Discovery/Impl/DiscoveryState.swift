@@ -15,6 +15,8 @@ public struct DiscoveryState {
     public var vacancies: [Vacancy] = []
     public var selectedVacancy: Vacancy?
     public var searchQuery: String = ""
+    public var errorMessage: String?
+    public var isOfflineMode = false
     
     public init() {}
     
@@ -25,7 +27,7 @@ public struct DiscoveryState {
 }
 
 extension DiscoveryState {
-    public struct Vacancy: Identifiable, Equatable, Hashable, Sendable {
+    public struct Vacancy: Identifiable, Equatable, Hashable, Sendable, Codable {
         public let id: String
         public let title: String
         public let company: String
@@ -72,10 +74,12 @@ extension DiscoveryState: FeatureState {
         case toggleFavorite(String)
         case searchQueryChanged(String)
         case searchSubmitted
+        case retryTapped
     }
     
     public enum Feedback: Sendable {
         case vacanciesLoaded([Vacancy])
+        case vacanciesLoadedFromCache([Vacancy])
         case loadingFailed(String)
         case favoriteToggled(String, Bool)
         case resumeCheckCompleted(hasResume: Bool)
@@ -121,6 +125,11 @@ extension DiscoveryState: FeatureState {
             state.isLoading = true
             return .loadVacancies(state.selectedFilter, searchQuery: state.searchQuery)
             
+        case .input(.retryTapped):
+            state.errorMessage = nil
+            state.isLoading = true
+            return .checkResume
+            
         case let .feedback(.resumeCheckCompleted(hasResume)):
             state.hasResume = hasResume
             if hasResume {
@@ -133,9 +142,18 @@ extension DiscoveryState: FeatureState {
         case let .feedback(.vacanciesLoaded(vacancies)):
             state.isLoading = false
             state.vacancies = vacancies
+            state.errorMessage = nil
+            state.isOfflineMode = false
+            
+        case let .feedback(.vacanciesLoadedFromCache(vacancies)):
+            state.isLoading = false
+            state.vacancies = vacancies
+            state.errorMessage = nil
+            state.isOfflineMode = true
             
         case let .feedback(.loadingFailed(error)):
             state.isLoading = false
+            state.errorMessage = error
             
         case let .feedback(.favoriteToggled(id, isFavorite)):
             if let index = state.vacancies.firstIndex(where: { $0.id == id }) {

@@ -2,7 +2,7 @@
 //  TypingIndicatorView.swift
 //  InterPrep
 //
-//  Animated "generating response" indicator for chat
+//  Animated "processing request" indicator for chat
 //
 
 import DesignSystem
@@ -36,7 +36,7 @@ struct TypingIndicatorView: View {
                     .fill(bubbleColor)
             )
 
-            Text("Генерирует ответ…")
+            Text("Обработка запроса…")
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .padding(.leading, 8)

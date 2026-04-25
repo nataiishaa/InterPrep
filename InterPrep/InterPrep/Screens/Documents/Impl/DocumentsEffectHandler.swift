@@ -30,7 +30,7 @@ public actor DocumentsEffectHandler: EffectHandler {
     
     private static func message(for error: Error) -> String {
         if let ne = error as? NetworkError, ne.isConnectionError {
-            return "Соединение разорвано. Проверьте интернет и попробуйте снова."
+            return "Нет подключения к интернету"
         }
         if let api = (error as? NetworkError)?.asAPIError {
             return api.userMessage

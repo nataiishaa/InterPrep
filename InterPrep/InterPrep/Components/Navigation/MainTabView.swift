@@ -11,7 +11,6 @@ import ChatFeature
 import DesignSystem
 import DiscoveryModule
 import DocumentsFeature
-import NetworkMonitorService
 import ProfileFeature
 import SwiftUI
 
@@ -21,8 +20,6 @@ struct MainTabView: View {
     @State private var showResumeUploadSheet: Bool = false
     @State private var chatStore: ChatStore?
     @StateObject private var discoveryStore: DiscoveryStore
-    @StateObject private var networkMonitor = NetworkMonitor.shared
-    @StateObject private var syncManager = OfflineSyncManager.shared
     private let appGraph: AppGraph
     private let onLogout: (() -> Void)?
     private let profileSessionService: (any ProfileSessionService)?
@@ -37,10 +34,6 @@ struct MainTabView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                if !networkMonitor.isConnected {
-                    OfflineBanner(hasPendingSync: syncManager.hasPendingOperations)
-                }
-                
                 Group {
                     switch selectedTab {
                     case .calendar:
@@ -76,11 +69,9 @@ struct MainTabView: View {
                 selectedTab = oldValue
             }
         }
-        .sheet(isPresented: $showChatSheet) {
+        .fullScreenCover(isPresented: $showChatSheet) {
             if let store = chatStore {
                 ChatContainer(store: store)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
             }
         }
         .sheet(isPresented: $showResumeUploadSheet) {

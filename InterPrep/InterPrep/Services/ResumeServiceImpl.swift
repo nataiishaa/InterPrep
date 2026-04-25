@@ -15,6 +15,8 @@ public final actor ResumeServiceImpl: ResumeService {
     private var lastCheckTime: Date?
     private let cacheValidityDuration: TimeInterval = 60
     
+    private static let persistedHasResumeKey = "com.interprep.last_known_has_resume"
+    
     public init(networkService: NetworkServiceV2 = .shared) {
         self.networkService = networkService
     }
@@ -40,7 +42,16 @@ public final actor ResumeServiceImpl: ResumeService {
             let hasSalary = profile.hasSalaryMin
             
             hasResumeValue = hasTargetRoles || hasAreas || hasSkills || hasExperience || hasSalary
-        case .failure:
+            UserDefaults.standard.set(hasResumeValue, forKey: Self.persistedHasResumeKey)
+        case .failure(let error):
+            // Cold start offline: in-memory cache is empty; use last successful value instead of false.
+            if error.isConnectionError,
+               UserDefaults.standard.object(forKey: Self.persistedHasResumeKey) != nil {
+                let stored = UserDefaults.standard.bool(forKey: Self.persistedHasResumeKey)
+                cachedHasResume = stored
+                lastCheckTime = Date()
+                return stored
+            }
             hasResumeValue = false
         }
         
@@ -50,8 +61,9 @@ public final actor ResumeServiceImpl: ResumeService {
         return hasResumeValue
     }
     
-    public func invalidateCache() {
+    public func invalidateCache() async {
         cachedHasResume = nil
         lastCheckTime = nil
+        UserDefaults.standard.removeObject(forKey: Self.persistedHasResumeKey)
     }
 }

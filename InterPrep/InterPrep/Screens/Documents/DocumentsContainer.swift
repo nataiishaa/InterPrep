@@ -6,10 +6,12 @@
 //
 
 import ArchitectureCore
+import NetworkMonitorService
 import SwiftUI
 
 public struct DocumentsContainer: View {
     @StateObject private var store: DocumentsStore
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     
     public init(store: @autoclosure @escaping () -> DocumentsStore) {
         _store = StateObject(wrappedValue: store())
@@ -19,6 +21,11 @@ public struct DocumentsContainer: View {
         DocumentsView(model: makeModel())
             .task {
                 store.send(.onAppear)
+            }
+            .onChange(of: networkMonitor.isConnected) { _, isConnected in
+                if isConnected && store.state.isOfflineMode {
+                    store.send(.retryTapped)
+                }
             }
     }
     
@@ -107,6 +114,9 @@ public struct DocumentsContainer: View {
             },
             onClearError: {
                 store.send(.clearError)
+            },
+            onRetry: {
+                store.send(.retryTapped)
             }
         )
     }

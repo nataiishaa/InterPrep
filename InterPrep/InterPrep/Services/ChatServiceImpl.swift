@@ -6,9 +6,18 @@
 //  Сохраняет conversation_id для продолжения диалога; таймаут запроса 120 с.
 //
 
+import CacheService
 import ChatFeature
 import Foundation
 import NetworkService
+
+// MARK: - Offline cache (minimal fields; buttons not persisted)
+
+private struct CachedCoachMessage: Codable, Sendable {
+    let text: String
+    let isUser: Bool
+    let timestamp: Date
+}
 
 public final actor ChatServiceImpl: ChatServicing {
     private let networkService: NetworkServiceV2
@@ -19,8 +28,6 @@ public final actor ChatServiceImpl: ChatServicing {
     }
 
     public func fetchMessages() async throws -> [ChatMessage] {
-        let historyMessages = try await getCoachChatHistory(pageSize: 50, pageOffset: 0)
-        
         let welcomeMessage = ChatMessage(
             text: "Здравствуйте! Я карьерный консультант. Задайте вопрос по карьере, подготовке к собеседованию или резюме.",
             sender: .consultant,
@@ -32,6 +39,24 @@ public final actor ChatServiceImpl: ChatServicing {
                 MessageButton(text: "Другое", action: .selectScenario(.other))
             ]
         )
+        
+        let historyMessages: [ChatMessage]
+        do {
+            let loaded = try await getCoachChatHistory(pageSize: 50, pageOffset: 0)
+            historyMessages = loaded
+            await persistCoachHistoryForOffline(loaded)
+        } catch {
+            if errorIndicatesOffline(error) {
+                if let fromDisk = await loadPersistedCoachHistory() {
+                    historyMessages = fromDisk
+                } else {
+                    // No history yet; still show welcome and empty thread without a cryptic iOS error.
+                    historyMessages = []
+                }
+            } else {
+                throw error
+            }
+        }
         
         return [welcomeMessage] + historyMessages.reversed()
     }
@@ -78,7 +103,7 @@ public final actor ChatServiceImpl: ChatServicing {
         switch action {
         case .selectScenario(.interviewPrep):
             return ChatMessage(
-                text: "Отлично! Для подготовки к собеседованию мне нужен ID вакансии с hh.ru.\n\nВы можете скопировать его в правом верхнем углу после клика на вакансию и открытия подробной информации.\n\nПожалуйста, отправьте ID вакансии.",
+                text: "Отлично! Для подготовки к собеседованию выберите вакансию из избранного.\n\nЕсли нужной вакансии нет — добавьте её в избранное на вкладке «Вакансии» и вернитесь сюда.",
                 sender: .consultant,
                 timestamp: Date(),
                 status: .sent
@@ -125,12 +150,28 @@ public final actor ChatServiceImpl: ChatServicing {
 
     private func userFacingError(for error: NetworkError) -> Error {
         if error.isConnectionError {
-            return ChatServiceError(message: "Соединение разорвано или таймаут. Проверьте интернет и нажмите «Повторить».")
+            return ChatServiceError(
+                message: "Нет подключения к интернету. Проверьте сеть и откройте чат снова.",
+                isConnectionFailure: true
+            )
         }
         if case .apiError(let api) = error {
-            return ChatServiceError(message: api.userMessage)
+            return ChatServiceError(message: api.userMessage, isConnectionFailure: false)
         }
-        return ChatServiceError(message: error.localizedDescription)
+        if case .transportError(let underlying) = error,
+           NetworkError.isTransportLikelyConnectionFailure(underlying) {
+            return ChatServiceError(
+                message: "Нет подключения к интернету. Проверьте сеть и откройте чат снова.",
+                isConnectionFailure: true
+            )
+        }
+        if case .transportError(let underlying) = error {
+            return ChatServiceError(
+                message: (underlying as NSError).localizedDescription,
+                isConnectionFailure: NetworkError.isTransportLikelyConnectionFailure(underlying)
+            )
+        }
+        return ChatServiceError(message: error.localizedDescription, isConnectionFailure: false)
     }
 
     private func questionForButtonAction(_ action: ButtonAction) -> String {
@@ -220,9 +261,43 @@ public final actor ChatServiceImpl: ChatServicing {
             throw userFacingError(for: error)
         }
     }
+    
+    private func persistCoachHistoryForOffline(_ messages: [ChatMessage]) async {
+        let payload: [CachedCoachMessage] = messages.map {
+            CachedCoachMessage(
+                text: $0.text,
+                isUser: $0.sender == .user,
+                timestamp: $0.timestamp
+            )
+        }
+        guard !payload.isEmpty else { return }
+        try? await CacheManager.shared.save(payload, forKey: CacheKey.coachChatHistory)
+    }
+    
+    private func loadPersistedCoachHistory() async -> [ChatMessage]? {
+        guard let rows = try? await CacheManager.shared.load(
+            forKey: CacheKey.coachChatHistory,
+            as: [CachedCoachMessage].self
+        ), !rows.isEmpty else { return nil }
+        return rows.map {
+            ChatMessage(
+                text: $0.text,
+                sender: $0.isUser ? .user : .consultant,
+                timestamp: $0.timestamp,
+                status: .read
+            )
+        }
+    }
+}
+
+private func errorIndicatesOffline(_ error: Error) -> Bool {
+    if let e = error as? ChatServiceError, e.isConnectionFailure { return true }
+    if let e = error as? NetworkError, e.isConnectionError { return true }
+    return false
 }
 
 private struct ChatServiceError: Error, LocalizedError {
     let message: String
+    let isConnectionFailure: Bool
     var errorDescription: String? { message }
 }
