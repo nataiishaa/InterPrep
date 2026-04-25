@@ -84,12 +84,15 @@ public enum NetworkError: Error, LocalizedError {
             // ECONNREFUSED, ENETUNREACH, EHOSTUNREACH, EPIPE (typical on Apple platforms)
             if [32, 50, 51, 54, 61, 64, 65].contains(ns.code) { return true }
         }
-        let low = ns.localizedDescription.lowercased()
+        let low = String(describing: error).lowercased()
         if low.contains("connection refused")
             || low.contains("connection reset")
             || low.contains("network is unreachable")
             || low.contains("could not connect")
-            || low.contains("broken pipe") {
+            || low.contains("broken pipe")
+            || low.contains("surfaceclientfailed")
+            || low.contains("client_internal_error")
+            || low.contains("stream reset") {
             return true
         }
         return false

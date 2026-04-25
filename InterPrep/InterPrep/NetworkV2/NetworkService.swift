@@ -40,6 +40,7 @@ public final class NetworkServiceV2: ObservableObject {
         do {
             return .success(try await operation(grpcClient, token))
         } catch {
+            print("[gRPC] error: type=\(type(of: error)) desc=\(String(describing: error))")
             guard let status = error as? GRPCStatus, status.code == .unauthenticated else {
                 if let api = apiErrorFromGRPC(error) { return .failure(.apiError(api)) }
                 return .failure(.transportError(error))
