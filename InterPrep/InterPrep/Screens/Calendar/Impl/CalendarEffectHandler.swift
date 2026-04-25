@@ -136,14 +136,14 @@ public actor CalendarEffectHandler: EffectHandler {
     
     private func userFacingMessage(for error: Error) -> String {
         if let ne = error as? NetworkError, ne.isConnectionError {
-            return "Проверьте подключение к интернету и попробуйте снова."
+            return "Нет подключения к интернету"
         }
         if let api = (error as? NetworkError)?.asAPIError {
             return api.userMessage
         }
         let text = error.localizedDescription.lowercased()
         if text.contains("connection was lost") || text.contains("network") || text.contains("timed out") || text.contains("offline") {
-            return "Проверьте подключение к интернету и попробуйте снова."
+            return "Нет подключения к интернету"
         }
         return "Не удалось загрузить события: \(error.localizedDescription)"
     }

@@ -46,5 +46,6 @@ extension DocumentsView {
         let onDocumentDelete: (Document) -> Void
         let onClearDocumentToOpen: () -> Void
         let onClearError: () -> Void
+        let onRetry: () -> Void
     }
 }

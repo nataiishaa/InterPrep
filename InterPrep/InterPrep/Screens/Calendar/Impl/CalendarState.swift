@@ -122,6 +122,7 @@ extension CalendarState: FeatureState {
         case deleteEvent(String)
         case editEvent(CalendarEvent)
         case syncCompleted([CalendarEvent])
+        case retryTapped
     }
     
     public enum Feedback: Sendable {
@@ -281,15 +282,22 @@ extension CalendarState: FeatureState {
         case let .input(.syncCompleted(events)):
             state.events = events
             
+        case .input(.retryTapped):
+            state.errorMessage = nil
+            state.isLoading = true
+            return .loadEvents(for: state.currentMonth)
+            
         case let .feedback(.eventsLoaded(events)):
             state.isLoading = false
             state.events = events
             state.isOfflineMode = false
+            state.errorMessage = nil
             
         case let .feedback(.eventsLoadedFromCache(events)):
             state.isLoading = false
             state.events = events
             state.isOfflineMode = true
+            state.errorMessage = nil
             
         case let .feedback(.eventCreated(event)):
             state.editingEventId = nil

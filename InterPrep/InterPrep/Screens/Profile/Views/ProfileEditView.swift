@@ -7,12 +7,14 @@
 
 import PhotosUI
 import SwiftUI
+import UIKit
 
 struct ProfileEditView: View {
     let model: Model
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isUploadingPhoto = false
+    @State private var photoError: String?
     
     var body: some View {
         NavigationStack {
@@ -27,6 +29,7 @@ struct ProfileEditView: View {
                     }
                     .onChange(of: selectedPhotoItem) { _, newItem in
                         guard let newItem else { return }
+                        photoError = nil
                         isUploadingPhoto = true
                         Task {
                             if let data = await loadImageData(from: newItem) {
@@ -36,7 +39,11 @@ struct ProfileEditView: View {
                                     selectedPhotoItem = nil
                                 }
                             } else {
-                                await MainActor.run { isUploadingPhoto = false }
+                                await MainActor.run {
+                                    photoError = "Не удалось обработать выбранное изображение. Попробуйте другое фото."
+                                    isUploadingPhoto = false
+                                    selectedPhotoItem = nil
+                                }
                             }
                         }
                     }
@@ -46,6 +53,11 @@ struct ProfileEditView: View {
                             Text("Загрузка…")
                                 .foregroundColor(.secondary)
                         }
+                    }
+                    if let photoError {
+                        Text(photoError)
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
                 }
                 
@@ -99,31 +111,41 @@ struct ProfileEditView: View {
 
 extension ProfileEditView {
     private func loadImageData(from item: PhotosPickerItem) async -> Data? {
-        guard let image = try? await item.loadTransferable(type: Image.self) else { return nil }
-        return imageToJPEGData(image: image)
+        guard let data = try? await item.loadTransferable(type: Data.self),
+              let uiImage = UIImage(data: data) else {
+            return nil
+        }
+        return compressToJPEG(uiImage)
     }
     
-    private func imageToJPEGData(image: Image) -> Data? {
-        let renderer = ImageRenderer(content: image)
-        let scale: CGFloat = {
-            let screenScale = UIScreen.main.scale
-            guard screenScale > 0, screenScale.isFinite else { return 2.0 }
-            return screenScale
-        }()
-        renderer.scale = scale
-        renderer.proposedSize = ProposedViewSize(width: 1024, height: 1024)
-        guard let uiImage = renderer.uiImage else { return nil }
-        let width = uiImage.size.width, height = uiImage.size.height
-        guard width > 0, height > 0, width.isFinite, height.isFinite else { return nil }
-        let maxBytes = 2 * 1024 * 1024
-        var quality: CGFloat = 0.85
-        repeat {
-            if let data = uiImage.jpegData(compressionQuality: quality), data.count <= maxBytes {
-                return data
+    private func compressToJPEG(_ original: UIImage) -> Data? {
+        let maxDimension: CGFloat = 800
+        let size = original.size
+        guard size.width > 0, size.height > 0 else { return nil }
+        
+        let image: UIImage
+        if size.width > maxDimension || size.height > maxDimension {
+            let scale = min(maxDimension / size.width, maxDimension / size.height)
+            let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
+            image = renderer.image { _ in
+                original.draw(in: CGRect(origin: .zero, size: newSize))
             }
-            quality -= 0.15
-        } while quality >= 0.4
-        return uiImage.jpegData(compressionQuality: 0.5)
+        } else {
+            image = original
+        }
+        
+        let maxBytes = 512 * 1024
+        var quality: CGFloat = 0.7
+        while quality >= 0.2 {
+            if let jpegData = image.jpegData(compressionQuality: quality), jpegData.count <= maxBytes {
+                return jpegData
+            }
+            quality -= 0.1
+        }
+        return image.jpegData(compressionQuality: 0.2)
     }
 }
 

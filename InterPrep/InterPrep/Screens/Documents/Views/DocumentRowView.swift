@@ -11,6 +11,16 @@ import SwiftUI
 struct DocumentRowView: View {
     let document: Document
     @Environment(\.colorScheme) var colorScheme
+    
+    private let relativeDate: String
+    
+    init(document: Document) {
+        self.document = document
+        let formatter = RelativeDateTimeFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.unitsStyle = .short
+        self.relativeDate = formatter.localizedString(for: document.createdAt, relativeTo: Date())
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -36,7 +46,7 @@ struct DocumentRowView: View {
                     Text("•")
                         .foregroundColor(.secondary)
                     
-                    Text(document.createdAt, style: .relative)
+                    Text(relativeDate)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

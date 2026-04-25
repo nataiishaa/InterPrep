@@ -11,11 +11,9 @@ import SwiftUI
 struct ChatInputBar: View {
     let text: String
     let isSending: Bool
-    let systemHints: [String]
     let waitingForVacancyId: Bool
     let onTextChanged: (String) -> Void
     let onSend: () -> Void
-    let onHintTapped: (String) -> Void
     let onFavoritesTapped: (() -> Void)?
     
     @FocusState private var isFocused: Bool
@@ -24,47 +22,21 @@ struct ChatInputBar: View {
     init(
         text: String,
         isSending: Bool,
-        systemHints: [String] = ChatState.systemHints,
         waitingForVacancyId: Bool = false,
         onTextChanged: @escaping (String) -> Void,
         onSend: @escaping () -> Void,
-        onHintTapped: @escaping (String) -> Void,
         onFavoritesTapped: (() -> Void)? = nil
     ) {
         self.text = text
         self.isSending = isSending
-        self.systemHints = systemHints
         self.waitingForVacancyId = waitingForVacancyId
         self.onTextChanged = onTextChanged
         self.onSend = onSend
-        self.onHintTapped = onHintTapped
         self.onFavoritesTapped = onFavoritesTapped
     }
     
     var body: some View {
-        VStack(spacing: 8) {
-            if !systemHints.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(systemHints, id: \.self) { hint in
-                            Button(action: { onHintTapped(hint) }, label: {
-                                Text(hint)
-                                    .font(.caption)
-                                    .lineLimit(1)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color.fieldBackground)
-                                    .foregroundColor(Color.primary)
-                                    .cornerRadius(16)
-                            })
-                            .disabled(isSending)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.vertical, 4)
-            }
-        
+        VStack(spacing: 0) {
         HStack(spacing: 12) {
             if waitingForVacancyId, let onFavoritesTapped {
                 Button {
@@ -83,7 +55,7 @@ struct ChatInputBar: View {
             }
             
             TextField(
-                waitingForVacancyId ? "ID вакансии или выберите из избранного" : "Сообщение",
+                waitingForVacancyId ? "Выберите вакансию из избранного" : "Сообщение",
                 text: .init(
                     get: { text },
                     set: { onTextChanged($0) }
@@ -136,8 +108,7 @@ struct ChatInputBar: View {
             text: "",
             isSending: false,
             onTextChanged: { _ in },
-            onSend: {},
-            onHintTapped: { _ in }
+            onSend: {}
         )
     }
 }
@@ -150,8 +121,7 @@ struct ChatInputBar: View {
             text: "Привет! Как дела?",
             isSending: false,
             onTextChanged: { _ in },
-            onSend: {},
-            onHintTapped: { _ in }
+            onSend: {}
         )
     }
 }
@@ -164,8 +134,7 @@ struct ChatInputBar: View {
             text: "",
             isSending: true,
             onTextChanged: { _ in },
-            onSend: {},
-            onHintTapped: { _ in }
+            onSend: {}
         )
     }
 }

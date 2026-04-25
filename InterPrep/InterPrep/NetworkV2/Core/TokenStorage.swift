@@ -42,6 +42,23 @@ public actor TokenStorage {
         return accessToken != nil && refreshToken != nil
     }
     
+    /// Synchronous Keychain check — safe to call outside actor context (e.g. from AppCoordinator.init).
+    public static func hasStoredTokensInKeychain() -> Bool {
+        let service = "com.interprep.app"
+        func exists(_ account: String) -> Bool {
+            let query: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service,
+                kSecAttrAccount as String: account,
+                kSecReturnData as String: true,
+                kSecMatchLimit as String: kSecMatchLimitOne
+            ]
+            var result: AnyObject?
+            return SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess
+        }
+        return exists("com.interprep.access_token") && exists("com.interprep.refresh_token")
+    }
+    
     private func saveToKeychain(key: String, value: String) {
         guard let data = value.data(using: .utf8) else { return }
         

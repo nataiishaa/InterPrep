@@ -6,10 +6,12 @@
 //
 
 import ArchitectureCore
+import NetworkMonitorService
 import SwiftUI
 
 public struct CalendarContainer: View {
     @StateObject private var store: CalendarStore
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     
     public init(store: CalendarStore) {
         _store = StateObject(wrappedValue: store)
@@ -28,6 +30,11 @@ public struct CalendarContainer: View {
             .onAppear {
                 store.send(.onAppear)
             }
+            .onChange(of: networkMonitor.isConnected) { _, isConnected in
+                if isConnected && store.state.isOfflineMode {
+                    store.send(.retryTapped)
+                }
+            }
     }
     
     private func makeModel() -> CalendarView.Model {
@@ -37,6 +44,7 @@ public struct CalendarContainer: View {
             events: store.state.events,
             isCreatingEvent: store.state.isCreatingEvent,
             isOfflineMode: store.state.isOfflineMode,
+            errorMessage: store.state.errorMessage,
             onDateSelected: { date in
                 store.send(.dateSelected(date))
             },
@@ -57,6 +65,9 @@ public struct CalendarContainer: View {
             },
             onSyncCompleted: { events in
                 store.send(.syncCompleted(events))
+            },
+            onRetry: {
+                store.send(.retryTapped)
             },
             eventCreationModel: makeEventCreationModel()
         )

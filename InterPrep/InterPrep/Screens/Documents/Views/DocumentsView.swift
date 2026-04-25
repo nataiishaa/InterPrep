@@ -6,20 +6,50 @@
 //
 
 import DesignSystem
+import NetworkMonitorService
 import QuickLook
 import SwiftUI
 
 struct DocumentsView: View {
     let model: Model
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
+    @State private var showOfflineToast = false
     @Environment(\.colorScheme) var colorScheme
 
+    private var hasAnyData: Bool {
+        !model.folders.isEmpty || !model.recentDocuments.isEmpty
+    }
+    
+    private var isOffline: Bool {
+        !networkMonitor.isConnected || model.isOfflineMode
+    }
+    
+    private func guardOffline(action: @escaping () -> Void) {
+        if isOffline {
+            showOfflineToast = true
+            Task {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                showOfflineToast = false
+            }
+        } else {
+            action()
+        }
+    }
+    
     var body: some View {
         NavigationStack {
-            Group {
-                if let folder = model.selectedFolder {
-                    folderContentView(folder: folder)
-                } else {
-                    rootContentView
+            VStack(spacing: 0) {
+                if model.isOfflineMode {
+                    OfflineBanner(showCachedHint: true)
+                }
+                Group {
+                    if model.error != nil && !hasAnyData {
+                        NoConnectionView(onRetry: model.onRetry)
+                    } else if let folder = model.selectedFolder {
+                        folderContentView(folder: folder)
+                    } else {
+                        rootContentView
+                    }
                 }
             }
             .background(Color.backgroundPrimary)
@@ -36,24 +66,41 @@ struct DocumentsView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
-                        Button { model.onUploadFileTap() } label: {
+                        Button { guardOffline { model.onUploadFileTap() } } label: {
                             Label("Загрузить файл", systemImage: "arrow.up.doc")
                         }
-                        Button { model.onCreateNoteTap() } label: {
+                        .disabled(isOffline)
+                        Button { guardOffline { model.onCreateNoteTap() } } label: {
                             Label("Создать заметку", systemImage: "note.text.badge.plus")
                         }
-                        Button { model.onCreateFolderTap() } label: {
+                        .disabled(isOffline)
+                        Button { guardOffline { model.onCreateFolderTap() } } label: {
                             Label("Создать папку", systemImage: "folder.badge.plus")
                         }
+                        .disabled(isOffline)
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
-                            .foregroundColor(.brandPrimary)
+                            .foregroundColor(isOffline ? .secondary : .brandPrimary)
                     }
                 }
             }
             .toolbarBackground(.visible, for: .navigationBar)
         }
+        .overlay(alignment: .bottom) {
+            if showOfflineToast {
+                Text("Нет интернета — действие недоступно")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(12)
+                    .padding(.bottom, 80)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: showOfflineToast)
         .sheet(isPresented: .constant(model.showingCreateFolderSheet)) {
             CreateFolderSheet(onDismiss: model.onDismissSheet, onCreate: model.onFolderCreate)
         }
@@ -96,7 +143,7 @@ struct DocumentsView: View {
                 Text("Папка «\(folder.name)» и всё её содержимое будут удалены. Это действие нельзя отменить.")
             }
         }
-        .alert("Ошибка", isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.onClearError() } })) {
+        .alert("Ошибка", isPresented: Binding(get: { model.error != nil && hasAnyData }, set: { if !$0 { model.onClearError() } })) {
             Button("OK", role: .cancel) { model.onClearError() }
         } message: {
             if let error = model.error { Text(error) }
@@ -111,24 +158,11 @@ struct DocumentsView: View {
     }
 
     private var rootContentView: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                if model.isOfflineMode {
-                    HStack(spacing: 8) {
-                        Image(systemName: "arrow.clockwise.icloud")
-                            .font(.caption)
-                        Text("Данные из кеша")
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.secondary.opacity(0.1))
-                    .cornerRadius(12)
-                }
-                
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 24) {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Мои папки")
+                    Text("Мое хранилище")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.textOnBackground)
@@ -140,15 +174,17 @@ struct DocumentsView: View {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                             ForEach(model.folders) { folder in
                                 FolderCardView(folder: folder)
-                                    .onTapGesture(count: 2) { model.onRenameFolderTap(folder) }
+                                    .onTapGesture(count: 2) { if !isOffline { model.onRenameFolderTap(folder) } }
                                     .onTapGesture(count: 1) { model.onFolderTap(folder) }
                                     .contextMenu {
                                     Button { model.onRenameFolderTap(folder) } label: {
                                         Label("Переименовать", systemImage: "pencil")
                                     }
+                                    .disabled(isOffline)
                                     Button(role: .destructive) { model.onDeleteFolderTap(folder) } label: {
                                         Label("Удалить папку", systemImage: "trash")
                                     }
+                                    .disabled(isOffline)
                                 }
                             }
                         }
@@ -157,7 +193,7 @@ struct DocumentsView: View {
                 .padding(.horizontal)
 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Документы")
+                    Text("Недавнее")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.textOnBackground)
@@ -183,8 +219,9 @@ struct DocumentsView: View {
                     }
                 }
                 .padding(.horizontal)
+                }
+                .padding(.vertical)
             }
-            .padding(.vertical)
         }
     }
 
@@ -205,15 +242,17 @@ struct DocumentsView: View {
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                                 ForEach(model.folderContentsFolders) { folder in
                                     FolderCardView(folder: folder)
-                                        .onTapGesture(count: 2) { model.onRenameFolderTap(folder) }
+                                        .onTapGesture(count: 2) { if !isOffline { model.onRenameFolderTap(folder) } }
                                         .onTapGesture(count: 1) { model.onFolderTap(folder) }
                                         .contextMenu {
                                         Button { model.onRenameFolderTap(folder) } label: {
                                             Label("Переименовать", systemImage: "pencil")
                                         }
+                                        .disabled(isOffline)
                                         Button(role: .destructive) { model.onDeleteFolderTap(folder) } label: {
                                             Label("Удалить папку", systemImage: "trash")
                                         }
+                                        .disabled(isOffline)
                                     }
                                 }
                             }
@@ -249,16 +288,24 @@ struct DocumentsView: View {
     private func documentRow(_ document: Document) -> some View {
         let canEditAsNote = document.isNote || document.type == .other
         return DocumentRowView(document: document)
-            .onTapGesture { model.onDocumentTap(document) }
+            .onTapGesture {
+                if isOffline && !canEditAsNote {
+                    guardOffline {}
+                } else {
+                    model.onDocumentTap(document)
+                }
+            }
             .contextMenu {
                 if canEditAsNote {
                     Button { model.onEditNoteTap(document) } label: {
                         Label("Редактировать", systemImage: "pencil")
                     }
+                    .disabled(isOffline)
                 }
                 Button(role: .destructive) { model.onDocumentDelete(document) } label: {
                     Label("Удалить", systemImage: "trash")
                 }
+                .disabled(isOffline)
             }
     }
 }
@@ -393,7 +440,8 @@ struct QuickLookPreview: UIViewControllerRepresentable {
             onEditNoteTap: { _ in },
             onDocumentDelete: { _ in },
             onClearDocumentToOpen: {},
-            onClearError: {}
+            onClearError: {},
+            onRetry: {}
         )
     )
 }

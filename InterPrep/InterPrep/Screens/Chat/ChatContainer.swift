@@ -6,10 +6,13 @@
 //
 
 import ArchitectureCore
+import NetworkMonitorService
 import SwiftUI
 
 public struct ChatContainer: View {
     @StateObject private var store: ChatStore
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
+    @Environment(\.dismiss) private var dismiss
     
     public init(store: @autoclosure @escaping () -> ChatStore) {
         _store = StateObject(wrappedValue: store())
@@ -19,6 +22,11 @@ public struct ChatContainer: View {
         ChatView(model: makeModel())
             .task {
                 store.send(.onAppear)
+            }
+            .onChange(of: networkMonitor.isConnected) { _, isConnected in
+                if isConnected && store.state.error != nil {
+                    store.send(.onAppear)
+                }
             }
     }
     
@@ -62,6 +70,12 @@ public struct ChatContainer: View {
             },
             onSelectFavoriteVacancy: { vacancy in
                 store.send(.selectFavoriteVacancy(vacancy))
+            },
+            onRetry: {
+                store.send(.onAppear)
+            },
+            onClose: {
+                dismiss()
             }
         )
     }

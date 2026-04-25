@@ -6,16 +6,33 @@
 //
 
 import DesignSystem
+import NetworkMonitorService
 import SwiftUI
 
 struct ChatView: View {
     let model: Model
     @Environment(\.colorScheme) var colorScheme
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
+    @State private var showClearConfirmation = false
+    
+    private var hasSubstantiveThread: Bool {
+        let hasUser = model.messages.contains { $0.sender == .user }
+        return hasUser || model.messages.count > 1
+    }
+    
+    /// No saved thread and (offline or load failed) — show full-screen placeholder, not a half-broken welcome.
+    private var shouldShowNoConnection: Bool {
+        if model.isLoading { return false }
+        if hasSubstantiveThread { return false }
+        if !networkMonitor.isConnected { return true }
+        if model.error != nil && model.messages.isEmpty { return true }
+        return false
+    }
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if let error = model.error {
+                if let error = model.error, !shouldShowNoConnection {
                     HStack(spacing: 12) {
                         Text(error)
                             .font(.caption)
@@ -24,6 +41,7 @@ struct ChatView: View {
                         Spacer(minLength: 8)
                         Button("Повторить") {
                             model.onDismissError()
+                            model.onRetry()
                         }
                         .font(.caption.weight(.medium))
                     }
@@ -32,105 +50,123 @@ struct ChatView: View {
                     .background(Color.red.opacity(0.12))
                 }
                 
-                if model.isLoading && model.messages.isEmpty {
+                if shouldShowNoConnection {
+                    NoConnectionView(onRetry: { model.onRetry() })
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if model.isLoading && model.messages.isEmpty {
                     Spacer()
                     ProgressView()
                     Spacer()
                 } else {
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            LazyVStack(spacing: 12) {
-                                if model.messages.count <= 1 {
-                                    ChatWelcomeView()
-                                }
-                                
-                                ForEach(model.messages) { message in
-                                    MessageBubbleView(
-                                        message: message,
-                                        onButtonTap: model.onButtonTapped,
-                                        isSending: model.isSending
-                                    )
-                                    .id(message.id)
-                                }
-                                
-                                if model.isSending {
-                                    HStack(alignment: .bottom, spacing: 8) {
-                                        TypingIndicatorView()
-                                            .id("loading-indicator")
-                                        Spacer(minLength: 60)
-                                    }
-                                }
-                            }
-                            .padding()
-                        }
-                        .onChange(of: model.messages.count) { _, _ in
-                            if let lastMessage = model.messages.last {
-                                withAnimation {
-                                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                                }
-                            }
-                        }
-                        .onChange(of: model.isSending) { _, isSending in
-                            if isSending {
-                                withAnimation {
-                                    proxy.scrollTo("loading-indicator", anchor: .bottom)
-                                }
-                            }
-                        }
+                    chatScrollContent
+                }
+                
+                if !shouldShowNoConnection {
+                    if !networkMonitor.isConnected && hasSubstantiveThread {
+                        OfflineBanner()
                     }
-                }
-                
-                if model.showFavoritesPicker {
-                    FavoriteVacancyPickerView(
-                        vacancies: model.favoriteVacancies,
-                        isLoading: model.isLoadingFavorites,
-                        onSelect: model.onSelectFavoriteVacancy,
-                        onDismiss: model.onHideFavoritesPicker
+                    
+                    if model.showFavoritesPicker {
+                        FavoriteVacancyPickerView(
+                            vacancies: model.favoriteVacancies,
+                            isLoading: model.isLoadingFavorites,
+                            onSelect: model.onSelectFavoriteVacancy,
+                            onDismiss: model.onHideFavoritesPicker
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                    
+                    ChatInputBar(
+                        text: model.inputText,
+                        isSending: model.isSending || !networkMonitor.isConnected,
+                        waitingForVacancyId: model.waitingForVacancyId,
+                        onTextChanged: model.onInputTextChanged,
+                        onSend: model.onSendMessage,
+                        onFavoritesTapped: model.onShowFavoritesPicker
                     )
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                
-                ChatInputBar(
-                    text: model.inputText,
-                    isSending: model.isSending,
-                    systemHints: model.systemHints,
-                    waitingForVacancyId: model.waitingForVacancyId,
-                    onTextChanged: model.onInputTextChanged,
-                    onSend: model.onSendMessage,
-                    onHintTapped: model.onHintTapped,
-                    onFavoritesTapped: model.onShowFavoritesPicker
-                )
             }
             .background(Color.backgroundPrimary)
-            .navigationTitle(model.consultant?.name ?? "Карьерный консультант")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    if let consultant = model.consultant {
-                        VStack(spacing: 2) {
-                            Text(consultant.name)
-                                .font(.headline)
-                            
-                            HStack(spacing: 4) {
-                                Circle()
-                                    .fill(consultant.isOnline ? Color.green : Color.gray)
-                                    .frame(width: 6, height: 6)
-                                
-                                Text(consultant.isOnline ? "В сети" : "Не в сети")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
+                    Text("Карьерный консультант")
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    if let onClose = model.onClose {
+                        Button {
+                            onClose()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.body.weight(.medium))
+                                .foregroundColor(.primary)
                         }
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        model.onClearHistory()
+                        showClearConfirmation = true
                     } label: {
-                        Text("Очистить чат")
-                            .font(.subheadline)
-                            .foregroundColor(.brandPrimary)
+                        Image(systemName: "trash")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .alert("Очистить чат?", isPresented: $showClearConfirmation) {
+                Button("Отмена", role: .cancel) {}
+                Button("Очистить", role: .destructive) {
+                    model.onClearHistory()
+                }
+            } message: {
+                Text("Вся история сообщений будет удалена. Это действие нельзя отменить.")
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var chatScrollContent: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(model.messages) { message in
+                        MessageBubbleView(
+                            message: message,
+                            onButtonTap: model.onButtonTapped,
+                            isSending: model.isSending
+                        )
+                        .id(message.id)
+                    }
+                    
+                    if model.isSending {
+                        HStack(alignment: .bottom, spacing: 8) {
+                            TypingIndicatorView()
+                                .id("loading-indicator")
+                            Spacer(minLength: 60)
+                        }
+                    }
+                }
+                .padding()
+            }
+            .onAppear {
+                if let lastMessage = model.messages.last {
+                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                }
+            }
+            .onChange(of: model.messages.count) { _, _ in
+                if let lastMessage = model.messages.last {
+                    withAnimation {
+                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                    }
+                }
+            }
+            .onChange(of: model.isSending) { _, isSending in
+                if isSending {
+                    withAnimation {
+                        proxy.scrollTo("loading-indicator", anchor: .bottom)
                     }
                 }
             }

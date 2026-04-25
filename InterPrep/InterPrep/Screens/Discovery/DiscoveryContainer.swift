@@ -6,11 +6,14 @@
 //
 
 import ArchitectureCore
+import NetworkMonitorService
 import SwiftUI
 
 public struct DiscoveryContainer: View {
     @StateObject private var store: DiscoveryStore
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     @State private var selectedVacancy: DiscoveryState.Vacancy?
+    @State private var showOfflineToast = false
     var onNavigateToResumeUpload: (() -> Void)?
     
     public init(store: @autoclosure @escaping () -> DiscoveryStore, onNavigateToResumeUpload: (() -> Void)? = nil) {
@@ -20,8 +23,27 @@ public struct DiscoveryContainer: View {
     
     public var body: some View {
         DiscoveryView(model: makeModel())
+            .overlay(alignment: .bottom) {
+                if showOfflineToast {
+                    Text("Нет интернета — откройте вакансию позже")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(Color.black.opacity(0.8))
+                        .cornerRadius(12)
+                        .padding(.bottom, 80)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.easeInOut(duration: 0.3), value: showOfflineToast)
             .task {
                 store.send(.onAppear)
+            }
+            .onChange(of: networkMonitor.isConnected) { _, isConnected in
+                if isConnected && store.state.isOfflineMode {
+                    store.send(.retryTapped)
+                }
             }
             .sheet(item: $selectedVacancy) { vacancy in
                 if let urlString = vacancy.url, let url = URL(string: urlString) {
@@ -53,6 +75,8 @@ public struct DiscoveryContainer: View {
             isLoading: store.state.isLoading,
             vacancies: store.state.vacancies,
             searchQuery: store.state.searchQuery,
+            errorMessage: store.state.errorMessage,
+            isOfflineMode: store.state.isOfflineMode,
             onFilterChanged: { filter in
                 store.send(.filterChanged(filter))
             },
@@ -60,7 +84,15 @@ public struct DiscoveryContainer: View {
                 onNavigateToResumeUpload?()
             },
             onVacancyTap: { vacancy in
-                selectedVacancy = vacancy
+                if networkMonitor.isConnected {
+                    selectedVacancy = vacancy
+                } else {
+                    showOfflineToast = true
+                    Task {
+                        try? await Task.sleep(nanoseconds: 2_500_000_000)
+                        showOfflineToast = false
+                    }
+                }
             },
             onToggleFavorite: { id in
                 store.send(.toggleFavorite(id))
@@ -70,6 +102,9 @@ public struct DiscoveryContainer: View {
             },
             onSearchSubmitted: {
                 store.send(.searchSubmitted)
+            },
+            onRetry: {
+                store.send(.retryTapped)
             }
         )
     }

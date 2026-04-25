@@ -14,6 +14,7 @@ extension CalendarView {
         let events: [CalendarState.CalendarEvent]
         let isCreatingEvent: Bool
         let isOfflineMode: Bool
+        let errorMessage: String?
         let onDateSelected: (Date) -> Void
         let onMonthChanged: (Date) -> Void
         let onCreateEventTapped: () -> Void
@@ -21,6 +22,7 @@ extension CalendarView {
         let onDeleteEvent: (String) -> Void
         let onEditEvent: (CalendarState.CalendarEvent) -> Void
         let onSyncCompleted: ([CalendarState.CalendarEvent]) -> Void
+        let onRetry: () -> Void
         let eventCreationModel: EventCreationView.Model
     }
 }

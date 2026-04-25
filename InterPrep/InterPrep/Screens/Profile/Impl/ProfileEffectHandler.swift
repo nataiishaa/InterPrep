@@ -209,10 +209,12 @@ public actor ProfileEffectHandler: EffectHandler {
         }
         let result = await NetworkServiceV2.shared.uploadProfilePhoto(imageData: data, filename: "photo.jpg", mimeType: "image/jpeg")
         switch result {
-        case .success:
+        case .success(let response):
+            guard response.ok else {
+                return .loadingFailed("Сервер отклонил фото. Попробуйте другое изображение")
+            }
             Self.profilePhotoSaveSync(userId: userId, data: data)
             if let baseURL = Self.profilePhotoCacheFileURL(userId: userId) {
-                // Add timestamp query to bust AsyncImage cache
                 var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
                 components?.queryItems = [URLQueryItem(name: "t", value: String(Date().timeIntervalSince1970))]
                 let url = components?.url ?? baseURL
@@ -220,7 +222,11 @@ public actor ProfileEffectHandler: EffectHandler {
             }
             return nil
         case .failure(let error):
-            let message = error.localizedDescription.isEmpty ? "Не удалось загрузить фото" : "Не удалось загрузить фото: \(error.localizedDescription)"
+            if error.isConnectionError {
+                return .loadingFailed("Нет соединения с сервером. Проверьте интернет и попробуйте снова")
+            }
+            let desc = error.localizedDescription
+            let message = desc.isEmpty ? "Не удалось загрузить фото" : "Не удалось загрузить фото: \(desc)"
             return .loadingFailed(message)
         }
     }

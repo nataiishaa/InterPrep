@@ -10,7 +10,6 @@ import WebKit
 public struct VacancyWebView: View {
     let url: URL
     let title: String
-    /// ID вакансии (hh.ru) — если передан, в тулбаре показывается кнопка «Копировать ID»
     let vacancyId: String?
     @Environment(\.dismiss) private var dismiss
     @State private var isLoading = true
@@ -49,16 +48,6 @@ public struct VacancyWebView: View {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title3)
                         .foregroundColor(.secondary)
-                }
-            }
-            
-            if let vacancyId = vacancyId {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        UIPasteboard.general.string = vacancyId
-                    } label: {
-                        Label("Копировать ID", systemImage: "doc.on.doc")
-                    }
                 }
             }
             
@@ -177,6 +166,10 @@ private struct WebViewRepresentable: UIViewRepresentable {
             parent.isLoading = true
         }
         
+        func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            parent.isLoading = false
+        }
+        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             parent.isLoading = false
             parent.canGoBack = webView.canGoBack
@@ -184,6 +177,10 @@ private struct WebViewRepresentable: UIViewRepresentable {
         }
         
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            parent.isLoading = false
+        }
+        
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
             parent.isLoading = false
         }
     }
