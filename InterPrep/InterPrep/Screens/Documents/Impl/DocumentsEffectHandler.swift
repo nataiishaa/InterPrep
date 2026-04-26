@@ -373,7 +373,6 @@ public final actor DocumentServiceImpl: DocumentServicing {
                 }
                 .sorted { $0.modifiedAt > $1.modifiedAt }
         case .failure(let error):
-            // RecentFiles not implemented on backend yet — return empty list instead of failing
             if case .apiError(let apiError) = error,
                apiError.serverMessage.contains("unknown method") || apiError.serverMessage.contains("unimplemented") {
                 print("[Documents] RecentFiles not implemented, returning empty list")

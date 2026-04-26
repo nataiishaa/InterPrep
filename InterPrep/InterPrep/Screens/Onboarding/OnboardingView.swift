@@ -16,7 +16,7 @@ struct OnboardingView: View {
             LinearGradient.brandBackground
                 .ignoresSafeArea()
             
-            VStack(spacing: 0) {
+            VStack(spacing: CGFloat.zero) {
                 if !model.isLastPage {
                     HStack {
                         Spacer()
@@ -25,11 +25,11 @@ struct OnboardingView: View {
                         }
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.8))
-                        .padding(.trailing, 24)
+                        .padding(.trailing, Layout.skipButtonTrailingPadding)
                     }
-                    .padding(.top, 8)
+                    .padding(.top, Layout.skipBarTopPadding)
                 } else {
-                    Color.clear.frame(height: 40)
+                    Color.clear.frame(height: Layout.skipBarPlaceholderHeight)
                 }
                 
                 TabView(selection: Binding(
@@ -44,7 +44,7 @@ struct OnboardingView: View {
                 .tabViewStyle(.page(indexDisplayMode: .always))
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
                 
-                VStack(spacing: 16) {
+                VStack(spacing: Layout.footerStackSpacing) {
                     if model.isLastPage {
                         Button {
                             model.onGetStarted()
@@ -52,10 +52,10 @@ struct OnboardingView: View {
                             Text("Начать")
                                 .font(.headline)
                                 .foregroundColor(.buttonText)
-                                .frame(maxWidth: 280)
-                                .padding(.vertical, 16)
+                                .frame(maxWidth: Layout.primaryButtonMaxWidth)
+                                .padding(.vertical, Layout.primaryButtonVerticalPadding)
                                 .background(Color.buttonBackground)
-                                .cornerRadius(12)
+                                .cornerRadius(Layout.primaryButtonCornerRadius)
                         }
                         .transition(.scale.combined(with: .opacity))
                     } else {
@@ -65,10 +65,10 @@ struct OnboardingView: View {
                             Text("Далее")
                                 .font(.headline)
                                 .foregroundColor(.buttonText)
-                                .frame(maxWidth: 280)
-                                .padding(.vertical, 16)
+                                .frame(maxWidth: Layout.primaryButtonMaxWidth)
+                                .padding(.vertical, Layout.primaryButtonVerticalPadding)
                                 .background(Color.buttonBackground)
-                                .cornerRadius(12)
+                                .cornerRadius(Layout.primaryButtonCornerRadius)
                         }
                         .transition(.scale.combined(with: .opacity))
                     }
@@ -78,10 +78,10 @@ struct OnboardingView: View {
                     }
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.9))
-                    .padding(.bottom, 20)
+                    .padding(.bottom, Layout.registerLinkBottomPadding)
                 }
                 .frame(maxWidth: .infinity)
-                .animation(.easeInOut(duration: 0.3), value: model.isLastPage)
+                .animation(.easeInOut(duration: Layout.footerAnimationDuration), value: model.isLastPage)
             }
         }
     }
@@ -89,19 +89,19 @@ struct OnboardingView: View {
 
 struct OnboardingPageView: View {
     let page: OnboardingView.Model.PageModel
-    @State private var imageScale: CGFloat = 0.8
-    @State private var imageOpacity: Double = 0
-    @State private var textOffset: CGFloat = 50
-    @State private var textOpacity: Double = 0
+    @State private var imageScale: CGFloat = Layout.imageScaleInitial
+    @State private var imageOpacity: Double = Layout.imageOpacityInitial
+    @State private var textOffset: CGFloat = Layout.textOffsetInitial
+    @State private var textOpacity: Double = Layout.textOpacityInitial
     
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: Layout.pageStackSpacing) {
             Spacer()
             
             Image(systemName: page.imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 200, height: 200)
+                .frame(width: Layout.heroImageSide, height: Layout.heroImageSide)
                 .foregroundStyle(
                     LinearGradient(
                         colors: [.white, .white.opacity(0.8)],
@@ -111,26 +111,26 @@ struct OnboardingPageView: View {
                 )
                 .scaleEffect(imageScale)
                 .opacity(imageOpacity)
-                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .shadow(color: .black.opacity(0.2), radius: Layout.heroShadowRadius, x: .zero, y: Layout.heroShadowY)
             
             Spacer()
-                .frame(height: 40)
+                .frame(height: Layout.heroToTextSpacerHeight)
             
-            VStack(spacing: 16) {
+            VStack(spacing: Layout.textBlockSpacing) {
                 Text(page.title)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, Layout.textHorizontalPadding)
                 
                 Text(page.description)
                     .font(.body)
                     .foregroundColor(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, Layout.textHorizontalPadding)
             }
             .offset(y: textOffset)
             .opacity(textOpacity)
@@ -138,16 +138,57 @@ struct OnboardingPageView: View {
             Spacer()
         }
         .task {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                imageScale = 1.0
-                imageOpacity = 1.0
+            withAnimation(
+                .spring(response: Layout.imageSpringResponse, dampingFraction: Layout.imageSpringDamping)
+            ) {
+                imageScale = Layout.imageScaleFinal
+                imageOpacity = Layout.imageOpacityFinal
             }
             
-            withAnimation(.easeOut(duration: 0.5).delay(0.2)) {
-                textOffset = 0
-                textOpacity = 1.0
+            withAnimation(
+                .easeOut(duration: Layout.textAnimationDuration).delay(Layout.textAnimationDelay)
+            ) {
+                textOffset = CGFloat.zero
+                textOpacity = Layout.textOpacityFinal
             }
         }
+    }
+}
+
+extension OnboardingView {
+    enum Layout {
+        static let skipButtonTrailingPadding: CGFloat = 24
+        static let skipBarTopPadding: CGFloat = 8
+        static let skipBarPlaceholderHeight: CGFloat = 40
+        static let footerStackSpacing: CGFloat = 16
+        static let primaryButtonMaxWidth: CGFloat = 280
+        static let primaryButtonVerticalPadding: CGFloat = 16
+        static let primaryButtonCornerRadius: CGFloat = 12
+        static let registerLinkBottomPadding: CGFloat = 20
+        static let footerAnimationDuration: Double = 0.3
+    }
+}
+
+extension OnboardingPageView {
+    enum Layout {
+        static let pageStackSpacing: CGFloat = 32
+        static let heroImageSide: CGFloat = 200
+        static let heroShadowRadius: CGFloat = 20
+        static let heroShadowY: CGFloat = 10
+        static let heroToTextSpacerHeight: CGFloat = 40
+        static let textBlockSpacing: CGFloat = 16
+        static let textHorizontalPadding: CGFloat = 40
+        static let imageScaleInitial: CGFloat = 0.8
+        static let imageScaleFinal: CGFloat = 1.0
+        static let imageOpacityInitial: Double = .zero
+        static let textOpacityInitial: Double = .zero
+        static let imageOpacityFinal: Double = 1.0
+        static let textOpacityFinal: Double = 1.0
+        static let textOffsetInitial: CGFloat = 50
+        static let imageSpringResponse: Double = 0.6
+        static let imageSpringDamping: Double = 0.7
+        static let textAnimationDuration: Double = 0.5
+        static let textAnimationDelay: Double = 0.2
     }
 }
 

@@ -20,7 +20,6 @@ struct OTPView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Background
             LinearGradient(
                 colors: [
                     Color(red: 0.45, green: 0.5, blue: 0.45),
@@ -36,7 +35,6 @@ struct OTPView: View {
                     Spacer()
                         .frame(height: 40)
                     
-                    // Title
                     VStack(spacing: 12) {
                         Text("InterPrep")
                             .font(.largeTitle)
@@ -66,7 +64,6 @@ struct OTPView: View {
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 32)
                     
-                    // OTP Fields
                     HStack(spacing: 8) {
                         ForEach(0..<6, id: \.self) { index in
                             OTPDigitField(
@@ -83,7 +80,6 @@ struct OTPView: View {
                     }
                     .padding(.horizontal, 24)
                     
-                    // Resend button
                     Button {
                         if canResend {
                             model.onResend()
@@ -104,7 +100,6 @@ struct OTPView: View {
                     .disabled(!canResend)
                     .padding(.top, 8)
                     
-                    // Error message
                     if let errorMessage = model.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
@@ -115,7 +110,6 @@ struct OTPView: View {
                     
                     Spacer()
                     
-                    // Button
                     Button {
                         model.onSubmit()
                     } label: {
@@ -162,14 +156,12 @@ struct OTPView: View {
     }
     
     private func handleDigitChange(at index: Int, newValue: String) {
-        // Если вставили несколько символов (например, из буфера обмена)
         if newValue.count > 1 {
             let digits = Array(newValue.prefix(6))
             for (i, char) in digits.enumerated() where i < 6 {
                 otpDigits[i] = String(char)
             }
             updateFullCode()
-            // Фокус на последнее заполненное поле или на первое пустое
             if digits.count == 6 {
                 focusedField = nil
             } else {
@@ -178,12 +170,10 @@ struct OTPView: View {
             return
         }
         
-        // Обычный ввод одного символа
         if newValue.count <= 1 {
             otpDigits[index] = newValue
             updateFullCode()
             
-            // Автоматический переход к следующему полю
             if !newValue.isEmpty && index < 5 {
                 focusedField = index + 1
             }
@@ -211,7 +201,6 @@ struct OTPDigitField: View {
     
     var body: some View {
         ZStack {
-            // Скрытое текстовое поле для ввода
             TextField("", text: $digit)
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.center)
@@ -221,13 +210,11 @@ struct OTPDigitField: View {
                 .opacity(0.01)
                 .focused($focusedField, equals: index)
                 .onChange(of: digit) { _, newValue in
-                    // Ограничиваем ввод одним символом
                     if newValue.count > 1 {
                         digit = String(newValue.prefix(1))
                     }
                 }
             
-            // Визуальное представление
             Text(digit.isEmpty ? "" : digit)
                 .font(.title2)
                 .fontWeight(.semibold)

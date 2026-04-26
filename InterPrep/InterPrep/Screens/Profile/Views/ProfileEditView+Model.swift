@@ -12,7 +12,6 @@ extension ProfileEditView {
         let firstName: String
         let lastName: String
         let email: String
-        /// Локальный файл из кеша (приоритетнее сетевого `avatarURL`).
         let cachedProfilePhotoURL: URL?
         let avatarURL: String?
         let errorMessage: String?

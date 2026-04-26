@@ -13,13 +13,13 @@ import NetworkService
 public actor DiscoveryEffectHandler: EffectHandler {
     public typealias StateType = DiscoveryState
     
-    private let resumeService: ResumeService
-    private let vacancyService: VacancyService
+    private let resumeService: ResumeServicing
+    private let vacancyService: VacancyServicing
     private let cacheManager = CacheManager.shared
     
     public init(
-        resumeService: ResumeService,
-        vacancyService: VacancyService
+        resumeService: ResumeServicing,
+        vacancyService: VacancyServicing
     ) {
         self.resumeService = resumeService
         self.vacancyService = vacancyService
@@ -64,17 +64,8 @@ public actor DiscoveryEffectHandler: EffectHandler {
     }
 }
 
-public protocol ResumeService: Actor {
-    func hasResume() async -> Bool
-    func invalidateCache() async
-}
 
-public protocol VacancyService: Actor {
-    func fetchVacancies(filter: DiscoveryState.FilterType, searchQuery: String) async throws -> [DiscoveryState.Vacancy]
-    func toggleFavorite(id: String) async throws -> Bool
-}
-
-public final actor ResumeServiceMock: ResumeService {
+public final actor ResumeServiceMock: ResumeServicing {
     public init() {}
     
     public func hasResume() async -> Bool {
@@ -86,7 +77,7 @@ public final actor ResumeServiceMock: ResumeService {
     }
 }
 
-public final actor VacancyServiceMock: VacancyService {
+public final actor VacancyServiceMock: VacancyServicing {
     public init() {}
     
     public func fetchVacancies(filter: DiscoveryState.FilterType, searchQuery: String) async throws -> [DiscoveryState.Vacancy] {

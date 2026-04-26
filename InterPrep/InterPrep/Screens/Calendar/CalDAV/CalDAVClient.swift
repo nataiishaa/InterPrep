@@ -285,7 +285,6 @@ public final class CalDAVClient {
         var request = URLRequest(url: url)
         request.httpMethod = method
         
-        // Basic Auth
         let credentials = "\(username):\(password)"
         if let credentialsData = credentials.data(using: .utf8) {
             let base64Credentials = credentialsData.base64EncodedString()

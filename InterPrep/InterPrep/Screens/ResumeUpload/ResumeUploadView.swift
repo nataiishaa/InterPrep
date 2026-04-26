@@ -18,7 +18,7 @@ public struct ResumeUploadView: View {
     }
     
     public var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: .zero) {
             header
             
             ScrollView {
@@ -61,7 +61,7 @@ public struct ResumeUploadView: View {
                 Image(systemName: "xmark")
                     .font(.title3)
                     .foregroundColor(.textPrimary)
-                    .padding()
+                    .padding(Layout.headerToolbarButtonPadding)
             }
             
             Spacer()
@@ -70,7 +70,7 @@ public struct ResumeUploadView: View {
                 model.onSkip()
             }
             .foregroundColor(.textTertiary)
-            .padding()
+            .padding(Layout.headerToolbarButtonPadding)
         }
     }
     
@@ -80,26 +80,26 @@ public struct ResumeUploadView: View {
             Image("upload_resume")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 200, height: 200)
+                .frame(width: Layout.illustrationSize, height: Layout.illustrationSize)
             
             if model.uploadStatus == .uploading {
                 VStack {
                     Spacer()
                     ProgressView()
                         .tint(.white)
-                        .scaleEffect(1.5)
+                        .scaleEffect(Layout.uploadProgressScale)
                 }
-                .frame(height: 200)
+                .frame(height: Layout.illustrationSize)
             } else if model.uploadStatus == .success {
                 VStack {
                     Spacer()
                     Image(systemName: "checkmark.circle.fill")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 60, height: 60)
+                        .frame(width: Layout.successIconSize, height: Layout.successIconSize)
                         .foregroundColor(.green)
                 }
-                .frame(height: 200)
+                .frame(height: Layout.illustrationSize)
             }
         }
         .padding(.top, Layout.illustrationTopPadding)
@@ -107,7 +107,7 @@ public struct ResumeUploadView: View {
     
     @ViewBuilder
     private var titleSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Layout.titleSectionSpacing) {
             Text(titleText)
                 .font(.title2)
                 .fontWeight(.bold)
@@ -145,21 +145,21 @@ public struct ResumeUploadView: View {
     
     @ViewBuilder
     private func fileCard(file: ResumeUploadState.SelectedFile) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Layout.fileCardHStackSpacing) {
             Image(systemName: file.type.icon)
                 .font(.largeTitle)
                 .foregroundColor(.brandPrimary)
-                .frame(width: 50, height: 50)
-                .background(Color.white.opacity(0.2))
-                .cornerRadius(10)
+                .frame(width: Layout.fileCardIconSize, height: Layout.fileCardIconSize)
+                .background(Color.white.opacity(Layout.fileCardIconBackgroundOpacity))
+                .cornerRadius(Layout.fileCardIconCornerRadius)
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Layout.fileCardTextVStackSpacing) {
                 Text(file.name)
                     .font(.headline)
                     .foregroundColor(.textPrimary)
                     .lineLimit(1)
                 
-                HStack(spacing: 8) {
+                HStack(spacing: Layout.fileCardMetaHStackSpacing) {
                     Text(file.type.rawValue)
                         .font(.caption)
                         .foregroundColor(.textSecondary)
@@ -185,9 +185,9 @@ public struct ResumeUploadView: View {
                 }
             }
         }
-        .padding()
-        .background(Color.white.opacity(0.15))
-        .cornerRadius(12)
+        .padding(Layout.cardContentPadding)
+        .background(Color.white.opacity(Layout.fileCardBackgroundOpacity))
+        .cornerRadius(Layout.cardCornerRadius)
     }
     
     @ViewBuilder
@@ -195,7 +195,7 @@ public struct ResumeUploadView: View {
         Button {
             showDocumentPicker = true
         } label: {
-            VStack(spacing: 16) {
+            VStack(spacing: Layout.selectFileDropZoneVStackSpacing) {
                 Image(systemName: "arrow.up.doc.fill")
                     .font(.largeTitle)
                     .foregroundColor(.white)
@@ -205,46 +205,49 @@ public struct ResumeUploadView: View {
                     .foregroundColor(.white)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 150)
-            .background(Color.white.opacity(0.15))
-            .cornerRadius(12)
+            .frame(height: Layout.selectFileDropZoneHeight)
+            .background(Color.white.opacity(Layout.selectFileDropZoneBackgroundOpacity))
+            .cornerRadius(Layout.cardCornerRadius)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.white.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [10]))
+                RoundedRectangle(cornerRadius: Layout.cardCornerRadius)
+                    .stroke(
+                        Color.white.opacity(Layout.selectFileDropZoneBorderOpacity),
+                        style: StrokeStyle(lineWidth: Layout.selectFileBorderLineWidth, dash: Layout.selectFileBorderDash)
+                    )
             )
         }
     }
     
     @ViewBuilder
     private var supportedFormatsSection: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Layout.supportedFormatsSectionSpacing) {
             Text("Поддерживаемые форматы:")
                 .font(.caption)
                 .foregroundColor(.textSecondary)
             
-            HStack(spacing: 12) {
+            HStack(spacing: Layout.supportedFormatsRowSpacing) {
                 ForEach(["PDF", "DOC", "DOCX", "TXT"], id: \.self) { format in
                     Text(format)
                         .font(.caption2)
                         .fontWeight(.medium)
                         .foregroundColor(.textPrimary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.2))
-                        .cornerRadius(8)
+                        .padding(.horizontal, Layout.formatChipHorizontalPadding)
+                        .padding(.vertical, Layout.formatChipVerticalPadding)
+                        .background(Color.white.opacity(Layout.formatChipBackgroundOpacity))
+                        .cornerRadius(Layout.formatChipCornerRadius)
                 }
             }
             
             Text("Максимальный размер: 10 МБ")
                 .font(.caption2)
                 .foregroundColor(.textTertiary)
-                .padding(.top, 4)
+                .padding(.top, Layout.supportedFormatsHintTopPadding)
         }
     }
     
     @ViewBuilder
     private func errorSection(_ error: String) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Layout.errorBannerHStackSpacing) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.red)
             
@@ -254,14 +257,14 @@ public struct ResumeUploadView: View {
             
             Spacer()
         }
-        .padding()
-        .background(Color.red.opacity(0.2))
-        .cornerRadius(12)
+        .padding(Layout.cardContentPadding)
+        .background(Color.red.opacity(Layout.errorBannerBackgroundOpacity))
+        .cornerRadius(Layout.cardCornerRadius)
     }
     
     @ViewBuilder
     private var bottomButtons: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Layout.bottomButtonsVStackSpacing) {
             if model.selectedFile != nil && model.uploadStatus != .success {
                 Button {
                     model.onUpload()
@@ -278,7 +281,7 @@ public struct ResumeUploadView: View {
                 .frame(height: Layout.buttonHeight)
                 .background(Color.buttonBackground)
                 .foregroundColor(.buttonText)
-                .cornerRadius(12)
+                .cornerRadius(Layout.cardCornerRadius)
                 .disabled(model.uploadStatus == .uploading)
             }
         }
@@ -292,11 +295,48 @@ public struct ResumeUploadView: View {
 private extension ResumeUploadView {
     enum Layout {
         static var horizontalPadding: CGFloat { 24 }
+        static var headerToolbarButtonPadding: CGFloat { 16 }
         static var topPadding: CGFloat { 24 }
         static var sectionSpacing: CGFloat { 24 }
         static var illustrationTopPadding: CGFloat { 20 }
         static var buttonHeight: CGFloat { 50 }
         static var bottomPadding: CGFloat { 32 }
+
+        static var illustrationSize: CGFloat { 200 }
+        static var uploadProgressScale: CGFloat { 1.5 }
+        static var successIconSize: CGFloat { 60 }
+
+        static var titleSectionSpacing: CGFloat { 12 }
+
+        static var fileCardHStackSpacing: CGFloat { 16 }
+        static var fileCardIconSize: CGFloat { 50 }
+        static var fileCardIconBackgroundOpacity: Double { 0.2 }
+        static var fileCardIconCornerRadius: CGFloat { 10 }
+        static var fileCardTextVStackSpacing: CGFloat { 4 }
+        static var fileCardMetaHStackSpacing: CGFloat { 8 }
+        static var fileCardBackgroundOpacity: Double { 0.15 }
+        static var cardCornerRadius: CGFloat { 12 }
+        static var cardContentPadding: CGFloat { 16 }
+
+        static var selectFileDropZoneVStackSpacing: CGFloat { 16 }
+        static var selectFileDropZoneHeight: CGFloat { 150 }
+        static var selectFileDropZoneBackgroundOpacity: Double { 0.15 }
+        static var selectFileDropZoneBorderOpacity: Double { 0.3 }
+        static var selectFileBorderLineWidth: CGFloat { 2 }
+        static var selectFileBorderDash: [CGFloat] { [10] }
+
+        static var supportedFormatsSectionSpacing: CGFloat { 8 }
+        static var supportedFormatsRowSpacing: CGFloat { 12 }
+        static var formatChipHorizontalPadding: CGFloat { 12 }
+        static var formatChipVerticalPadding: CGFloat { 6 }
+        static var formatChipBackgroundOpacity: Double { 0.2 }
+        static var formatChipCornerRadius: CGFloat { 8 }
+        static var supportedFormatsHintTopPadding: CGFloat { 4 }
+
+        static var errorBannerHStackSpacing: CGFloat { 12 }
+        static var errorBannerBackgroundOpacity: Double { 0.2 }
+
+        static var bottomButtonsVStackSpacing: CGFloat { 12 }
     }
 }
 

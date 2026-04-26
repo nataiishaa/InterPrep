@@ -10,7 +10,7 @@ import DiscoveryModule
 import Foundation
 import NetworkService
 
-public final actor VacancyServiceImpl: VacancyService, FavoritesProviding {
+public final actor VacancyServiceImpl: VacancyServicing, FavoritesProviding {
     private let networkService: NetworkServiceV2
     
     public init(networkService: NetworkServiceV2 = .shared) {

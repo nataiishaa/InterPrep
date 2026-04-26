@@ -21,8 +21,8 @@ import SwiftUI
 final class AppGraph {
     
     private lazy var onboardingStorageService: OnboardingStorageService = OnboardingStorageServiceImpl()
-    private lazy var authService: AuthService = AuthServiceImpl()
-    private lazy var resumeService: ResumeService = ResumeServiceImpl()
+    private lazy var authService: AuthServicing = AuthService()
+    private lazy var resumeService: ResumeServicing = ResumeServiceImpl()
     private lazy var vacancyService: VacancyServiceImpl = VacancyServiceImpl()
     private lazy var fileUploadService: FileUploadService = {
         FileUploadServiceImpl(resumeService: self.resumeService)

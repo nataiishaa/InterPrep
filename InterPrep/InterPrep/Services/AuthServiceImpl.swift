@@ -9,7 +9,7 @@ import AuthFeature
 import Foundation
 import NetworkService
 
-public final class AuthServiceImpl: AuthService {
+public final class AuthService: AuthServicing {
     private let networkService: NetworkServiceV2
     
     public init(networkService: NetworkServiceV2 = .shared) {

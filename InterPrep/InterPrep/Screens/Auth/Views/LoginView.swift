@@ -44,7 +44,7 @@ struct LoginView: View {
     
     @ViewBuilder
     private var titleSection: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Layout.titleStackSpacing) {
             Text("InterPrep")
                 .font(.largeTitle)
                 .fontWeight(.bold)
@@ -139,7 +139,7 @@ struct LoginView: View {
             .frame(height: Layout.buttonHeight)
             .background(Color.buttonBackground)
             .foregroundColor(.buttonText)
-            .cornerRadius(12)
+            .cornerRadius(Layout.buttonCornerRadius)
             .disabled(model.isLoading)
             .padding(.horizontal, Layout.horizontalPadding)
         }
@@ -159,9 +159,11 @@ private extension LoginView {
     enum Layout {
         static var topSpacing: CGFloat { 40 }
         static var titleBottomPadding: CGFloat { 40 }
+        static var titleStackSpacing: CGFloat { 8 }
         static var fieldSpacing: CGFloat { 16 }
         static var horizontalPadding: CGFloat { 32 }
         static var buttonHeight: CGFloat { 50 }
+        static var buttonCornerRadius: CGFloat { 12 }
         static var bottomPadding: CGFloat { 20 }
         static var sectionSpacing: CGFloat { 24 }
     }

@@ -21,7 +21,6 @@ struct ResumeProfileDetailView: View {
     @State private var isSaving = false
     @State private var saveError: String?
     
-    // Редактируемые поля (комма/перенос строки — разделители списков)
     @State private var targetRolesText = ""
     @State private var experienceLevel = ""
     @State private var areasText = ""

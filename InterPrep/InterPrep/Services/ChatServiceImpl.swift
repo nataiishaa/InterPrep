@@ -50,7 +50,6 @@ public final actor ChatServiceImpl: ChatServicing {
                 if let fromDisk = await loadPersistedCoachHistory() {
                     historyMessages = fromDisk
                 } else {
-                    // No history yet; still show welcome and empty thread without a cryptic iOS error.
                     historyMessages = []
                 }
             } else {

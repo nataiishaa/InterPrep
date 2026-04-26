@@ -143,7 +143,7 @@ public final actor ChatServiceMock: ChatServicing {
     }
     
     public func sendMessage(_ message: ChatMessage) async throws -> ChatMessage? {
-        try await Task.sleep(nanoseconds: 600_000_000) // 0.6 c
+        try await Task.sleep(nanoseconds: 600_000_000)
         return ChatMessage(
             text: "Принял. По вашему запросу могу подсказать: подготовьте краткий рассказ о себе, примеры проектов и типичные вопросы по вашей области. Если нужна помощь с конкретным вопросом — напишите его.",
             sender: .consultant

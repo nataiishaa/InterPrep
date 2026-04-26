@@ -17,7 +17,7 @@ public struct DiscoveryView: View {
     }
     
     public var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: Layout.rootStackSpacing) {
             header
             
             if model.isOfflineMode {
@@ -40,15 +40,15 @@ public struct DiscoveryView: View {
         }
         .background(Color.backgroundPrimary)
         .safeAreaInset(edge: .bottom) {
-            Color.clear.frame(height: 60)
+            Color.clear.frame(height: Layout.safeAreaBottomInset)
         }
     }
     
     @ViewBuilder
     private var header: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                HStack(spacing: 8) {
+        VStack(spacing: Layout.headerOuterSpacing) {
+            HStack(spacing: Layout.headerRowSpacing) {
+                HStack(spacing: Layout.searchInnerSpacing) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
                         .font(.body)
@@ -74,17 +74,17 @@ public struct DiscoveryView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.horizontal, Layout.searchHorizontalPadding)
+                .padding(.vertical, Layout.searchVerticalPadding)
                 .background(Color.fieldBackground)
-                .cornerRadius(12)
+                .cornerRadius(Layout.searchCornerRadius)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.divider.opacity(0.5), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: Layout.searchCornerRadius)
+                        .stroke(Color.divider.opacity(0.5), lineWidth: Layout.searchStrokeWidth)
                 )
             }
             .padding(.horizontal, Layout.horizontalPadding)
-            .padding(.top, 12)
+            .padding(.top, Layout.headerTopPadding)
             
             HStack(spacing: Layout.tabSpacing) {
                 filterTab(
@@ -101,7 +101,7 @@ public struct DiscoveryView: View {
             }
             .padding(.horizontal, Layout.horizontalPadding)
         }
-        .padding(.bottom, 8)
+        .padding(.bottom, Layout.headerBottomPadding)
         .background(Color.cardBackground)
     }
     
@@ -113,7 +113,7 @@ public struct DiscoveryView: View {
                 .fontWeight(isSelected ? .semibold : .medium)
                 .foregroundColor(isSelected ? .white : .primary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, Layout.tabVerticalPadding)
                 .background(
                     Group {
                         if isSelected {
@@ -127,26 +127,26 @@ public struct DiscoveryView: View {
                         }
                     }
                 )
-                .cornerRadius(12)
+                .cornerRadius(Layout.tabCornerRadius)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color.clear : Color.divider.opacity(0.5), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: Layout.tabCornerRadius)
+                        .stroke(isSelected ? Color.clear : Color.divider.opacity(0.5), lineWidth: Layout.tabStrokeWidth)
                 )
                 .shadow(
                     color: isSelected ? .brandPrimary.opacity(0.3) : .clear,
-                    radius: isSelected ? 8 : 0,
-                    x: 0,
-                    y: isSelected ? 4 : 0
+                    radius: isSelected ? Layout.tabSelectedShadowRadius : .zero,
+                    x: .zero,
+                    y: isSelected ? Layout.tabSelectedShadowY : .zero
                 )
         }
     }
     
     @ViewBuilder
     private var loadingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Layout.loadingStackSpacing) {
             Spacer()
             ProgressView()
-                .scaleEffect(1.5)
+                .scaleEffect(Layout.loadingProgressScale)
                 .tint(.brandPrimary)
             Text("Загрузка вакансий...")
                 .foregroundColor(.textSecondary)
@@ -156,13 +156,13 @@ public struct DiscoveryView: View {
     
     @ViewBuilder
     private var emptyStateView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Layout.emptyStackSpacing) {
             Spacer()
             
             Image(systemName: "doc.text.magnifyingglass")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 80, height: 80)
+                .frame(width: Layout.emptyIconSide, height: Layout.emptyIconSide)
                 .foregroundStyle(
                     LinearGradient(
                         colors: [.brandPrimary, .brandSecondary],
@@ -171,7 +171,7 @@ public struct DiscoveryView: View {
                     )
                 )
             
-            VStack(spacing: 8) {
+            VStack(spacing: Layout.emptyTextSpacing) {
                 Text("Вакансий пока нет")
                     .font(.title3)
                     .fontWeight(.semibold)
@@ -201,18 +201,18 @@ public struct DiscoveryView: View {
             )
             .ignoresSafeArea()
             
-            VStack(spacing: 0) {
+            VStack(spacing: Layout.uploadOuterSpacing) {
                 Spacer()
-                    .frame(minHeight: 30)
+                    .frame(minHeight: Layout.uploadTopSpacerMinHeight)
                 
                 Image("upload_cloud")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
-                    .frame(height: 300)
-                    .padding(.horizontal, 20)
+                    .frame(height: Layout.uploadImageHeight)
+                    .padding(.horizontal, Layout.uploadImageHorizontalPadding)
                 
-                VStack(spacing: 12) {
+                VStack(spacing: Layout.uploadTextBlockSpacing) {
                     Text("Загрузите свое резюме,\nчтобы получить\nперсональные рекомендации")
                         .font(.title3)
                         .fontWeight(.semibold)
@@ -226,15 +226,15 @@ public struct DiscoveryView: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, Layout.uploadCopyHorizontalPadding)
                 
                 Spacer()
-                    .frame(minHeight: 40)
+                    .frame(minHeight: Layout.uploadMidSpacerMinHeight)
                 
                 Button {
                     model.onUploadResume()
                 } label: {
-                    HStack(spacing: 12) {
+                    HStack(spacing: Layout.uploadButtonInnerSpacing) {
                         Image(systemName: "arrow.up.doc.fill")
                             .font(.title3)
                         Text("Загрузить резюме")
@@ -242,7 +242,7 @@ public struct DiscoveryView: View {
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(height: Layout.uploadButtonHeight)
                     .background(
                         LinearGradient(
                             colors: [.brandPrimary, .brandSecondary],
@@ -250,11 +250,16 @@ public struct DiscoveryView: View {
                             endPoint: .trailing
                         )
                     )
-                    .cornerRadius(16)
-                    .shadow(color: .brandPrimary.opacity(0.4), radius: 12, x: 0, y: 6)
+                    .cornerRadius(Layout.uploadButtonCornerRadius)
+                    .shadow(
+                        color: .brandPrimary.opacity(0.4),
+                        radius: Layout.uploadButtonShadowRadius,
+                        x: .zero,
+                        y: Layout.uploadButtonShadowY
+                    )
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.horizontal, Layout.uploadButtonHorizontalPadding)
+                .padding(.bottom, Layout.uploadButtonBottomPadding)
             }
         }
     }
@@ -262,13 +267,13 @@ public struct DiscoveryView: View {
     @ViewBuilder
     private var vacanciesList: some View {
         ScrollView {
-            LazyVStack(spacing: 16) {
+            LazyVStack(spacing: Layout.listRowSpacing) {
                 ForEach(model.vacancies) { vacancy in
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: Layout.cardInnerStackSpacing) {
 
-                        HStack(alignment: .top, spacing: 12) {
+                        HStack(alignment: .top, spacing: Layout.cardMainRowSpacing) {
  
-                            HStack(alignment: .top, spacing: 12) {
+                            HStack(alignment: .top, spacing: Layout.cardMainRowSpacing) {
                                 Group {
                                     if let urlString = vacancy.companyLogoURL, let url = URL(string: urlString) {
                                         AsyncImage(url: url) { phase in
@@ -287,10 +292,10 @@ public struct DiscoveryView: View {
                                         logoPlaceholderView(vacancy: vacancy)
                                     }
                                 }
-                                .frame(width: 48, height: 48)
+                                .frame(width: Layout.logoSize, height: Layout.logoSize)
                                 .clipShape(Circle())
                                 
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: Layout.titleBlockSpacing) {
                                     Text(vacancy.company)
                                         .font(.subheadline)
                                         .fontWeight(.medium)
@@ -318,19 +323,19 @@ public struct DiscoveryView: View {
                             }
                             .buttonStyle(.plain)
                         }
-                        .padding(16)
+                        .padding(Layout.cardPadding)
       
-                        VStack(alignment: .leading, spacing: 0) {
+                        VStack(alignment: .leading, spacing: Layout.cardInnerStackSpacing) {
                             Text(vacancy.description)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .lineLimit(3)
-                                .padding(.horizontal, 16)
-                                .padding(.bottom, 12)
+                                .padding(.horizontal, Layout.cardPadding)
+                                .padding(.bottom, Layout.descriptionBottomPadding)
                             
-                            HStack(spacing: 8) {
+                            HStack(spacing: Layout.metaRowSpacing) {
                                 if let salaryText = vacancy.salaryText {
-                                    HStack(spacing: 4) {
+                                    HStack(spacing: Layout.chipInnerSpacing) {
                                         Image(systemName: "rublesign.circle.fill")
                                             .font(.caption)
                                         Text(salaryText)
@@ -338,13 +343,13 @@ public struct DiscoveryView: View {
                                             .fontWeight(.medium)
                                     }
                                     .foregroundColor(.brandPrimary)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, Layout.chipHorizontalPadding)
+                                    .padding(.vertical, Layout.chipVerticalPadding)
                                     .background(Color.brandPrimary.opacity(0.1))
-                                    .cornerRadius(8)
+                                    .cornerRadius(Layout.chipCornerRadius)
                                 }
                                 if let experienceText = vacancy.experienceText {
-                                    HStack(spacing: 4) {
+                                    HStack(spacing: Layout.chipInnerSpacing) {
                                         Image(systemName: "briefcase.fill")
                                             .font(.caption)
                                         Text(experienceText)
@@ -352,15 +357,15 @@ public struct DiscoveryView: View {
                                             .fontWeight(.medium)
                                     }
                                     .foregroundColor(.secondary)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, Layout.chipHorizontalPadding)
+                                    .padding(.vertical, Layout.chipVerticalPadding)
                                     .background(Color.fieldBackground)
-                                    .cornerRadius(8)
+                                    .cornerRadius(Layout.chipCornerRadius)
                                 }
                                 Spacer()
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 16)
+                            .padding(.horizontal, Layout.cardPadding)
+                            .padding(.bottom, Layout.metaBottomPadding)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
@@ -368,18 +373,18 @@ public struct DiscoveryView: View {
                             model.onVacancyTap(vacancy)
                         }
                     }
-                    .opacity(model.isOfflineMode ? 0.7 : 1.0)
+                    .opacity(model.isOfflineMode ? Layout.offlineCardOpacity : Layout.onlineCardOpacity)
                     .background(Color.cardBackground)
-                    .cornerRadius(16)
-                    .shadow(color: shadowColor, radius: 12, x: 0, y: 4)
+                    .cornerRadius(Layout.cardCornerRadius)
+                    .shadow(color: shadowColor, radius: Layout.cardShadowRadius, x: .zero, y: Layout.cardShadowY)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.divider, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Layout.cardCornerRadius)
+                            .stroke(Color.divider, lineWidth: Layout.cardStrokeWidth)
                     )
                 }
             }
             .padding(.horizontal, Layout.horizontalPadding)
-            .padding(.top, 8)
+            .padding(.top, Layout.listTopPadding)
         }
     }
     
@@ -409,13 +414,63 @@ public struct DiscoveryView: View {
 
 private extension DiscoveryView {
     enum Layout {
+        static let rootStackSpacing = CGFloat.zero
+        static let safeAreaBottomInset: CGFloat = 60
+        static let headerOuterSpacing: CGFloat = 12
+        static let headerRowSpacing: CGFloat = 12
+        static let searchInnerSpacing: CGFloat = 8
+        static let searchHorizontalPadding: CGFloat = 12
+        static let searchVerticalPadding: CGFloat = 10
+        static let searchCornerRadius: CGFloat = 12
+        static let searchStrokeWidth: CGFloat = 1
+        static let headerTopPadding: CGFloat = 12
+        static let headerBottomPadding: CGFloat = 8
+        static let tabVerticalPadding: CGFloat = 14
+        static let tabCornerRadius: CGFloat = 12
+        static let tabStrokeWidth: CGFloat = 1
+        static let tabSelectedShadowRadius: CGFloat = 8
+        static let tabSelectedShadowY: CGFloat = 4
+        static let loadingStackSpacing: CGFloat = 16
+        static let loadingProgressScale: CGFloat = 1.5
+        static let emptyStackSpacing: CGFloat = 24
+        static let emptyIconSide: CGFloat = 80
+        static let emptyTextSpacing: CGFloat = 8
+        static let uploadOuterSpacing = CGFloat.zero
+        static let uploadTopSpacerMinHeight: CGFloat = 30
+        static let uploadImageHeight: CGFloat = 300
+        static let uploadImageHorizontalPadding: CGFloat = 20
+        static let uploadTextBlockSpacing: CGFloat = 12
+        static let uploadCopyHorizontalPadding: CGFloat = 24
+        static let uploadMidSpacerMinHeight: CGFloat = 40
+        static let uploadButtonInnerSpacing: CGFloat = 12
+        static let uploadButtonHeight: CGFloat = 56
+        static let uploadButtonCornerRadius: CGFloat = 16
+        static let uploadButtonShadowRadius: CGFloat = 12
+        static let uploadButtonShadowY: CGFloat = 6
+        static let uploadButtonHorizontalPadding: CGFloat = 24
+        static let uploadButtonBottomPadding: CGFloat = 40
+        static let listRowSpacing: CGFloat = 16
+        static let cardInnerStackSpacing = CGFloat.zero
+        static let cardMainRowSpacing: CGFloat = 12
+        static let logoSize: CGFloat = 48
+        static let titleBlockSpacing: CGFloat = 4
+        static let cardPadding: CGFloat = 16
+        static let descriptionBottomPadding: CGFloat = 12
+        static let metaRowSpacing: CGFloat = 8
+        static let chipInnerSpacing: CGFloat = 4
+        static let chipHorizontalPadding: CGFloat = 10
+        static let chipVerticalPadding: CGFloat = 6
+        static let chipCornerRadius: CGFloat = 8
+        static let metaBottomPadding: CGFloat = 16
+        static let offlineCardOpacity: Double = 0.7
+        static let onlineCardOpacity: Double = 1.0
+        static let cardCornerRadius: CGFloat = 16
+        static let cardShadowRadius: CGFloat = 12
+        static let cardShadowY: CGFloat = 4
+        static let cardStrokeWidth: CGFloat = 1
+        static let listTopPadding: CGFloat = 8
         static var horizontalPadding: CGFloat { 16 }
-        static var topPadding: CGFloat { 16 }
-        static var headerSpacing: CGFloat { 16 }
-        static var headerBottomPadding: CGFloat { 8 }
         static var tabSpacing: CGFloat { 12 }
-        static var buttonHeight: CGFloat { 50 }
-        static var bottomPadding: CGFloat { 32 }
     }
 }
 

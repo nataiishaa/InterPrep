@@ -12,11 +12,11 @@ import ResumeUploadFeature
 public actor AuthEffectHandler: EffectHandler {
     public typealias StateType = AuthState
     
-    private let authService: AuthService
+    private let authService: AuthServicing
     private let fileUploadService: FileUploadService?
     private var uploadTask: Task<Void, Never>?
     
-    public init(authService: AuthService, fileUploadService: FileUploadService? = nil) {
+    public init(authService: AuthServicing, fileUploadService: FileUploadService? = nil) {
         self.authService = authService
         self.fileUploadService = fileUploadService
     }
@@ -111,7 +111,7 @@ public actor AuthEffectHandler: EffectHandler {
     }
 }
 
-public protocol AuthService {
+public protocol AuthServicing {
     func login(email: String, password: String) async throws
     func register(firstName: String, lastName: String, email: String, password: String) async throws
     func sendPasswordResetCode(email: String) async throws
@@ -120,7 +120,7 @@ public protocol AuthService {
     func changePassword(email: String, code: String, newPassword: String) async throws
 }
 
-public final class AuthServiceMock: AuthService {
+public final class AuthServiceMock: AuthServicing {
     public init() {}
     public func login(email: String, password: String) async throws {
         try await Task.sleep(nanoseconds: 1_500_000_000)

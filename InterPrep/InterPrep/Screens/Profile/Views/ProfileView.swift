@@ -153,7 +153,6 @@ struct ProfileView: View {
                 }
             }
             
-            // Имя и почта (почта только просмотр)
             VStack(spacing: 4) {
                 Text(model.user?.fullName ?? "Пользователь")
                     .font(.title2)
@@ -181,7 +180,6 @@ struct ProfileView: View {
     
     @ViewBuilder
     private func avatarImageFromURL(_ url: URL) -> some View {
-        // Strip query parameters for file path since they're only used for cache busting
         let filePath = url.path
         if let uiImage = UIImage(contentsOfFile: filePath) {
             Image(uiImage: uiImage)
@@ -301,7 +299,7 @@ struct ProfileView: View {
         }
     }
     
-    // MARK: - Statistics Section (с бэкенда: запланировано / предстоит)
+    // MARK: - Statistics Section
     
     @ViewBuilder
     private var statisticsSection: some View {
@@ -575,7 +573,6 @@ struct InterviewRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                // Icon
                 Image(systemName: interview.isCompleted ? "checkmark.circle.fill" : "calendar")
                     .font(.body)
                     .foregroundColor(.white)
@@ -583,7 +580,6 @@ struct InterviewRow: View {
                     .background(interview.isCompleted ? Color.green : Color.brandPrimary)
                     .cornerRadius(8)
                 
-                // Content
                 VStack(alignment: .leading, spacing: 4) {
                     Text(interview.title)
                         .font(.body)

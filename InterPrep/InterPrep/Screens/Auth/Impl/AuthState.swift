@@ -35,7 +35,6 @@ public struct AuthState {
     public var newPassword = ""
     public var newPasswordConfirm = ""
     
-    // Resume upload state
     public var resumeUploadStatus: ResumeUploadState.UploadStatus = .idle
     public var selectedResumeFile: ResumeUploadState.SelectedFile?
     public var resumeUploadProgress: Double = 0.0
@@ -85,13 +84,11 @@ extension AuthState: FeatureState {
         case resumeUploadTapped
         case resumeSkipTapped
         
-        // Full resume upload inputs
         case resumeFileSelected(URL)
         case resumeUploadFileTapped
         case resumeRemoveFileTapped
         case resumeUploadCancelTapped
         
-        // Profile review inputs
         case profileConfirmTapped
         
         case newPasswordChanged(String)
@@ -111,7 +108,6 @@ extension AuthState: FeatureState {
         case resumeUploaded
         case passwordChanged
         
-        // File upload feedbacks
         case resumeFileValidated(ResumeUploadState.SelectedFile)
         case resumeFileValidationFailed(String)
         case resumeUploadProgress(Double)
@@ -127,7 +123,6 @@ extension AuthState: FeatureState {
         case uploadResume
         case changePassword(email: String, code: String, newPassword: String)
         
-        // File upload effects
         case validateResumeFile(URL)
         case uploadResumeFile(ResumeUploadState.SelectedFile)
         case cancelResumeUpload
@@ -232,7 +227,6 @@ extension AuthState: FeatureState {
         case .resumeSkipTapped:
             state.isAuthenticated = true
             
-        // Full resume upload
         case let .resumeFileSelected(url):
             state.resumeUploadStatus = .idle
             state.resumeUploadError = nil
@@ -318,7 +312,6 @@ extension AuthState: FeatureState {
             state.hasUploadedResume = true
             state.isAuthenticated = true
             
-        // File upload feedbacks
         case let .resumeFileValidated(file):
             state.selectedResumeFile = file
             state.resumeUploadStatus = .selected

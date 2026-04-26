@@ -17,7 +17,6 @@ struct RegistrationDetailsView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Background
             LinearGradient(
                 colors: [
                     Color(red: 0.45, green: 0.5, blue: 0.45),
@@ -30,7 +29,6 @@ struct RegistrationDetailsView: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    // Progress indicator
                     HStack(spacing: 8) {
                         Circle()
                             .fill(Color.white.opacity(0.3))
@@ -45,14 +43,12 @@ struct RegistrationDetailsView: View {
                     Spacer()
                         .frame(height: 20)
                     
-                    // Title
                     Text("Регистрация")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
                         .padding(.bottom, 40)
                     
-                    // Form
                     VStack(spacing: 16) {
                         CustomTextField(
                             placeholder: "Почта",
@@ -92,7 +88,6 @@ struct RegistrationDetailsView: View {
                     }
                     .padding(.horizontal, 32)
                     
-                    // Error message
                     if let errorMessage = model.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
@@ -103,7 +98,6 @@ struct RegistrationDetailsView: View {
                     
                     Spacer()
                     
-                    // Button
                     Button {
                         model.onSubmit()
                     } label: {

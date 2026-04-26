@@ -55,18 +55,16 @@ struct ICalendarParser {
     }
     
     private static func parseDateProperty(_ line: String) -> Date? {
-        // Extract date value after colon
         guard let colonIndex = line.firstIndex(of: ":") else {
             return nil
         }
         
         let dateString = String(line[line.index(after: colonIndex)...])
         
-        // Try different date formats
         let formatters = [
-            createFormatter("yyyyMMdd'T'HHmmss'Z'"), // UTC
-            createFormatter("yyyyMMdd'T'HHmmss"),     // Local
-            createFormatter("yyyyMMdd")                // Date only
+            createFormatter("yyyyMMdd'T'HHmmss'Z'"),
+            createFormatter("yyyyMMdd'T'HHmmss"),
+            createFormatter("yyyyMMdd")
         ]
         
         for formatter in formatters {

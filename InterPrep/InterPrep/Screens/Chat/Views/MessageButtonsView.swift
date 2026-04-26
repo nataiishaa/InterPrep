@@ -13,7 +13,7 @@ struct MessageButtonsView: View {
     let onTap: (MessageButton) -> Void
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Layout.stackSpacing) {
             ForEach(buttons) { button in
                 Button {
                     onTap(button)
@@ -23,14 +23,14 @@ struct MessageButtonsView: View {
                         .fontWeight(.medium)
                         .foregroundColor(.brandPrimary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, Layout.buttonVerticalPadding)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
+                            RoundedRectangle(cornerRadius: Layout.buttonCornerRadius)
                                 .fill(Color.backgroundSecondary)
                         )
                         .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.brandPrimary.opacity(0.3), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: Layout.buttonCornerRadius)
+                                .stroke(Color.brandPrimary.opacity(0.3), lineWidth: Layout.buttonStrokeWidth)
                         )
                 }
                 .buttonStyle(.plain)
@@ -39,10 +39,20 @@ struct MessageButtonsView: View {
     }
 }
 
+extension MessageButtonsView {
+    enum Layout {
+        static let stackSpacing: CGFloat = 8
+        static let buttonVerticalPadding: CGFloat = 12
+        static let buttonCornerRadius: CGFloat = 8
+        static let buttonStrokeWidth: CGFloat = 1
+        static let previewOuterSpacing: CGFloat = 20
+    }
+}
+
 // MARK: - Preview
 
 #Preview {
-    VStack(spacing: 20) {
+    VStack(spacing: MessageButtonsView.Layout.previewOuterSpacing) {
         MessageButtonsView(
             buttons: [
                 MessageButton(text: "Помощь в подготовке к собеседованию", action: .selectScenario(.interviewPrep)),

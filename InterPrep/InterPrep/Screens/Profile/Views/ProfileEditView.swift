@@ -21,7 +21,7 @@ struct ProfileEditView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: Layout.formStackSpacing) {
                     avatarSection
                     fieldsSection
                     emailSection
@@ -63,12 +63,12 @@ struct ProfileEditView: View {
     // MARK: - Avatar Section
     
     private var avatarSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Layout.avatarSectionSpacing) {
             ZStack(alignment: .bottomTrailing) {
                 avatarPreview
-                    .frame(width: 120, height: 120)
+                    .frame(width: Layout.avatarSide, height: Layout.avatarSide)
                     .clipShape(Circle())
-                    .shadow(color: shadowColor, radius: 8, x: 0, y: 4)
+                    .shadow(color: shadowColor, radius: Layout.avatarShadowRadius, x: .zero, y: Layout.avatarShadowY)
                 
                 PhotosPicker(
                     selection: $selectedPhotoItem,
@@ -76,14 +76,14 @@ struct ProfileEditView: View {
                     photoLibrary: .shared()
                 ) {
                     Image(systemName: "camera.fill")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: Layout.cameraIconFontSize, weight: .semibold))
                         .foregroundColor(.white)
-                        .frame(width: 36, height: 36)
+                        .frame(width: Layout.cameraButtonSide, height: Layout.cameraButtonSide)
                         .background(Color.brandPrimary)
                         .clipShape(Circle())
                         .overlay(
                             Circle()
-                                .stroke(Color(.systemGroupedBackground), lineWidth: 3)
+                                .stroke(Color(.systemGroupedBackground), lineWidth: Layout.cameraButtonRingWidth)
                         )
                 }
                 .buttonStyle(.plain)
@@ -110,7 +110,7 @@ struct ProfileEditView: View {
             }
             
             if isUploadingPhoto {
-                HStack(spacing: 8) {
+                HStack(spacing: Layout.uploadRowSpacing) {
                     ProgressView()
                         .tint(.brandPrimary)
                     Text("Загрузка…")
@@ -132,21 +132,21 @@ struct ProfileEditView: View {
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
+        .padding(.vertical, Layout.avatarSectionVerticalPadding)
         .background(Color.cardBackground)
-        .cornerRadius(16)
-        .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
+        .cornerRadius(Layout.largeCardCornerRadius)
+        .shadow(color: shadowColor, radius: Layout.cardShadowRadius, x: .zero, y: Layout.cardShadowY)
     }
     
     // MARK: - Fields Section
     
     private var fieldsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Layout.sectionBlockSpacing) {
             Text("Имя и фамилия")
                 .font(.headline)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Layout.sectionTitleInset)
             
-            VStack(spacing: 12) {
+            VStack(spacing: Layout.fieldsInnerSpacing) {
                 EditField(
                     label: "Имя",
                     text: Binding(
@@ -165,23 +165,23 @@ struct ProfileEditView: View {
             }
             .padding()
             .background(Color.cardBackground)
-            .cornerRadius(12)
-            .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
+            .cornerRadius(Layout.cardCornerRadius)
+            .shadow(color: shadowColor, radius: Layout.cardShadowRadius, x: .zero, y: Layout.cardShadowY)
         }
     }
     
     // MARK: - Email Section
     
     private var emailSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Layout.sectionBlockSpacing) {
             Text("Почта")
                 .font(.headline)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Layout.sectionTitleInset)
             
-            HStack(spacing: 12) {
+            HStack(spacing: Layout.emailRowSpacing) {
                 Image(systemName: "envelope.fill")
                     .foregroundColor(.brandPrimary)
-                    .frame(width: 24)
+                    .frame(width: Layout.emailIconWidth)
                 
                 Text(model.email.isEmpty ? "—" : model.email)
                     .foregroundColor(.secondary)
@@ -190,8 +190,8 @@ struct ProfileEditView: View {
             }
             .padding()
             .background(Color.cardBackground)
-            .cornerRadius(12)
-            .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
+            .cornerRadius(Layout.cardCornerRadius)
+            .shadow(color: shadowColor, radius: Layout.cardShadowRadius, x: .zero, y: Layout.cardShadowY)
         }
     }
     
@@ -208,20 +208,20 @@ private struct EditField: View {
     @FocusState private var isFocused: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: EditField.Layout.labelFieldSpacing) {
             Text(label)
                 .font(.caption)
                 .foregroundColor(.secondary)
             
             TextField(label, text: $text)
                 .focused($isFocused)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.horizontal, EditField.Layout.fieldHorizontalPadding)
+                .padding(.vertical, EditField.Layout.fieldVerticalPadding)
                 .background(Color(.tertiarySystemBackground))
-                .cornerRadius(10)
+                .cornerRadius(EditField.Layout.fieldCornerRadius)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(isFocused ? Color.brandPrimary : Color.clear, lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: EditField.Layout.fieldCornerRadius)
+                        .stroke(isFocused ? Color.brandPrimary : Color.clear, lineWidth: EditField.Layout.focusStrokeWidth)
                 )
                 .tint(.brandPrimary)
         }
@@ -263,7 +263,7 @@ extension ProfileEditView {
             )
             .overlay(
                 Text(avatarInitials)
-                    .font(.system(size: 36, weight: .bold))
+                    .font(.system(size: Layout.initialsFontSize, weight: .bold))
                     .foregroundColor(.white)
             )
     }
@@ -324,6 +324,41 @@ extension ProfileEditView {
             quality -= 0.1
         }
         return image.jpegData(compressionQuality: 0.2)
+    }
+}
+
+extension ProfileEditView {
+    enum Layout {
+        static let formStackSpacing: CGFloat = 24
+        static let avatarSectionSpacing: CGFloat = 16
+        static let avatarSide: CGFloat = 120
+        static let avatarShadowRadius: CGFloat = 8
+        static let avatarShadowY: CGFloat = 4
+        static let cameraIconFontSize: CGFloat = 14
+        static let cameraButtonSide: CGFloat = 36
+        static let cameraButtonRingWidth: CGFloat = 3
+        static let uploadRowSpacing: CGFloat = 8
+        static let avatarSectionVerticalPadding: CGFloat = 20
+        static let largeCardCornerRadius: CGFloat = 16
+        static let cardCornerRadius: CGFloat = 12
+        static let cardShadowRadius: CGFloat = 4
+        static let cardShadowY: CGFloat = 2
+        static let sectionTitleInset: CGFloat = 4
+        static let sectionBlockSpacing: CGFloat = 16
+        static let fieldsInnerSpacing: CGFloat = 12
+        static let emailRowSpacing: CGFloat = 12
+        static let emailIconWidth: CGFloat = 24
+        static let initialsFontSize: CGFloat = 36
+    }
+}
+
+extension EditField {
+    enum Layout {
+        static let labelFieldSpacing: CGFloat = 6
+        static let fieldHorizontalPadding: CGFloat = 12
+        static let fieldVerticalPadding: CGFloat = 10
+        static let fieldCornerRadius: CGFloat = 10
+        static let focusStrokeWidth: CGFloat = 1.5
     }
 }
 

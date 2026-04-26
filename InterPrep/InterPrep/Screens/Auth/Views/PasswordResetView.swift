@@ -17,7 +17,6 @@ struct PasswordResetView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Background
             LinearGradient(
                 colors: [
                     Color(red: 0.45, green: 0.5, blue: 0.45),
@@ -33,7 +32,6 @@ struct PasswordResetView: View {
                     Spacer()
                         .frame(height: 40)
                     
-                    // Title
                     VStack(spacing: 8) {
                         Text("InterPrep")
                             .font(.largeTitle)
@@ -47,7 +45,6 @@ struct PasswordResetView: View {
                     }
                     .padding(.bottom, 40)
                     
-                    // Email field
                     CustomTextField(
                         placeholder: "Почта",
                         text: Binding(
@@ -61,7 +58,6 @@ struct PasswordResetView: View {
                     .onSubmit { model.onSendCode() }
                     .padding(.horizontal, 32)
                     
-                    // Error message
                     if let errorMessage = model.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
@@ -72,7 +68,6 @@ struct PasswordResetView: View {
                     
                     Spacer()
                     
-                    // Button
                     Button {
                         model.onSendCode()
                     } label: {

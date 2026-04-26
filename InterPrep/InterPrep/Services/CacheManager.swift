@@ -104,7 +104,6 @@ public actor CacheManager {
 // MARK: - Cache Keys
 
 public enum CacheKey {
-    // Calendar
     public static func calendarEvents(month: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM"
@@ -113,14 +112,12 @@ public enum CacheKey {
     
     public static let allCalendarEvents = "calendar_events_all"
     
-    // Profile
     public static let profileUser = "profile_user"
     public static let profileStatistics = "profile_statistics"
     public static let profileSettings = "profile_settings"
     public static let profileInterviewsUpcoming = "profile_interviews_upcoming"
     public static let profileInterviewsCompleted = "profile_interviews_completed"
     
-    // Documents
     public static let documentsFolders = "documents_folders"
     public static let documentsRoot = "documents_root"
     public static let documentsRecent = "documents_recent"
@@ -133,9 +130,7 @@ public enum CacheKey {
         return "document_content_\(documentId)"
     }
     
-    // Discovery
     public static let discoveryVacancies = "discovery_vacancies"
     
-    /// Last successful coach chat history (user/assistant text only; for offline read).
     public static let coachChatHistory = "coach_chat_history"
 }

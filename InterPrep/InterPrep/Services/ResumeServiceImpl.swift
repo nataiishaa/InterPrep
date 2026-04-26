@@ -9,7 +9,7 @@ import DiscoveryModule
 import Foundation
 import NetworkService
 
-public final actor ResumeServiceImpl: ResumeService {
+public final actor ResumeServiceImpl: ResumeServicing {
     private let networkService: NetworkServiceV2
     private var cachedHasResume: Bool?
     private var lastCheckTime: Date?

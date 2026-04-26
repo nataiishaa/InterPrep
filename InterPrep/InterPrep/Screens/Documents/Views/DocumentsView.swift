@@ -38,7 +38,7 @@ struct DocumentsView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack(spacing: Layout.rootStackSpacing) {
                 if model.isOfflineMode {
                     OfflineBanner(showCachedHint: true)
                 }
@@ -96,15 +96,15 @@ struct DocumentsView: View {
                 Text("Нет интернета — действие недоступно")
                     .font(.subheadline.weight(.medium))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, Layout.toastHorizontalPadding)
+                    .padding(.vertical, Layout.toastVerticalPadding)
                     .background(Color.black.opacity(0.8))
-                    .cornerRadius(12)
-                    .padding(.bottom, 80)
+                    .cornerRadius(Layout.toastCornerRadius)
+                    .padding(.bottom, Layout.toastBottomPadding)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: showOfflineToast)
+        .animation(.easeInOut(duration: Layout.overlayAnimationDuration), value: showOfflineToast)
         .sheet(isPresented: Binding(get: { model.showingCreateFolderSheet }, set: { if !$0 { model.onDismissSheet() } })) {
             CreateFolderSheet(onDismiss: model.onDismissSheet, onCreate: model.onFolderCreate)
         }
@@ -162,10 +162,10 @@ struct DocumentsView: View {
     }
 
     private var rootContentView: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: Layout.rootStackSpacing) {
             ScrollView {
-                VStack(spacing: 24) {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(spacing: Layout.mainSectionSpacing) {
+                VStack(alignment: .leading, spacing: Layout.sectionTitleSpacing) {
                     Text("Мое хранилище")
                         .font(.title2)
                         .fontWeight(.bold)
@@ -176,7 +176,7 @@ struct DocumentsView: View {
                             .padding()
                     } else {
                         if !model.folders.isEmpty {
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: Layout.gridSpacing) {
                                 ForEach(model.folders) { folder in
                                     FolderCardView(folder: folder)
                                         .onTapGesture(count: 2) { if !isOffline { model.onRenameFolderTap(folder) } }
@@ -195,16 +195,16 @@ struct DocumentsView: View {
                             }
                         }
                         if !model.rootDocuments.isEmpty {
-                            VStack(spacing: 12) {
+                            VStack(spacing: Layout.documentListSpacing) {
                                 ForEach(model.rootDocuments) { document in
                                     documentRow(document)
                                 }
                             }
                         }
                         if model.folders.isEmpty && model.rootDocuments.isEmpty {
-                            VStack(spacing: 12) {
+                            VStack(spacing: Layout.documentListSpacing) {
                                 Image(systemName: "folder.fill")
-                                    .font(.system(size: 36))
+                                    .font(.system(size: Layout.emptyStateIconSize))
                                     .foregroundColor(.secondary.opacity(0.5))
                                 Text("Хранилище пусто")
                                     .foregroundColor(.secondary)
@@ -213,21 +213,21 @@ struct DocumentsView: View {
                                     .foregroundColor(.secondary.opacity(0.7))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 24)
+                            .padding(.vertical, Layout.emptyStateVerticalPadding)
                         }
                     }
                 }
                 .padding(.horizontal)
 
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: Layout.sectionTitleSpacing) {
                     Text("Недавнее")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.textOnBackground)
                     if model.recentDocuments.isEmpty {
-                        VStack(spacing: 12) {
+                        VStack(spacing: Layout.documentListSpacing) {
                             Image(systemName: "doc.text.fill")
-                                .font(.system(size: 36))
+                                .font(.system(size: Layout.emptyStateIconSize))
                                 .foregroundColor(.secondary.opacity(0.5))
                             Text("Нет документов")
                                 .foregroundColor(.secondary)
@@ -236,9 +236,9 @@ struct DocumentsView: View {
                                 .foregroundColor(.secondary.opacity(0.7))
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
+                        .padding(.vertical, Layout.emptyStateVerticalPadding)
                     } else {
-                        VStack(spacing: 12) {
+                        VStack(spacing: Layout.documentListSpacing) {
                             ForEach(model.recentDocuments) { document in
                                 documentRow(document)
                             }
@@ -254,19 +254,19 @@ struct DocumentsView: View {
 
     private func folderContentView(folder: Folder) -> some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: Layout.mainSectionSpacing) {
                 if model.isLoading && model.folderContentsFolders.isEmpty && model.folderContentsDocuments.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
+                        .padding(.vertical, Layout.folderLoadingVerticalPadding)
                 } else {
                     if !model.folderContentsFolders.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: Layout.sectionTitleSpacing) {
                             Text("Папки")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(.textOnBackground)
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: Layout.gridSpacing) {
                                 ForEach(model.folderContentsFolders) { folder in
                                     FolderCardView(folder: folder)
                                         .onTapGesture(count: 2) { if !isOffline { model.onRenameFolderTap(folder) } }
@@ -287,12 +287,12 @@ struct DocumentsView: View {
                         .padding(.horizontal)
                     }
                     if !model.folderContentsDocuments.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: Layout.sectionTitleSpacing) {
                             Text("Файлы")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(.textOnBackground)
-                            VStack(spacing: 12) {
+                            VStack(spacing: Layout.documentListSpacing) {
                                 ForEach(model.folderContentsDocuments) { document in
                                     documentRow(document)
                                 }
@@ -304,7 +304,7 @@ struct DocumentsView: View {
                         Text("Папка пуста")
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
+                            .padding(.vertical, Layout.emptyFolderVerticalPadding)
                     }
                 }
             }
@@ -337,87 +337,22 @@ struct DocumentsView: View {
     }
 }
 
-private struct DocumentsRenameFolderSheet: View {
-    let folder: Folder
-    let onSave: (String) -> Void
-    let onDismiss: () -> Void
-    @State private var name: String
-    @FocusState private var isFieldFocused: Bool
-
-    init(folder: Folder, onSave: @escaping (String) -> Void, onDismiss: @escaping () -> Void) {
-        self.folder = folder
-        self.onSave = onSave
-        self.onDismiss = onDismiss
-        _name = State(initialValue: folder.name)
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Название папки", text: $name)
-                    .focused($isFieldFocused)
-                    .onAppear { isFieldFocused = true }
-            }
-            .navigationTitle("Переименовать папку")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { onDismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") {
-                        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !trimmed.isEmpty { onSave(trimmed) }
-                    }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-        }
-    }
-}
-
-struct DocumentPreviewSheet: View {
-    let url: URL
-    let onDismiss: () -> Void
-    
-    var body: some View {
-        NavigationStack {
-            QuickLookPreview(url: url)
-                .navigationTitle(url.lastPathComponent)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Готово") {
-                            onDismiss()
-                        }
-                    }
-                }
-        }
-    }
-}
-
-struct QuickLookPreview: UIViewControllerRepresentable {
-    let url: URL
-    
-    func makeUIViewController(context: Context) -> QLPreviewController {
-        let controller = QLPreviewController()
-        controller.dataSource = context.coordinator
-        return controller
-    }
-    
-    func updateUIViewController(_ uiViewController: QLPreviewController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(url: url)
-    }
-    
-    class Coordinator: NSObject, QLPreviewControllerDataSource {
-        let url: URL
-        init(url: URL) { self.url = url }
-        func numberOfPreviewItems(in controller: QLPreviewController) -> Int { 1 }
-        func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
-            url as QLPreviewItem
-        }
+extension DocumentsView {
+    enum Layout {
+        static let rootStackSpacing = CGFloat.zero
+        static let mainSectionSpacing: CGFloat = 24
+        static let sectionTitleSpacing: CGFloat = 16
+        static let gridSpacing: CGFloat = 16
+        static let documentListSpacing: CGFloat = 12
+        static let emptyStateIconSize: CGFloat = 36
+        static let emptyStateVerticalPadding: CGFloat = 24
+        static let folderLoadingVerticalPadding: CGFloat = 40
+        static let emptyFolderVerticalPadding: CGFloat = 40
+        static let toastHorizontalPadding: CGFloat = 20
+        static let toastVerticalPadding: CGFloat = 12
+        static let toastCornerRadius: CGFloat = 12
+        static let toastBottomPadding: CGFloat = 80
+        static let overlayAnimationDuration: Double = 0.3
     }
 }
 

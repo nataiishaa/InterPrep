@@ -18,10 +18,10 @@ public struct VacancyCardCompact: View {
     
     public var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Layout.vStackSpacing) {
                 Circle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 40, height: 40)
+                    .fill(Color.gray.opacity(Layout.avatarPlaceholderOpacity))
+                    .frame(width: Layout.avatarSize, height: Layout.avatarSize)
                     .overlay(
                         Text(vacancy.company.prefix(1))
                             .font(.title3)
@@ -49,7 +49,7 @@ public struct VacancyCardCompact: View {
                         .foregroundColor(.green)
                 }
                 
-                HStack(spacing: 4) {
+                HStack(spacing: Layout.metaRowSpacing) {
                     Image(systemName: vacancy.isRemote ? "network" : "mappin.circle.fill")
                         .font(.caption)
                     Text(vacancy.location)
@@ -57,17 +57,42 @@ public struct VacancyCardCompact: View {
                 }
                 .foregroundColor(.secondary)
             }
-            .padding(16)
-            .frame(width: 200, height: 220)
+            .padding(Layout.contentPadding)
+            .frame(width: Layout.cardWidth, height: Layout.cardHeight)
             .background(Color(.systemBackground))
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+            .cornerRadius(Layout.cornerRadius)
+            .shadow(
+                color: Color.black.opacity(Layout.shadowOpacity),
+                radius: Layout.shadowRadius,
+                x: Layout.shadowOffsetX,
+                y: Layout.shadowOffsetY
+            )
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                RoundedRectangle(cornerRadius: Layout.cornerRadius)
+                    .stroke(Color.gray.opacity(Layout.borderOpacity), lineWidth: Layout.borderLineWidth)
             )
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+extension VacancyCardCompact {
+    enum Layout {
+        static let vStackSpacing: CGFloat = 12
+        static let avatarSize: CGFloat = 40
+        static let avatarPlaceholderOpacity: Double = 0.2
+        static let metaRowSpacing: CGFloat = 4
+        static let contentPadding: CGFloat = 16
+        static let cardWidth: CGFloat = 200
+        static let cardHeight: CGFloat = 220
+        static let cornerRadius: CGFloat = 16
+        static let shadowOpacity: Double = 0.05
+        static let shadowRadius: CGFloat = 8
+        static let shadowOffsetX: CGFloat = 0
+        static let shadowOffsetY: CGFloat = 2
+        static let borderOpacity: Double = 0.1
+        static let borderLineWidth: CGFloat = 1
+        static let previewCardsSpacing: CGFloat = 16
     }
 }
 
@@ -77,7 +102,7 @@ public struct VacancyCardCompact: View {
 struct VacancyCardCompact_Previews: PreviewProvider {
     static var previews: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
+            HStack(spacing: VacancyCardCompact.Layout.previewCardsSpacing) {
                 VacancyCardCompact(vacancy: .mock1)
                 VacancyCardCompact(vacancy: .mock2)
                 VacancyCardCompact(vacancy: .mock3)

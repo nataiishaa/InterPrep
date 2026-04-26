@@ -36,8 +36,8 @@ struct ChatInputBar: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-        HStack(spacing: 12) {
+        VStack(spacing: CGFloat.zero) {
+        HStack(spacing: Layout.rowSpacing) {
             if waitingForVacancyId, let onFavoritesTapped {
                 Button {
                     onFavoritesTapped()
@@ -45,7 +45,7 @@ struct ChatInputBar: View {
                     Image(systemName: "bookmark.fill")
                         .font(.title3)
                         .foregroundColor(.brandPrimary)
-                        .frame(width: 40, height: 40)
+                        .frame(width: Layout.actionButtonSide, height: Layout.actionButtonSide)
                         .background(
                             Circle()
                                 .fill(Color.brandPrimary.opacity(0.12))
@@ -62,10 +62,10 @@ struct ChatInputBar: View {
                 )
             )
             .textFieldStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Layout.fieldHorizontalPadding)
+            .padding(.vertical, Layout.fieldVerticalPadding)
             .background(Color.fieldBackground)
-            .cornerRadius(20)
+            .cornerRadius(Layout.fieldCornerRadius)
             .focused($isFocused)
             .disabled(isSending)
             
@@ -76,7 +76,7 @@ struct ChatInputBar: View {
                 Image(systemName: "paperplane.fill")
                     .font(.title3)
                     .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
+                    .frame(width: Layout.actionButtonSide, height: Layout.actionButtonSide)
                     .background(
                         Circle()
                             .fill(canSend ? Color.brandPrimary : Color.gray)
@@ -85,10 +85,10 @@ struct ChatInputBar: View {
             .disabled(!canSend || isSending)
         }
         .padding(.horizontal)
-        .padding(.vertical, 8)
+        .padding(.vertical, Layout.outerVerticalPadding)
         }
         .background(Color.cardBackground)
-        .shadow(color: shadowColor, radius: 4, x: 0, y: -2)
+        .shadow(color: shadowColor, radius: Layout.barShadowRadius, x: .zero, y: Layout.barShadowY)
     }
     
     private var shadowColor: Color {
@@ -97,6 +97,19 @@ struct ChatInputBar: View {
     
     private var canSend: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
+extension ChatInputBar {
+    enum Layout {
+        static let rowSpacing: CGFloat = 12
+        static let actionButtonSide: CGFloat = 40
+        static let fieldHorizontalPadding: CGFloat = 16
+        static let fieldVerticalPadding: CGFloat = 10
+        static let fieldCornerRadius: CGFloat = 20
+        static let outerVerticalPadding: CGFloat = 8
+        static let barShadowRadius: CGFloat = 4
+        static let barShadowY: CGFloat = -2
     }
 }
 

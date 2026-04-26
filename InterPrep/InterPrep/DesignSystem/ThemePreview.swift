@@ -58,7 +58,6 @@ struct ThemePreviewView: View {
                 .background(Color.cardBackground)
                 .cornerRadius(12)
                 
-                // Buttons
                 VStack(spacing: 12) {
                     Text("Кнопки")
                         .font(.headline)
@@ -77,7 +76,6 @@ struct ThemePreviewView: View {
                 .background(Color.cardBackground)
                 .cornerRadius(12)
                 
-                // Cards
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Карточки")
                         .font(.headline)

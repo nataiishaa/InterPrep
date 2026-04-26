@@ -63,9 +63,9 @@ public protocol FileUploadService: Actor {
 
 public final actor FileUploadServiceImpl: FileUploadService {
     private let networkService: NetworkServiceV2
-    private let resumeService: (any ResumeService)?
+    private let resumeService: (any ResumeServicing)?
     
-    public init(networkService: NetworkServiceV2 = .shared, resumeService: (any ResumeService)? = nil) {
+    public init(networkService: NetworkServiceV2 = .shared, resumeService: (any ResumeServicing)? = nil) {
         self.networkService = networkService
         self.resumeService = resumeService
     }

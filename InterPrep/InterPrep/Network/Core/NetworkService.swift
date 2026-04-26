@@ -23,6 +23,5 @@ public final class NetworkService: ObservableObject {
     }
     
     public func configure(host: String = "api.interprep.ru", port: Int = 443) {
-        // Configuration can be done here if needed
     }
 }
