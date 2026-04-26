@@ -15,8 +15,9 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
     // MARK: - Tests
     
     func testOnboardingView_firstPage() {
-        let view = OnboardingView(model: .fixture)
-        let hostingController = UIHostingController(rootView: view)
+        let hostingController = UIHostingController(
+            rootView: OnboardingView(model: .fixture)
+        )
         
         assertSnapshot(
             of: hostingController,
@@ -26,8 +27,9 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
     }
     
     func testOnboardingView_lastPage() {
-        let view = OnboardingView(model: .lastPageFixture)
-        let hostingController = UIHostingController(rootView: view)
+        let hostingController = UIHostingController(
+            rootView: OnboardingView(model: .lastPageFixture)
+        )
         
         assertSnapshot(
             of: hostingController,
@@ -37,7 +39,7 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
     }
     
     func testOnboardingView_middlePage() {
-        let view = OnboardingView(model: .init(
+        let model = OnboardingView.Model(
             currentPage: 1,
             pages: [
                 .init(
@@ -66,8 +68,10 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
             onSkip: {},
             onGetStarted: {},
             onRegister: {}
-        ))
-        let hostingController = UIHostingController(rootView: view)
+        )
+        let hostingController = UIHostingController(
+            rootView: OnboardingView(model: model)
+        )
         
         assertSnapshot(
             of: hostingController,
@@ -77,8 +81,9 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
     }
     
     func testOnboardingView_iPhone14Pro() {
-        let view = OnboardingView(model: .fixture)
-        let hostingController = UIHostingController(rootView: view)
+        let hostingController = UIHostingController(
+            rootView: OnboardingView(model: .fixture)
+        )
         
         assertSnapshot(
             of: hostingController,
@@ -88,8 +93,9 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
     }
     
     func testOnboardingView_iPhoneSE() {
-        let view = OnboardingView(model: .fixture)
-        let hostingController = UIHostingController(rootView: view)
+        let hostingController = UIHostingController(
+            rootView: OnboardingView(model: .fixture)
+        )
         
         assertSnapshot(
             of: hostingController,

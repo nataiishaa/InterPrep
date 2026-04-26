@@ -57,7 +57,6 @@ struct OnboardingView: View {
                                 .background(Color.buttonBackground)
                                 .cornerRadius(Layout.primaryButtonCornerRadius)
                         }
-                        .transition(.scale.combined(with: .opacity))
                     } else {
                         Button {
                             model.onNext()
@@ -70,7 +69,6 @@ struct OnboardingView: View {
                                 .background(Color.buttonBackground)
                                 .cornerRadius(Layout.primaryButtonCornerRadius)
                         }
-                        .transition(.scale.combined(with: .opacity))
                     }
                     
                     Button("Зарегистрироваться") {
@@ -81,7 +79,6 @@ struct OnboardingView: View {
                     .padding(.bottom, Layout.registerLinkBottomPadding)
                 }
                 .frame(maxWidth: .infinity)
-                .animation(.easeInOut(duration: Layout.footerAnimationDuration), value: model.isLastPage)
             }
         }
     }
@@ -89,10 +86,6 @@ struct OnboardingView: View {
 
 struct OnboardingPageView: View {
     let page: OnboardingView.Model.PageModel
-    @State private var imageScale: CGFloat = Layout.imageScaleInitial
-    @State private var imageOpacity: Double = Layout.imageOpacityInitial
-    @State private var textOffset: CGFloat = Layout.textOffsetInitial
-    @State private var textOpacity: Double = Layout.textOpacityInitial
     
     var body: some View {
         VStack(spacing: Layout.pageStackSpacing) {
@@ -109,8 +102,6 @@ struct OnboardingPageView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .scaleEffect(imageScale)
-                .opacity(imageOpacity)
                 .shadow(color: .black.opacity(0.2), radius: Layout.heroShadowRadius, x: .zero, y: Layout.heroShadowY)
             
             Spacer()
@@ -132,25 +123,8 @@ struct OnboardingPageView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, Layout.textHorizontalPadding)
             }
-            .offset(y: textOffset)
-            .opacity(textOpacity)
             
             Spacer()
-        }
-        .task {
-            withAnimation(
-                .spring(response: Layout.imageSpringResponse, dampingFraction: Layout.imageSpringDamping)
-            ) {
-                imageScale = Layout.imageScaleFinal
-                imageOpacity = Layout.imageOpacityFinal
-            }
-            
-            withAnimation(
-                .easeOut(duration: Layout.textAnimationDuration).delay(Layout.textAnimationDelay)
-            ) {
-                textOffset = CGFloat.zero
-                textOpacity = Layout.textOpacityFinal
-            }
         }
     }
 }
@@ -165,7 +139,6 @@ extension OnboardingView {
         static let primaryButtonVerticalPadding: CGFloat = 16
         static let primaryButtonCornerRadius: CGFloat = 12
         static let registerLinkBottomPadding: CGFloat = 20
-        static let footerAnimationDuration: Double = 0.3
     }
 }
 
@@ -178,17 +151,6 @@ extension OnboardingPageView {
         static let heroToTextSpacerHeight: CGFloat = 40
         static let textBlockSpacing: CGFloat = 16
         static let textHorizontalPadding: CGFloat = 40
-        static let imageScaleInitial: CGFloat = 0.8
-        static let imageScaleFinal: CGFloat = 1.0
-        static let imageOpacityInitial: Double = .zero
-        static let textOpacityInitial: Double = .zero
-        static let imageOpacityFinal: Double = 1.0
-        static let textOpacityFinal: Double = 1.0
-        static let textOffsetInitial: CGFloat = 50
-        static let imageSpringResponse: Double = 0.6
-        static let imageSpringDamping: Double = 0.7
-        static let textAnimationDuration: Double = 0.5
-        static let textAnimationDelay: Double = 0.2
     }
 }
 
