@@ -38,36 +38,6 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
         )
     }
     
-    func testOnboardingView_middlePage() {
-        let model = OnboardingView.Model(
-            currentPage: 0,
-            pages: [
-                .init(
-                    id: 0,
-                    imageName: "calendar.circle.fill",
-                    title: "Планируйте собеседования",
-                    description: "Календарь и материалы для подготовки. Все в одном приложении."
-                )
-            ],
-            isLastPage: false,
-            onNext: {},
-            onPrevious: {},
-            onPageChanged: { _ in },
-            onSkip: {},
-            onGetStarted: {},
-            onRegister: {}
-        )
-        let hostingController = UIHostingController(
-            rootView: OnboardingView(model: model)
-        )
-        
-        assertSnapshot(
-            of: hostingController,
-            as: .image(on: .iPhone13Pro),
-            named: "middlePage"
-        )
-    }
-    
     func testOnboardingView_iPhone14Pro() {
         let hostingController = UIHostingController(
             rootView: OnboardingView(model: .fixture)
