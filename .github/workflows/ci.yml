@@ -46,16 +46,12 @@ jobs:
         echo "Using simulator UUID: $SIMULATOR_UUID"
         echo "SIMULATOR_UUID=$SIMULATOR_UUID" >> $GITHUB_ENV
 
-    - name: Install mise
-      run: |
-        curl -sSf https://mise.run | sh
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
     - name: Install Tuist via mise
-      working-directory: InterPrep
-      run: |
-        ~/.local/bin/mise install
-        echo "Tuist version: $(~/.local/bin/mise exec -- tuist version)"
+      uses: jdx/mise-action@v2
+      with:
+        working_directory: InterPrep
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Cache SPM dependencies
       uses: actions/cache@v4
@@ -68,7 +64,7 @@ jobs:
     
     - name: Generate Xcode project
       working-directory: InterPrep
-      run: ~/.local/bin/mise exec -- tuist generate --no-open
+      run: tuist generate --no-open
       
     - name: Build for testing
       working-directory: InterPrep
