@@ -19,7 +19,7 @@ struct MainTabView: View {
     @State private var showChatSheet: Bool = false
     @State private var showResumeUploadSheet: Bool = false
     @State private var chatStore: ChatStore?
-    @StateObject private var discoveryStore: DiscoveryStore
+    @State private var discoveryStore: DiscoveryStore
     private let appGraph: AppGraph
     private let onLogout: (() -> Void)?
     private let profileSessionService: (any ProfileSessionService)?
@@ -28,7 +28,7 @@ struct MainTabView: View {
         self.appGraph = appGraph
         self.onLogout = onLogout
         self.profileSessionService = profileSessionService
-        _discoveryStore = StateObject(wrappedValue: appGraph.makeDiscoveryStore())
+        self.discoveryStore = appGraph.makeDiscoveryStore()
     }
     
     var body: some View {

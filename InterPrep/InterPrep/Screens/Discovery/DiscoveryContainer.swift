@@ -10,14 +10,14 @@ import NetworkMonitorService
 import SwiftUI
 
 public struct DiscoveryContainer: View {
-    @StateObject private var store: DiscoveryStore
+    @State private var store: DiscoveryStore
     @ObservedObject private var networkMonitor = NetworkMonitor.shared
     @State private var selectedVacancy: DiscoveryState.Vacancy?
     @State private var showOfflineToast = false
     var onNavigateToResumeUpload: (() -> Void)?
     
-    public init(store: @autoclosure @escaping () -> DiscoveryStore, onNavigateToResumeUpload: (() -> Void)? = nil) {
-        _store = StateObject(wrappedValue: store())
+    public init(store: DiscoveryStore, onNavigateToResumeUpload: (() -> Void)? = nil) {
+        self.store = store
         self.onNavigateToResumeUpload = onNavigateToResumeUpload
     }
     

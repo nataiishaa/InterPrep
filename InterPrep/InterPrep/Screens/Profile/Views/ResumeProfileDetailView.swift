@@ -9,7 +9,6 @@ import DesignSystem
 import NetworkService
 import SwiftUI
 
-// swiftlint:disable:next type_body_length
 struct ResumeProfileDetailView: View {
     var userId: String?
     var onUploadNewResume: (() -> Void)?

@@ -9,6 +9,7 @@ import DesignSystem
 import NetworkService
 import SwiftUI
 
+// swiftlint:disable:next type_body_length
 struct AuthResumeProfileReviewView: View {
     let onConfirm: () -> Void
     let onBack: () -> Void

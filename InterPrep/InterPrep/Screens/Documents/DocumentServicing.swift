@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol DocumentServicing: Actor {
-    func fetchFolders() async throws -> [Folder]
+    func fetchRootContents() async throws -> (folders: [Folder], documents: [Document])
     func fetchRecentDocuments() async throws -> [Document]
     func fetchFolderContents(parentNodeId: UInt32) async throws -> (folders: [Folder], documents: [Document])
     func createFolder(name: String, parentId: UInt32?) async throws

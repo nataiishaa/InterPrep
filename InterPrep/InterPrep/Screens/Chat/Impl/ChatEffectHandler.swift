@@ -19,6 +19,7 @@ public actor ChatEffectHandler: EffectHandler {
         self.favoritesProvider = favoritesProvider
     }
     
+    // swiftlint:disable:next cyclomatic_complexity
     public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case .loadMessages:
@@ -157,7 +158,7 @@ public final actor ChatServiceMock: ChatServicing {
             switch scenario {
             case .interviewPrep:
                 return ChatMessage(
-                    text: "Отлично! Для подготовки к собеседованию выберите вакансию из избранного.\n\nЕсли нужной вакансии нет — добавьте её в избранное на вкладке «Вакансии» и вернитесь сюда.",
+                    text: "Выберите вакансию из избранного для подготовки к собеседованию.",
                     sender: .consultant
                 )
                 
@@ -248,5 +249,10 @@ public final actor ChatServiceMock: ChatServicing {
                 status: .read
             )
         ]
+    }
+    
+    public func addChatMessage(conversationId: String?, content: String, isUser: Bool) async throws -> String {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        return "mock-conversation-id"
     }
 }

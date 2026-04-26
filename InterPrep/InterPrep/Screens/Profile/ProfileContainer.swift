@@ -10,8 +10,8 @@ import NotificationService
 import SwiftUI
 
 public struct ProfileContainer: View {
-    @StateObject private var store: ProfileStore
-    @StateObject private var notificationManager = NotificationManager.shared
+    @State private var store: ProfileStore
+    @ObservedObject private var notificationManager = NotificationManager.shared
     @State private var showResumeDetailSheet = false
     private let onLogoutComplete: (() -> Void)?
     private let onNavigateToResumeUpload: (() -> Void)?
@@ -21,10 +21,10 @@ public struct ProfileContainer: View {
         onLogoutComplete: (() -> Void)? = nil,
         onNavigateToResumeUpload: (() -> Void)? = nil
     ) {
-        _store = StateObject(wrappedValue: Store(
+        self.store = Store(
             state: ProfileState(),
             effectHandler: ProfileEffectHandler(sessionService: sessionService)
-        ))
+        )
         self.onLogoutComplete = onLogoutComplete
         self.onNavigateToResumeUpload = onNavigateToResumeUpload
     }
@@ -107,6 +107,8 @@ public struct ProfileContainer: View {
             firstName: store.state.user?.firstName ?? store.state.editedFirstName,
             lastName: store.state.user?.lastName ?? store.state.editedLastName,
             email: store.state.user?.email ?? "",
+            cachedProfilePhotoURL: store.state.cachedProfilePhotoURL,
+            avatarURL: store.state.user?.avatarURL,
             errorMessage: store.state.errorMessage,
             onPhotoSelected: { data in
                 store.send(.uploadProfilePhoto(data))

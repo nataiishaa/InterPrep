@@ -5,18 +5,19 @@
 //  Created by Architecture Core
 //
 
-import Combine
 import Foundation
+import Observation
+import SwiftUI
 
 @MainActor
-public final class Store<S: FeatureState, EH: EffectHandler>: ObservableObject where EH.StateType == S {
-    @Published public private(set) var state: S
+@Observable
+@dynamicMemberLookup
+public final class Store<S: FeatureState, EH: EffectHandler> where EH.StateType == S {
+    public private(set) var state: S
+    public let effectHandler: EH
     
-    private let effectHandler: EH
-    private var effectTask: Task<Void, Never>?
-    /// Счётчик «поколения» эффекта: после `await` нельзя полагаться только на `Task.isCancelled` — отмена предыдущей задачи
-    /// помечает её cancelled даже если сеть уже успела вернуть ответ, и фидбек теряется → вечный `isLoading`.
-    private var effectGeneration = 0
+    private nonisolated(unsafe) var tasks: [Task<Void, Error>] = []
+    private nonisolated(unsafe) var debouncingContainer: AnyObject?
     
     public init(
         state: S,
@@ -30,33 +31,125 @@ public final class Store<S: FeatureState, EH: EffectHandler>: ObservableObject w
         self.init(state: state, effectHandler: DummyEffectHandler())
     }
     
-    public func send(_ input: S.Input) {
-        process(message: .input(input))
+    deinit {
+        tasks.forEach { $0.cancel() }
     }
     
-    private func process(message: Message<S.Input, S.Feedback>) {
-        let effect = S.reduce(state: &state, with: message)
-        
-        guard let effect = effect else { return }
-        
-        effectGeneration += 1
-        let generation = effectGeneration
-        effectTask?.cancel()
-        effectTask = Task { [weak self] in
-            guard let self = self else { return }
-            
-            let feedback = await self.effectHandler.handle(effect: effect)
-            guard let feedback else { return }
-            
+    public subscript<Value>(dynamicMember keyPath: KeyPath<S, Value>) -> Value {
+        state[keyPath: keyPath]
+    }
+    
+    public func send(_ input: S.Input) {
+        send(.input(input))
+    }
+    
+    private func send(_ message: Message<S.Input, S.Feedback>) {
+        guard let effect = updateState(with: message) else { return }
+        handle(effect)
+    }
+    
+    func updateState(with message: Message<S.Input, S.Feedback>) -> S.Effect? {
+        S.reduce(state: &state, with: message)
+    }
+    
+    private func handle(_ effect: S.Effect) {
+        let task = Task {
+            guard let feedback = await effectHandler.handle(effect: effect) else { return }
+            try Task.checkCancellation()
             await MainActor.run { [weak self] in
-                guard let self else { return }
-                guard generation == self.effectGeneration else { return }
-                self.process(message: .feedback(feedback))
+                self?.send(.feedback(feedback))
             }
         }
+        tasks.append(task)
+    }
+}
+
+// MARK: - Debouncing
+
+public extension Store where S.Input: Hashable {
+    private func getOrCreateDebouncingContainer() -> DebouncingContainer<S.Input> {
+        if let container = debouncingContainer as? DebouncingContainer<S.Input> {
+            return container
+        }
+        let container = DebouncingContainer<S.Input>()
+        debouncingContainer = container
+        return container
     }
     
-    deinit {
-        effectTask?.cancel()
+    func send(
+        debouncing input: S.Input,
+        with debouncingPolicy: DebouncingPolicy
+    ) {
+        guard let effect = updateState(with: .input(input)) else { return }
+        
+        getOrCreateDebouncingContainer().debounce(
+            value: input,
+            with: debouncingPolicy,
+            action: { [weak self] in
+                await self?.handle(effect)
+            }
+        )
+    }
+}
+
+// MARK: - Bindings
+
+public extension Store {
+    func binding<Value>(
+        get keyPath: KeyPath<S, Value>,
+        set input: @escaping (Value) -> S.Input
+    ) -> Binding<Value> {
+        Binding(
+            get: { self.state[keyPath: keyPath] },
+            set: { self.send(input($0)) }
+        )
+    }
+    
+    func binding<Value>(
+        get keyPath: KeyPath<S, Value>,
+        set input: @escaping (Value) -> S.Input,
+        debouncingPolicy: DebouncingPolicy
+    ) -> Binding<Value> where S.Input: Hashable {
+        Binding(
+            get: { self.state[keyPath: keyPath] },
+            set: { self.send(debouncing: input($0), with: debouncingPolicy) }
+        )
+    }
+}
+
+// MARK: - Debouncing Support
+
+public struct DebouncingPolicy: Sendable {
+    public let duration: Duration
+    
+    public init(duration: Duration) {
+        self.duration = duration
+    }
+    
+    public static func seconds(_ seconds: Double) -> DebouncingPolicy {
+        DebouncingPolicy(duration: .milliseconds(Int(seconds * 1000)))
+    }
+    
+    public static func milliseconds(_ ms: Int) -> DebouncingPolicy {
+        DebouncingPolicy(duration: .milliseconds(ms))
+    }
+}
+
+@MainActor
+final class DebouncingContainer<Input: Hashable>: @unchecked Sendable {
+    private var tasks: [Input: Task<Void, Never>] = [:]
+    
+    func debounce(
+        value: Input,
+        with policy: DebouncingPolicy,
+        action: @escaping @Sendable () async -> Void
+    ) {
+        tasks[value]?.cancel()
+        
+        tasks[value] = Task {
+            try? await Task.sleep(for: policy.duration)
+            guard !Task.isCancelled else { return }
+            await action()
+        }
     }
 }

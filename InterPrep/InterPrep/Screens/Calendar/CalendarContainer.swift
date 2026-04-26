@@ -10,19 +10,18 @@ import NetworkMonitorService
 import SwiftUI
 
 public struct CalendarContainer: View {
-    @StateObject private var store: CalendarStore
+    @State private var store: CalendarStore
     @ObservedObject private var networkMonitor = NetworkMonitor.shared
     
     public init(store: CalendarStore) {
-        _store = StateObject(wrappedValue: store)
+        self.store = store
     }
     
     public init() {
-
-        _store = StateObject(wrappedValue: Store(
+        self.store = Store(
             state: CalendarState(),
             effectHandler: CalendarEffectHandler(calendarService: MockCalendarService())
-        ))
+        )
     }
     
     public var body: some View {

@@ -10,17 +10,17 @@ import DesignSystem
 import SwiftUI
 
 public struct ResumeUploadContainer: View {
-    @StateObject private var store: ResumeUploadStore
+    @State private var store: ResumeUploadStore
     @State private var isClosing = false
     let onComplete: () -> Void
     let onCancel: () -> Void
     
     public init(
-        store: @autoclosure @escaping () -> ResumeUploadStore,
+        store: ResumeUploadStore,
         onComplete: @escaping () -> Void,
         onCancel: @escaping () -> Void
     ) {
-        _store = StateObject(wrappedValue: store())
+        self.store = store
         self.onComplete = onComplete
         self.onCancel = onCancel
     }

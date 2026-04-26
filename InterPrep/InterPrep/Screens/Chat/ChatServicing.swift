@@ -20,6 +20,7 @@ public protocol ChatServicing: Actor {
     func reviewResume() async throws -> (score: Double, recommendations: String)
     func clearChatHistory(conversationId: String?) async throws -> (ok: Bool, deletedConversations: Int)
     func getCoachChatHistory(pageSize: Int, pageOffset: Int) async throws -> [ChatMessage]
+    func addChatMessage(conversationId: String?, content: String, isUser: Bool) async throws -> String
 }
 
 public protocol FavoritesProviding: Actor {

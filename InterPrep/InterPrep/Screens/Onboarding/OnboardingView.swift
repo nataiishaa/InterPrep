@@ -5,6 +5,7 @@
 //  Passive View for Onboarding screen
 //
 
+import DesignSystem
 import SwiftUI
 
 struct OnboardingView: View {
@@ -12,15 +13,8 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0.45, green: 0.5, blue: 0.45),
-                    Color(red: 0.35, green: 0.4, blue: 0.35)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            LinearGradient.brandBackground
+                .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 if !model.isLastPage {
@@ -29,11 +23,13 @@ struct OnboardingView: View {
                         Button("Пропустить") {
                             model.onSkip()
                         }
+                        .font(.subheadline)
                         .foregroundColor(.white.opacity(0.8))
-                        .padding()
+                        .padding(.trailing, 24)
                     }
+                    .padding(.top, 8)
                 } else {
-                    Color.clear.frame(height: 60)
+                    Color.clear.frame(height: 40)
                 }
                 
                 TabView(selection: Binding(
@@ -55,13 +51,12 @@ struct OnboardingView: View {
                         } label: {
                             Text("Начать")
                                 .font(.headline)
-                                .foregroundColor(Color(red: 0.35, green: 0.4, blue: 0.35))
-                                .frame(maxWidth: .infinity)
+                                .foregroundColor(.buttonText)
+                                .frame(maxWidth: 280)
                                 .padding(.vertical, 16)
-                                .background(Color.white)
+                                .background(Color.buttonBackground)
                                 .cornerRadius(12)
                         }
-                        .padding(.horizontal, 40)
                         .transition(.scale.combined(with: .opacity))
                     } else {
                         Button {
@@ -69,13 +64,12 @@ struct OnboardingView: View {
                         } label: {
                             Text("Далее")
                                 .font(.headline)
-                                .foregroundColor(Color(red: 0.35, green: 0.4, blue: 0.35))
-                                .frame(maxWidth: .infinity)
+                                .foregroundColor(.buttonText)
+                                .frame(maxWidth: 280)
                                 .padding(.vertical, 16)
-                                .background(Color.white)
+                                .background(Color.buttonBackground)
                                 .cornerRadius(12)
                         }
-                        .padding(.horizontal, 40)
                         .transition(.scale.combined(with: .opacity))
                     }
                     
@@ -86,6 +80,7 @@ struct OnboardingView: View {
                     .foregroundColor(.white.opacity(0.9))
                     .padding(.bottom, 20)
                 }
+                .frame(maxWidth: .infinity)
                 .animation(.easeInOut(duration: 0.3), value: model.isLastPage)
             }
         }
@@ -127,12 +122,14 @@ struct OnboardingPageView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 40)
                 
                 Text(page.description)
                     .font(.body)
                     .foregroundColor(.white.opacity(0.9))
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 40)
             }
             .offset(y: textOffset)

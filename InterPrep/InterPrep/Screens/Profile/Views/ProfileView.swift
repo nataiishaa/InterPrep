@@ -829,6 +829,8 @@ private struct ProfileContactDevelopersView: View {
             firstName: "Иван",
             lastName: "Иванов",
             email: "ivan@example.com",
+            cachedProfilePhotoURL: nil,
+            avatarURL: nil,
             errorMessage: nil,
             onPhotoSelected: { _ in },
             onFirstNameChanged: { _ in },

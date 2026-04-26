@@ -21,6 +21,7 @@ public actor AuthEffectHandler: EffectHandler {
         self.fileUploadService = fileUploadService
     }
     
+    // swiftlint:disable:next cyclomatic_complexity
     public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case let .performLogin(email, password):

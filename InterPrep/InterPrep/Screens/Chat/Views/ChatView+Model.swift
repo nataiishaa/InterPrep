@@ -37,32 +37,22 @@ extension ChatView {
 }
 
 #if DEBUG
+private struct NoopCallbacks {
+    let onInputTextChanged: (String) -> Void = { _ in }
+    let onSendMessage: () -> Void = {}
+    let onHintTapped: (String) -> Void = { _ in }
+    let onButtonTapped: (MessageButton) -> Void = { _ in }
+    let onDismissError: () -> Void = {}
+    let onClearHistory: () -> Void = {}
+    let onShowFavoritesPicker: () -> Void = {}
+    let onHideFavoritesPicker: () -> Void = {}
+    let onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void = { _ in }
+    let onRetry: () -> Void = {}
+    let onClose: (() -> Void)? = nil
+}
+
 extension ChatView.Model {
-    private static let noopCallbacks: (
-        onInputTextChanged: (String) -> Void,
-        onSendMessage: () -> Void,
-        onHintTapped: (String) -> Void,
-        onButtonTapped: (MessageButton) -> Void,
-        onDismissError: () -> Void,
-        onClearHistory: () -> Void,
-        onShowFavoritesPicker: () -> Void,
-        onHideFavoritesPicker: () -> Void,
-        onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void,
-        onRetry: () -> Void,
-        onClose: (() -> Void)?
-    ) = (
-        onInputTextChanged: { _ in },
-        onSendMessage: {},
-        onHintTapped: { _ in },
-        onButtonTapped: { _ in },
-        onDismissError: {},
-        onClearHistory: {},
-        onShowFavoritesPicker: {},
-        onHideFavoritesPicker: {},
-        onSelectFavoriteVacancy: { _ in },
-        onRetry: {},
-        onClose: nil
-    )
+    private static let noopCallbacks = NoopCallbacks()
 
     static var fixtureWelcome: Self {
         .init(

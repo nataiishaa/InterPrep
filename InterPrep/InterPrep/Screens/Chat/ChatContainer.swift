@@ -10,12 +10,12 @@ import NetworkMonitorService
 import SwiftUI
 
 public struct ChatContainer: View {
-    @StateObject private var store: ChatStore
+    @State private var store: ChatStore
     @ObservedObject private var networkMonitor = NetworkMonitor.shared
     @Environment(\.dismiss) private var dismiss
     
-    public init(store: @autoclosure @escaping () -> ChatStore) {
-        _store = StateObject(wrappedValue: store())
+    public init(store: ChatStore) {
+        self.store = store
     }
     
     public var body: some View {

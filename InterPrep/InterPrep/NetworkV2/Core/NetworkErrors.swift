@@ -52,8 +52,8 @@ public enum NetworkError: Error, LocalizedError {
             case .unavailable, .deadlineExceeded, .cancelled:
                 return true
             case .unknown, .aborted:
-                let m = (status.message ?? "").lowercased()
-                if m.contains("connection") || m.contains("network") || m.contains("reset") || m.contains("refused") {
+                let msg = (status.message ?? "").lowercased()
+                if msg.contains("connection") || msg.contains("network") || msg.contains("reset") || msg.contains("refused") {
                     return true
                 }
                 return false
@@ -124,7 +124,6 @@ public struct APIError: Error, LocalizedError, Sendable {
         self.serverMessage = serverMessage
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public var userMessage: String {
         let msg = serverMessage.lowercased()
         switch code {

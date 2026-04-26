@@ -147,6 +147,7 @@ extension AuthState: FeatureState {
     }
     
     @MainActor
+    // swiftlint:disable:next function_body_length
     private static func handleInput(state: inout Self, input: Input) -> Effect? {
         switch input {
         case .showLogin:

@@ -122,6 +122,7 @@ public enum CacheKey {
     
     // Documents
     public static let documentsFolders = "documents_folders"
+    public static let documentsRoot = "documents_root"
     public static let documentsRecent = "documents_recent"
     
     public static func documentFolderContents(folderId: String) -> String {

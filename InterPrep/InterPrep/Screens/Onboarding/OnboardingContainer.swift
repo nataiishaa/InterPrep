@@ -9,15 +9,15 @@ import ArchitectureCore
 import SwiftUI
 
 public struct OnboardingContainer: View {
-    @StateObject private var store: OnboardingStore
+    @State private var store: OnboardingStore
     
     let onComplete: () -> Void
     
     public init(
-        store: @autoclosure @escaping () -> OnboardingStore,
+        store: OnboardingStore,
         onComplete: @escaping () -> Void
     ) {
-        self._store = StateObject(wrappedValue: store())
+        self.store = store
         self.onComplete = onComplete
     }
     

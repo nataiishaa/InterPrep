@@ -29,11 +29,15 @@ public actor DocumentsEffectHandler: EffectHandler {
     }
     
     private static func message(for error: Error) -> String {
-        if let ne = error as? NetworkError, ne.isConnectionError {
-            return "Нет подключения к интернету"
-        }
-        if let api = (error as? NetworkError)?.asAPIError {
-            return api.userMessage
+        print("[Documents] error: \(error)")
+        if let ne = error as? NetworkError {
+            print("[Documents] NetworkError case: \(ne)")
+            if ne.isConnectionError {
+                return "Нет подключения к интернету"
+            }
+            if let api = ne.asAPIError {
+                return api.userMessage
+            }
         }
         return error.localizedDescription
     }
@@ -43,17 +47,20 @@ public actor DocumentsEffectHandler: EffectHandler {
         switch effect {
         case .loadFolders:
             do {
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
                 
                 try? await cacheManager.save(folders, forKey: CacheKey.documentsFolders)
-                try? await cacheManager.save(documents, forKey: CacheKey.documentsRecent)
+                try? await cacheManager.save(rootDocs, forKey: CacheKey.documentsRoot)
+                try? await cacheManager.save(recentDocs, forKey: CacheKey.documentsRecent)
                 
-                return .foldersAndDocumentsLoaded(folders, documents)
+                return .foldersAndDocumentsLoaded(folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
-                if let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self),
-                   let cachedDocuments = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self) {
-                    return .foldersAndDocumentsLoadedFromCache(cachedFolders, cachedDocuments)
+                let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self)
+                let cachedRootDocs = try? await cacheManager.load(forKey: CacheKey.documentsRoot, as: [Document].self)
+                let cachedRecentDocs = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self)
+                if cachedFolders != nil || cachedRootDocs != nil || cachedRecentDocs != nil {
+                    return .foldersAndDocumentsLoadedFromCache(folders: cachedFolders ?? [], rootDocuments: cachedRootDocs ?? [], recentDocuments: cachedRecentDocs ?? [])
                 }
                 return .loadingFailed(Self.message(for: error))
             }
@@ -74,13 +81,14 @@ public actor DocumentsEffectHandler: EffectHandler {
             do {
                 let parentId = parentFolder.flatMap { $0.nodeId }.map { UInt32($0) }
                 try await documentService.createFolder(name: name, parentId: parentId)
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
                 
                 try? await cacheManager.save(folders, forKey: CacheKey.documentsFolders)
-                try? await cacheManager.save(documents, forKey: CacheKey.documentsRecent)
+                try? await cacheManager.save(rootDocs, forKey: CacheKey.documentsRoot)
+                try? await cacheManager.save(recentDocs, forKey: CacheKey.documentsRecent)
                 
-                return .foldersAndDocumentsLoaded(folders, documents)
+                return .foldersAndDocumentsLoaded(folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
                 if (error as? NetworkError)?.isConnectionError == true {
                     let parentId = parentFolder.flatMap { $0.nodeId }.map { UInt32($0) }
@@ -88,9 +96,10 @@ public actor DocumentsEffectHandler: EffectHandler {
                         OfflineSyncManager.shared.addOperation(.createFolder(name: name, parentId: parentId))
                     }
                     
-                    if let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self),
-                       let cachedDocuments = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self) {
-                        return .foldersAndDocumentsLoaded(cachedFolders, cachedDocuments)
+                    if let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self) {
+                        let cachedRootDocs = (try? await cacheManager.load(forKey: CacheKey.documentsRoot, as: [Document].self)) ?? []
+                        let cachedRecentDocs = (try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self)) ?? []
+                        return .foldersAndDocumentsLoaded(folders: cachedFolders, rootDocuments: cachedRootDocs, recentDocuments: cachedRecentDocs)
                     }
                 }
                 return .loadingFailed(Self.message(for: error))
@@ -119,9 +128,9 @@ public actor DocumentsEffectHandler: EffectHandler {
         case .uploadFile(let url, let folderId):
             do {
                 try await documentService.uploadFile(url: url, folderId: folderId)
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
-                return .foldersAndDocumentsLoaded(folders, documents)
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
+                return .foldersAndDocumentsLoaded(folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
                 return .loadingFailed(Self.message(for: error))
             }
@@ -129,20 +138,23 @@ public actor DocumentsEffectHandler: EffectHandler {
         case .createNote(let title, let content, let parentFolder):
             do {
                 let parentId = parentFolder.flatMap { $0.nodeId }.map { UInt32($0) }
+                print("[Documents] createNote title=\(title) parentId=\(String(describing: parentId))")
                 try await documentService.createNote(title: title, content: content, parentId: parentId)
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
-                return .foldersAndDocumentsLoaded(folders, documents)
+                print("[Documents] createNote success, refreshing...")
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
+                return .foldersAndDocumentsLoaded(folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
+                print("[Documents] createNote failed: \(error)")
                 return .loadingFailed(Self.message(for: error))
             }
             
         case .updateNote(let document, let newName, let content):
             do {
                 try await documentService.updateNote(document: document, newName: newName, content: content)
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
-                return .noteUpdatedAndRefreshed(folders, documents)
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
+                return .noteUpdatedAndRefreshed(folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
                 return .loadingFailed(Self.message(for: error))
             }
@@ -158,27 +170,28 @@ public actor DocumentsEffectHandler: EffectHandler {
         case .deleteDocument(let id):
             do {
                 try await documentService.deleteDocument(id: id)
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
                 
                 try? await cacheManager.save(folders, forKey: CacheKey.documentsFolders)
-                try? await cacheManager.save(documents, forKey: CacheKey.documentsRecent)
+                try? await cacheManager.save(rootDocs, forKey: CacheKey.documentsRoot)
+                try? await cacheManager.save(recentDocs, forKey: CacheKey.documentsRecent)
                 
-                return .foldersAndDocumentsLoaded(folders, documents)
+                return .foldersAndDocumentsLoaded(folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
                 if (error as? NetworkError)?.isConnectionError == true {
                     await MainActor.run {
                         OfflineSyncManager.shared.addOperation(.deleteDocument(id: id))
                     }
                     
-                    if var cachedDocuments = try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self) {
-                        cachedDocuments.removeAll { $0.id == id }
-                        try? await cacheManager.save(cachedDocuments, forKey: CacheKey.documentsRecent)
-                        
-                        if let cachedFolders = try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self) {
-                            return .foldersAndDocumentsLoaded(cachedFolders, cachedDocuments)
-                        }
-                    }
+                    let cachedFolders = (try? await cacheManager.load(forKey: CacheKey.documentsFolders, as: [Folder].self)) ?? []
+                    var cachedRootDocs = (try? await cacheManager.load(forKey: CacheKey.documentsRoot, as: [Document].self)) ?? []
+                    var cachedRecentDocs = (try? await cacheManager.load(forKey: CacheKey.documentsRecent, as: [Document].self)) ?? []
+                    cachedRootDocs.removeAll { $0.id == id }
+                    cachedRecentDocs.removeAll { $0.id == id }
+                    try? await cacheManager.save(cachedRootDocs, forKey: CacheKey.documentsRoot)
+                    try? await cacheManager.save(cachedRecentDocs, forKey: CacheKey.documentsRecent)
+                    return .foldersAndDocumentsLoaded(folders: cachedFolders, rootDocuments: cachedRootDocs, recentDocuments: cachedRecentDocs)
                 }
                 return .loadingFailed(Self.message(for: error))
             }
@@ -186,9 +199,9 @@ public actor DocumentsEffectHandler: EffectHandler {
         case .renameFolder(let folder, let newName):
             do {
                 try await documentService.renameFolder(folder: folder, newName: newName)
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
-                return .folderRenamedAndRefreshed(folderId: folder.id, newName: newName, folders, documents)
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
+                return .folderRenamedAndRefreshed(folderId: folder.id, newName: newName, folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
                 return .loadingFailed(Self.message(for: error))
             }
@@ -196,9 +209,9 @@ public actor DocumentsEffectHandler: EffectHandler {
         case .deleteFolder(let folder):
             do {
                 try await documentService.deleteFolder(folder: folder)
-                let folders = try await documentService.fetchFolders()
-                let documents = try await documentService.fetchRecentDocuments()
-                return .folderDeletedAndRefreshed(deletedFolderId: folder.id, folders, documents)
+                let (folders, rootDocs) = try await documentService.fetchRootContents()
+                let recentDocs = try await documentService.fetchRecentDocuments()
+                return .folderDeletedAndRefreshed(deletedFolderId: folder.id, folders: folders, rootDocuments: rootDocs, recentDocuments: recentDocs)
             } catch {
                 return .loadingFailed(Self.message(for: error))
             }
@@ -250,12 +263,15 @@ public final actor DocumentServiceImpl: DocumentServicing {
         self.networkService = networkService
     }
     
-    public func fetchFolders() async throws -> [Folder] {
+    public func fetchRootContents() async throws -> (folders: [Folder], documents: [Document]) {
         let result = await networkService.listFolder(parentId: nil)
         switch result {
         case .success(let response):
             folderIdToNodeId.removeAll()
-            let folderNodes = response.nodes.filter { $0.type == "folder" }
+            let allNodes = response.nodes
+            let folderNodes = allNodes.filter { $0.type == "folder" }
+            let fileNodes = allNodes.filter { $0.type == "file" }
+            
             var folders: [Folder] = []
             await withTaskGroup(of: (node: Materials_Node, count: Int).self) { group in
                 for node in folderNodes {
@@ -283,29 +299,45 @@ public final actor DocumentServiceImpl: DocumentServicing {
                     ))
                 }
             }
-            return folders.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            
+            for node in fileNodes {
+                let documentId = Self.uuidFromNodeId(node.id, folder: false)
+                nodeIdByDocumentId[documentId] = node.id
+                if node.hasMaterialID {
+                    documentIdToMaterialId[documentId] = node.materialID
+                }
+            }
+            
+            let documents: [Document] = fileNodes.map { node in
+                let documentId = Self.uuidFromNodeId(node.id, folder: false)
+                var size = node.hasFile ? node.file.size : 0
+                if size == 0, node.hasMaterialID, let cachedSize = documentSizeCache[node.materialID] {
+                    size = cachedSize
+                }
+                return Document(
+                    id: documentId,
+                    name: node.name,
+                    type: detectDocumentType(from: node.name),
+                    size: size,
+                    createdAt: Self.safeDate(timestamp: Int64(node.createdAt)),
+                    modifiedAt: Self.safeDate(timestamp: Int64(node.updatedAt)),
+                    folderId: nil,
+                    url: nil
+                )
+            }.sorted { $0.modifiedAt > $1.modifiedAt }
+            
+            return (folders.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }, documents)
         case .failure(let error):
             throw error
         }
     }
     
     public func fetchRecentDocuments() async throws -> [Document] {
-        let result = await networkService.listFolder(parentId: nil)
+        let result = await networkService.recentFiles()
         
         switch result {
         case .success(let response):
-            nodeIdByDocumentId.removeAll()
-            documentIdToMaterialId.removeAll()
-            
-            let allNodes = response.nodes
-            let folderNodes = allNodes.filter { $0.type == "folder" }
-            for node in folderNodes {
-                let folderId = Self.uuidFromNodeId(node.id, folder: true)
-                folderIdToNodeId[folderId] = node.id
-            }
-            
-            let fileNodes = allNodes.filter { $0.type == "file" }
-            let folderNodeIds = Set(folderNodes.map { $0.id })
+            let fileNodes = response.nodes
             
             for node in fileNodes {
                 let documentId = Self.uuidFromNodeId(node.id, folder: false)
@@ -316,13 +348,12 @@ public final actor DocumentServiceImpl: DocumentServicing {
             }
             
             return fileNodes
-                .filter { !$0.hasParentID || !folderNodeIds.contains($0.parentID) }
                 .map { node in
                     let documentId = Self.uuidFromNodeId(node.id, folder: false)
                     
                     var size = node.hasFile ? node.file.size : 0
                     if size == 0, node.hasMaterialID, let cachedSize = documentSizeCache[node.materialID] {
-                        size = cachedSize
+                        size = Int64(Int(cachedSize))
                     }
                     let createdAt = Self.safeDate(timestamp: Int64(node.createdAt))
                     let updatedAt = Self.safeDate(timestamp: Int64(node.updatedAt))
@@ -342,6 +373,12 @@ public final actor DocumentServiceImpl: DocumentServicing {
                 }
                 .sorted { $0.modifiedAt > $1.modifiedAt }
         case .failure(let error):
+            // RecentFiles not implemented on backend yet — return empty list instead of failing
+            if case .apiError(let apiError) = error,
+               apiError.serverMessage.contains("unknown method") || apiError.serverMessage.contains("unimplemented") {
+                print("[Documents] RecentFiles not implemented, returning empty list")
+                return []
+            }
             throw error
         }
     }

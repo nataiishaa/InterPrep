@@ -317,9 +317,14 @@ public final class NetworkServiceV2: ObservableObject {
         if let parentId = parentId {
             request.parentID = parentId
         }
-        return await performGRPC { client, token in
+        print("[NetworkService] listFolder parentId=\(String(describing: parentId))")
+        let result = await performGRPC { client, token in
             try await client.listFolder(request: request, accessToken: token)
         }
+        if case .failure(let error) = result {
+            print("[NetworkService] listFolder failed: \(error)")
+        }
+        return result
     }
     
     public func createFolder(name: String, parentId: UInt32? = nil) async -> Result<Materials_CreateFolderResponse, NetworkError> {
@@ -366,6 +371,23 @@ public final class NetworkServiceV2: ObservableObject {
         return await performGRPC { client, token in
             try await client.deleteNode(request: request, accessToken: token)
         }
+    }
+    
+    public func recentFiles() async -> Result<Materials_RecentFilesResponse, NetworkError> {
+        let request = Materials_RecentFilesRequest()
+        print("[NetworkService] recentFiles")
+        let result = await performGRPC { client, token in
+            try await client.recentFiles(request: request, accessToken: token)
+        }
+        if case .failure(let error) = result {
+            if case .apiError(let apiError) = error,
+               apiError.serverMessage.contains("unknown method") || apiError.serverMessage.contains("unimplemented") {
+                print("[NetworkService] recentFiles: method not implemented on backend (expected)")
+            } else {
+                print("[NetworkService] recentFiles failed: \(error)")
+            }
+        }
+        return result
     }
     
     // MARK: - Coach
@@ -450,6 +472,18 @@ public final class NetworkServiceV2: ObservableObject {
         request.pageOffset = pageOffset
         return await performGRPC { client, token in
             try await client.getCoachChatHistory(request: request, accessToken: token)
+        }
+    }
+    
+    public func addChatMessage(conversationId: String?, content: String, owner: Coach_ChatMessageOwner) async -> Result<Coach_AddChatMessageResponse, NetworkError> {
+        var request = Coach_AddChatMessageRequest()
+        if let conversationId = conversationId {
+            request.conversationID = conversationId
+        }
+        request.content = content
+        request.owner = owner
+        return await performGRPC { client, token in
+            try await client.addChatMessage(request: request, accessToken: token)
         }
     }
     
@@ -574,7 +608,6 @@ public final class NetworkServiceV2: ObservableObject {
         }
     }
     
-    // swiftlint:disable:next cyclomatic_complexity
     public func updateEvent(params: UpdateEventParams) async -> Result<Calendar_UpdateEventResponse, NetworkError> {
         var patch = Calendar_EventPatch()
         if let title = params.title {
@@ -938,6 +971,16 @@ public final class BackendGatewayGRPCClient: Sendable {
         return try await eventLoopFutureToAsync(call.response)
     }
     
+    public func recentFiles(request: Materials_RecentFilesRequest, accessToken: String?) async throws -> Materials_RecentFilesResponse {
+        let call: UnaryCall<Materials_RecentFilesRequest, Materials_RecentFilesResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/RecentFiles",
+            request: request,
+            callOptions: callOptions(with: accessToken),
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
     // MARK: - Coach (LLM calls use 120s timeout)
 
     public func ask(request: Coach_AskRequest, accessToken: String?) async throws -> Coach_AskResponse {
@@ -1030,6 +1073,16 @@ public final class BackendGatewayGRPCClient: Sendable {
         return try await eventLoopFutureToAsync(call.response)
     }
     
+    public func addChatMessage(request: Coach_AddChatMessageRequest, accessToken: String?) async throws -> Coach_AddChatMessageResponse {
+        let call: UnaryCall<Coach_AddChatMessageRequest, Coach_AddChatMessageResponse> = connection.makeUnaryCall(
+            path: "/gateway.BackendGateway/AddChatMessage",
+            request: request,
+            callOptions: callOptions(with: accessToken),
+            interceptors: []
+        )
+        return try await eventLoopFutureToAsync(call.response)
+    }
+    
     // MARK: - Calendar
 
     public func listEvents(request: Calendar_ListEventsRequest, accessToken: String?) async throws -> Calendar_ListEventsResponse {
@@ -1109,7 +1162,7 @@ public final class BackendGatewayGRPCClient: Sendable {
         }
         return CallOptions(
             customMetadata: metadata,
-            timeLimit: .timeout(.seconds(60))
+            timeLimit: .timeout(.seconds(90))
         )
     }
     

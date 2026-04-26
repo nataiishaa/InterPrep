@@ -88,6 +88,8 @@ public final actor ChatServiceImpl: ChatServicing {
             if !response.conversationID.isEmpty {
                 conversationId = response.conversationID
             }
+            _ = try? await addChatMessage(conversationId: conversationId, content: message.text, isUser: true)
+            _ = try? await addChatMessage(conversationId: conversationId, content: response.answer, isUser: false)
             return ChatMessage(
                 text: response.answer,
                 sender: .consultant,
@@ -262,6 +264,24 @@ public final actor ChatServiceImpl: ChatServicing {
         }
     }
     
+    public func addChatMessage(conversationId: String?, content: String, isUser: Bool) async throws -> String {
+        let owner: Coach_ChatMessageOwner = isUser ? .user : .assistant
+        let result = await networkService.addChatMessage(
+            conversationId: conversationId ?? self.conversationId,
+            content: content,
+            owner: owner
+        )
+        switch result {
+        case .success(let response):
+            if !response.conversationID.isEmpty {
+                self.conversationId = response.conversationID
+            }
+            return response.conversationID
+        case .failure(let error):
+            throw userFacingError(for: error)
+        }
+    }
+    
     private func persistCoachHistoryForOffline(_ messages: [ChatMessage]) async {
         let payload: [CachedCoachMessage] = messages.map {
             CachedCoachMessage(
@@ -291,8 +311,8 @@ public final actor ChatServiceImpl: ChatServicing {
 }
 
 private func errorIndicatesOffline(_ error: Error) -> Bool {
-    if let e = error as? ChatServiceError, e.isConnectionFailure { return true }
-    if let e = error as? NetworkError, e.isConnectionError { return true }
+    if let chatErr = error as? ChatServiceError, chatErr.isConnectionFailure { return true }
+    if let netErr = error as? NetworkError, netErr.isConnectionError { return true }
     return false
 }
 

@@ -32,11 +32,11 @@ final class DocumentsStateTests: XCTestCase {
 
         XCTAssertEqual(state.selectedFolder?.name, "Work")
         XCTAssertTrue(state.isLoading)
-        guard case .loadFolderContents(let f) = effect else {
+        guard case .loadFolderContents(let folder) = effect else {
             XCTFail("Expected loadFolderContents")
             return
         }
-        XCTAssertEqual(f.name, "Work")
+        XCTAssertEqual(folder.name, "Work")
     }
 
     func testBackFromFolder_clearsSelection() {
@@ -96,11 +96,11 @@ final class DocumentsStateTests: XCTestCase {
         let effect = DocumentsState.reduce(state: &state, with: .input(.commitFolderRename("  New  ")))
 
         XCTAssertNil(state.folderToRename)
-        guard case .renameFolder(let f, let name) = effect else {
+        guard case .renameFolder(let folder, let name) = effect else {
             XCTFail("Expected renameFolder")
             return
         }
-        XCTAssertEqual(f.name, "Old")
+        XCTAssertEqual(folder.name, "Old")
         XCTAssertEqual(name, "New")
     }
 

@@ -11,14 +11,14 @@ import ResumeUploadFeature
 import SwiftUI
 
 public struct AuthContainer: View {
-    @StateObject private var store: AuthStore
+    @State private var store: AuthStore
     let onAuthComplete: () -> Void
     
     public init(
-        store: @autoclosure @escaping () -> AuthStore,
+        store: AuthStore,
         onAuthComplete: @escaping () -> Void
     ) {
-        self._store = StateObject(wrappedValue: store())
+        self.store = store
         self.onAuthComplete = onAuthComplete
     }
     

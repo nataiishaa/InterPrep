@@ -55,7 +55,7 @@ struct ChatInputBar: View {
             }
             
             TextField(
-                waitingForVacancyId ? "Выберите вакансию из избранного" : "Сообщение",
+                waitingForVacancyId ? "Выберите вакансию" : "Сообщение",
                 text: .init(
                     get: { text },
                     set: { onTextChanged($0) }

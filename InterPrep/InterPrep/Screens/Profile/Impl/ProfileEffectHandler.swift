@@ -207,7 +207,8 @@ public actor ProfileEffectHandler: EffectHandler {
         guard !data.isEmpty else {
             return .loadingFailed("Выберите изображение")
         }
-        print("[ProfilePhoto] uploading \(data.count) bytes for userId=\(userId)")
+        let sizeKB = Double(data.count) / 1024.0
+        print("[ProfilePhoto] uploading \(String(format: "%.1f", sizeKB)) KB for userId=\(userId)")
         let result = await NetworkServiceV2.shared.uploadProfilePhoto(imageData: data, filename: "photo.jpg", mimeType: "image/jpeg")
         switch result {
         case .success(let response):
@@ -230,6 +231,9 @@ public actor ProfileEffectHandler: EffectHandler {
             }
             if case .apiError(let apiErr) = error {
                 print("[ProfilePhoto] apiError: code=\(apiErr.code) msg=\(apiErr.serverMessage)")
+                if apiErr.code == .internalError {
+                    return .loadingFailed("Ошибка сервера при загрузке фото. Попробуйте позже")
+                }
             }
             if error.isConnectionError {
                 return .loadingFailed("Ошибка соединения. Проверьте интернет и попробуйте снова")

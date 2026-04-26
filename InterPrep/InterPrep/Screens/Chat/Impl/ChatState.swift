@@ -183,7 +183,7 @@ extension ChatState: FeatureState {
     }
     
     @MainActor
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     public static func reduce(
         state: inout Self,
         with message: Message<Input, Feedback>
