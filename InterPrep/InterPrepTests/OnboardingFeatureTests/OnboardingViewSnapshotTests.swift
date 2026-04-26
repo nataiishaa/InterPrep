@@ -40,25 +40,13 @@ final class OnboardingViewSnapshotTests: SnapshotTestCase {
     
     func testOnboardingView_middlePage() {
         let model = OnboardingView.Model(
-            currentPage: 1,
+            currentPage: 0,
             pages: [
                 .init(
                     id: 0,
-                    imageName: "video.circle.fill",
-                    title: "Ищите работу в пару кликов",
-                    description: "Не тратьте время на просмотр неинтересных для вас вакансий"
-                ),
-                .init(
-                    id: 1,
                     imageName: "calendar.circle.fill",
                     title: "Планируйте собеседования",
                     description: "Календарь и материалы для подготовки. Все в одном приложении."
-                ),
-                .init(
-                    id: 2,
-                    imageName: "chart.line.uptrend.xyaxis.circle.fill",
-                    title: "Прокачивайте карьеру",
-                    description: "Карьерный консунтант подскажет, что улучшить в навыках и куда расти дальше"
                 )
             ],
             isLastPage: false,
