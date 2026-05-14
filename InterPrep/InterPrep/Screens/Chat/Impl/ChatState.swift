@@ -347,11 +347,17 @@ extension ChatState: FeatureState {
         case .feedback(.loadingFailed(let error)):
             state.isLoading = false
             state.isSending = false
-            let resumeKeywords = ["резюме", "resume", "Загрузите резюме", "Заполните профиль резюме"]
-            if resumeKeywords.contains(where: { error.lowercased().contains($0.lowercased()) }) {
+            let lowercasedError = error.lowercased()
+            let resumeKeywords = [
+                "резюме",
+                "resume",
+                "профиль резюме"
+            ]
+            let isResumeRelated = resumeKeywords.contains(where: { lowercasedError.contains($0) })
+            if isResumeRelated {
                 state.showResumeUploadPrompt = true
                 let message = ChatMessage(
-                    text: "Для этой функции нужно загруженное резюме. Перейдите в «Профиль» → «Загрузить резюме», а затем вернитесь сюда.",
+                    text: "У вас не загружено резюме. Загрузите его, чтобы пользоваться всем функционалом.",
                     sender: .consultant,
                     status: .sent
                 )

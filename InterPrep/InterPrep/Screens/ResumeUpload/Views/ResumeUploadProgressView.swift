@@ -18,14 +18,12 @@ public struct ResumeUploadProgressView: View {
     private let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect()
 
     private let messages: [ProgressMessage] = [
-        ProgressMessage(icon: "arrow.up.doc.fill", title: "Загружаем резюме", subtitle: "Передаём ваш файл на сервер"),
-        ProgressMessage(icon: "doc.text.magnifyingglass", title: "Читаем резюме", subtitle: "Извлекаем информацию из документа"),
-        ProgressMessage(icon: "brain.head.profile", title: "Анализируем опыт", subtitle: "Изучаем ваш профессиональный путь"),
-        ProgressMessage(icon: "list.bullet.clipboard", title: "Выделяем навыки", subtitle: "Определяем ключевые компетенции"),
+        ProgressMessage(icon: "arrow.up.doc.fill", title: "Загружаем резюме", subtitle: "Наши алгоритмы уже анализируют его"),
+        ProgressMessage(icon: "doc.text.magnifyingglass", title: "Изучаем опыт", subtitle: "Смотрим ваши достижения"),
+        ProgressMessage(icon: "list.bullet.clipboard", title: "Определяем навыки", subtitle: "Выделяем ваши сильные стороны"),
         ProgressMessage(icon: "sparkles", title: "Оцениваем профиль", subtitle: "Сопоставляем с требованиями рынка"),
         ProgressMessage(icon: "person.2.fill", title: "Подбираем вакансии", subtitle: "Ищем идеальные предложения для вас"),
-        ProgressMessage(icon: "star.fill", title: "Ранжируем результаты", subtitle: "Сортируем по релевантности"),
-        ProgressMessage(icon: "hourglass", title: "Осталось совсем чуть-чуть", subtitle: "Завершаем обработку")
+        ProgressMessage(icon: "hourglass", title: "Уже ищем вакансии для вас", subtitle: "Осталось чуть-чуть")
     ]
 
     public init(isComplete: Bool = false) {

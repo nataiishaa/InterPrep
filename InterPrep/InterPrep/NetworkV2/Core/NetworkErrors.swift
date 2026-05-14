@@ -259,6 +259,7 @@ public struct APIError: Error, LocalizedError, Sendable {
             return "Выполните требуемые условия"
 
         case .internalError:
+            if msg.contains("resume") { return "Профиль резюме не найден" }
             if msg.contains("database error") { return "Ошибка сервера. Попробуйте позже" }
             if msg.contains("failed to hash password") { return "Ошибка сервера. Попробуйте позже" }
             if msg.contains("failed to create user") { return "Ошибка регистрации. Попробуйте позже" }

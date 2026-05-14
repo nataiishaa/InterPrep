@@ -4,6 +4,9 @@ struct RegistrationView: View {
     let model: Model
     @FocusState private var focusedField: Field?
 
+    private let gradientColorLight = Color(red: 0.45, green: 0.5, blue: 0.45)
+    private let gradientColorDark = Color(red: 0.35, green: 0.4, blue: 0.35)
+
     enum Field {
         case firstName, lastName
     }
@@ -15,39 +18,36 @@ struct RegistrationView: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             LinearGradient(
-                colors: [
-                    Color(red: 0.45, green: 0.5, blue: 0.45),
-                    Color(red: 0.35, green: 0.4, blue: 0.35)
-                ],
+                colors: [gradientColorLight, gradientColorDark],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 24) {
-                    HStack(spacing: 8) {
+                VStack(spacing: Layout.contentSpacing) {
+                    HStack(spacing: Layout.indicatorSpacing) {
                         Circle()
                             .fill(Color.white)
-                            .frame(width: 30, height: 4)
+                            .frame(width: Layout.indicatorWidth, height: Layout.indicatorHeight)
 
                         Circle()
-                            .fill(Color.white.opacity(0.3))
-                            .frame(width: 30, height: 4)
+                            .fill(Color.white.opacity(Layout.inactiveOpacity))
+                            .frame(width: Layout.indicatorWidth, height: Layout.indicatorHeight)
                     }
-                    .padding(.top, 60)
+                    .padding(.top, Layout.indicatorTopPadding)
 
                     Spacer()
-                        .frame(height: 20)
+                        .frame(height: Layout.titleSpacerHeight)
 
                     Text("Давайте знакомиться!\nКак вас зовут?")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white)
-                        .padding(.bottom, 40)
+                        .padding(.bottom, Layout.titleBottomPadding)
 
-                    VStack(spacing: 16) {
+                    VStack(spacing: Layout.fieldSpacing) {
                         CustomTextField(
                             placeholder: "Имя",
                             text: Binding(
@@ -70,13 +70,13 @@ struct RegistrationView: View {
                         .submitLabel(.continue)
                         .onSubmit { model.onContinue() }
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, Layout.horizontalPadding)
 
                     if let errorMessage = model.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
                             .foregroundColor(.red)
-                            .padding(.horizontal, 32)
+                            .padding(.horizontal, Layout.horizontalPadding)
                             .transition(.opacity)
                     }
 
@@ -88,16 +88,34 @@ struct RegistrationView: View {
                         Text("Продолжить")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+                            .frame(height: Layout.buttonHeight)
                             .background(Color.white)
-                            .foregroundColor(Color(red: 0.35, green: 0.4, blue: 0.35))
-                            .cornerRadius(12)
+                            .foregroundColor(gradientColorDark)
+                            .cornerRadius(Layout.buttonCornerRadius)
                     }
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, Layout.horizontalPadding)
+                    .padding(.bottom, Layout.buttonBottomPadding)
                 }
             }
         }
+    }
+}
+
+private extension RegistrationView {
+    enum Layout {
+        static let contentSpacing: CGFloat = 24
+        static let indicatorSpacing: CGFloat = 8
+        static let indicatorWidth: CGFloat = 30
+        static let indicatorHeight: CGFloat = 4
+        static let indicatorTopPadding: CGFloat = 60
+        static let titleSpacerHeight: CGFloat = 20
+        static let titleBottomPadding: CGFloat = 40
+        static let fieldSpacing: CGFloat = 16
+        static let horizontalPadding: CGFloat = 32
+        static let buttonHeight: CGFloat = 50
+        static let buttonCornerRadius: CGFloat = 12
+        static let buttonBottomPadding: CGFloat = 20
+        static let inactiveOpacity: Double = 0.3
     }
 }
 

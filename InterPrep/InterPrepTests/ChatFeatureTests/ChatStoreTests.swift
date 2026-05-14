@@ -274,4 +274,55 @@ final class ChatStoreTests: XCTestCase {
 
         XCTAssertEqual(store.state.inputText, "Расскажи про свой опыт")
     }
+
+    func test_resumeConsultation_profileNotFound_showsResumePrompt() async {
+        let resumeError = NSError(
+            domain: "test",
+            code: 0,
+            userInfo: [NSLocalizedDescriptionKey: "Профиль резюме не найден"]
+        )
+        await chatService.setReviewResumeResult(.failure(resumeError))
+
+        let button = MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation))
+        store.send(.buttonTapped(button))
+
+        await waitForEffects()
+
+        XCTAssertTrue(store.state.showResumeUploadPrompt)
+        XCTAssertNil(store.state.error)
+        XCTAssertTrue(store.state.messages.contains(where: {
+            $0.text.contains("У вас не загружено резюме")
+        }))
+    }
+
+    func test_resumeConsultation_resumeNotUploaded_showsResumePrompt() async {
+        let resumeError = NSError(
+            domain: "test",
+            code: 0,
+            userInfo: [NSLocalizedDescriptionKey: "Резюме не загружено"]
+        )
+        await chatService.setReviewResumeResult(.failure(resumeError))
+
+        let button = MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation))
+        store.send(.buttonTapped(button))
+
+        await waitForEffects()
+
+        XCTAssertTrue(store.state.showResumeUploadPrompt)
+        XCTAssertNil(store.state.error)
+    }
+
+    func test_resumeConsultation_success_showsScore() async {
+        await chatService.setReviewResumeResult(.success((8.5, "Отличное резюме!")))
+
+        let button = MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation))
+        store.send(.buttonTapped(button))
+
+        await waitForEffects()
+
+        XCTAssertFalse(store.state.showResumeUploadPrompt)
+        XCTAssertTrue(store.state.messages.contains(where: {
+            $0.text.contains("8.5/10") && $0.text.contains("Отличное резюме!")
+        }))
+    }
 }

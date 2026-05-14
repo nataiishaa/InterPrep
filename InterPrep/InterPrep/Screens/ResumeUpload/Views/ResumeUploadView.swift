@@ -128,9 +128,9 @@ public struct ResumeUploadView: View {
     private var subtitleText: String {
         switch model.uploadStatus {
         case .idle, .selected, .failed:
-            return "Мы подберем вакансии\nспециально для вас"
+            return "Загрузите его, чтобы пользоваться\nвсем функционалом"
         case .uploading:
-            return "Наши алгоритмы анализируют\nваше резюме"
+            return "Анализируем ваше резюме"
         case .success:
             return "Резюме успешно загружено"
         case .awaitingQuestions:
