@@ -39,23 +39,33 @@ jobs:
     - name: Find simulator
       run: |
         xcrun simctl list devices available iPhone
-        SIMULATOR_UUID=$(xcrun simctl list devices available \
-          | grep -E "iPhone.*\([A-F0-9-]+\)" \
-          | head -1 \
-          | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
+        SIMULATOR_UUID=$(xcrun simctl list devices available -j \
+          | python3 -c "
+        import json, sys
+        data = json.load(sys.stdin)
+        for runtime, devices in data['devices'].items():
+            if 'iOS-18' in runtime:
+                for d in devices:
+                    if d['name'] == 'iPhone 16 Pro' and d['isAvailable']:
+                        print(d['udid'])
+                        sys.exit(0)
+        # fallback: any available iPhone
+        for runtime, devices in data['devices'].items():
+            if 'iOS' in runtime:
+                for d in devices:
+                    if 'iPhone' in d['name'] and d['isAvailable']:
+                        print(d['udid'])
+                        sys.exit(0)
+        ")
         echo "Using simulator UUID: $SIMULATOR_UUID"
         echo "SIMULATOR_UUID=$SIMULATOR_UUID" >> $GITHUB_ENV
 
-    - name: Install mise
-      run: |
-        curl -sSf https://mise.run | sh
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
     - name: Install Tuist via mise
-      working-directory: InterPrep
-      run: |
-        ~/.local/bin/mise install
-        echo "Tuist version: $(~/.local/bin/mise exec -- tuist version)"
+      uses: jdx/mise-action@v2
+      with:
+        working_directory: InterPrep
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Cache SPM dependencies
       uses: actions/cache@v4
@@ -66,9 +76,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-spm-
     
+    - name: Create Secrets.swift from example
+      working-directory: InterPrep
+      run: cp InterPrep/Config/Secrets.example.swift InterPrep/Config/Secrets.swift
+
     - name: Generate Xcode project
       working-directory: InterPrep
-      run: ~/.local/bin/mise exec -- tuist generate --no-open
+      run: tuist generate --no-open
       
     - name: Build for testing
       working-directory: InterPrep
@@ -96,9 +110,13 @@ jobs:
           -only-testing:DiscoveryModuleTests \
           -only-testing:OnboardingFeatureTests \
           -only-testing:ResumeUploadFeatureTests \
-          -only-testing:InterPrepTests/CalendarStateTests \
-          -only-testing:InterPrepTests/DocumentsStateTests \
-          -only-testing:InterPrepTests/ProfileStateTests \
+          -only-testing:InterPrepTests/CalendarStoreTests \
+          -only-testing:InterPrepTests/ICalendarParserTests \
+          -only-testing:InterPrepTests/DocumentsStoreTests \
+          -only-testing:InterPrepTests/ProfileStoreTests \
+          -only-testing:InterPrepTests/ProfileEffectHandlerTests \
+          -only-testing:InterPrepTests/VacancyTests \
+          -only-testing:InterPrepTests/VacancyCardViewSnapshotTests \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO
           

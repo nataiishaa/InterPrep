@@ -1,10 +1,3 @@
-//
-//  View+Snapshot.swift
-//  InterPrep
-//
-//  Extensions for snapshot testing SwiftUI views
-//
-
 import SnapshotTesting
 import SwiftUI
 import XCTest
@@ -34,7 +27,7 @@ public extension View {
             )
         }
     }
-    
+
     func test(
         batch: SnapshotBatch,
         precision: Float = 0.999,
@@ -47,13 +40,13 @@ public extension View {
         let fileUrl = URL(fileURLWithPath: "\(file)", isDirectory: false)
         let fileName = fileUrl.deletingPathExtension().lastPathComponent
         let testNameForDirectory = sanitizePathComponent(String(describing: testName))
-        
+
         let directory = fileUrl
             .deletingLastPathComponent()
             .appendingPathComponent("__Snapshots__")
             .appendingPathComponent(fileName)
             .appendingPathComponent(testNameForDirectory)
-        
+
         batch.testingEnvironments.forEach { testingEnvironment in
             let failure = verifySnapshot(
                 of: self,
@@ -77,7 +70,7 @@ public extension View {
                 line: line,
                 column: column
             )
-            
+
             if let failure {
                 XCTFail(
                     failure,
@@ -103,15 +96,15 @@ private func assembleTestFileName(
     suffixToRemove: String
 ) -> String {
     var name = testName
-    
+
     if name.hasPrefix(prefixToRemove) {
         name = String(name.dropFirst(prefixToRemove.count))
     }
-    
+
     if name.hasSuffix(suffixToRemove) {
         name = String(name.dropLast(suffixToRemove.count))
     }
-    
+
     let components = [name] + testingEnvironment.descriptionComponents
     return components.joined(separator: "-")
 }
