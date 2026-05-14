@@ -1,33 +1,26 @@
-//
-//  AuthContainer.swift
-//  InterPrep
-//
-//  Container for Auth module
-//
-
 import ArchitectureCore
 import NetworkService
 import ResumeUploadFeature
 import SwiftUI
 
 public struct AuthContainer: View {
-    @StateObject private var store: AuthStore
+    @State private var store: AuthStore
     let onAuthComplete: () -> Void
-    
+
     public init(
-        store: @autoclosure @escaping () -> AuthStore,
+        store: AuthStore,
         onAuthComplete: @escaping () -> Void
     ) {
-        self._store = StateObject(wrappedValue: store())
+        self.store = store
         self.onAuthComplete = onAuthComplete
     }
-    
+
     public var body: some View {
         NavigationStack {
             ZStack {
                 currentFlowView
                     .animation(.easeInOut(duration: 0.3), value: store.state.authFlow)
-                
+
                 if shouldShowBackButton {
                     VStack {
                         HStack {
@@ -44,7 +37,7 @@ public struct AuthContainer: View {
                         Spacer()
                     }
                 }
-                
+
                 if store.state.authFlow == .login {
                     VStack {
                         Spacer()
@@ -64,9 +57,16 @@ public struct AuthContainer: View {
                     onAuthComplete()
                 }
             }
+            .onChange(of: store.state.resumeUploadStatus) { _, status in
+                if status == .success, store.state.authFlow == .fullResumeUpload {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                        store.send(.resumeUploadReadyToNavigate)
+                    }
+                }
+            }
         }
     }
-    
+
     private var shouldShowBackButton: Bool {
         switch store.state.authFlow {
         case .login, .resumeUpload, .fullResumeUpload, .resumeProfileReview:
@@ -75,51 +75,78 @@ public struct AuthContainer: View {
             return true
         }
     }
-    
+
     @ViewBuilder
     private var currentFlowView: some View {
         switch store.state.authFlow {
         case .login:
             LoginView(model: makeLoginModel())
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
-            
+
         case .registration:
             RegistrationView(model: makeRegistrationModel())
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
-            
+
         case .registrationDetails:
             RegistrationDetailsView(model: makeRegistrationDetailsModel())
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
-            
+
         case .passwordReset:
             PasswordResetView(model: makePasswordResetModel())
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
-            
+
         case .otpVerification:
             OTPView(model: makeOTPModel())
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
-            
+
         case .resumeUpload:
             SimpleResumeUploadView(model: makeSimpleResumeUploadModel())
                 .transition(.opacity.combined(with: .scale))
-            
+
         case .fullResumeUpload:
-            ResumeUploadView(model: makeFullResumeUploadModel())
+            fullResumeUploadView
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
-            
+
         case .resumeProfileReview:
             AuthResumeProfileReviewView(
                 onConfirm: { store.send(.profileConfirmTapped) },
                 onBack: { store.send(.backTapped) }
             )
             .transition(.opacity.combined(with: .move(edge: .trailing)))
-            
+
         case .newPassword:
             NewPasswordView(model: makeNewPasswordModel())
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
         }
     }
-    
+
+    private var fullResumeUploadView: some View {
+        ZStack {
+            ResumeUploadView(model: makeFullResumeUploadModel())
+
+            if shouldShowResumeUploadOverlay {
+                resumeUploadOverlay
+                    .transition(.opacity)
+                    .allowsHitTesting(false)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: shouldShowResumeUploadOverlay)
+    }
+
+    private var shouldShowResumeUploadOverlay: Bool {
+        guard store.state.authFlow == .fullResumeUpload else { return false }
+        switch store.state.resumeUploadStatus {
+        case .uploading, .success:
+            return true
+        case .idle, .selected, .awaitingQuestions, .failed:
+            return false
+        }
+    }
+
+    private var resumeUploadOverlay: some View {
+        ResumeUploadProgressView(isComplete: store.state.resumeUploadStatus == .success)
+    }
+
     private func makeLoginModel() -> LoginView.Model {
         .init(
             email: store.state.loginEmail,
@@ -132,7 +159,7 @@ public struct AuthContainer: View {
             onForgotPassword: { store.send(.forgotPasswordTapped) }
         )
     }
-    
+
     private func makeRegistrationModel() -> RegistrationView.Model {
         .init(
             firstName: store.state.registrationFirstName,
@@ -143,7 +170,7 @@ public struct AuthContainer: View {
             onContinue: { store.send(.registrationContinueTapped) }
         )
     }
-    
+
     private func makeRegistrationDetailsModel() -> RegistrationDetailsView.Model {
         .init(
             email: store.state.registrationEmail,
@@ -157,7 +184,7 @@ public struct AuthContainer: View {
             onSubmit: { store.send(.registrationSubmitTapped) }
         )
     }
-    
+
     private func makePasswordResetModel() -> PasswordResetView.Model {
         .init(
             email: store.state.resetEmail,
@@ -167,7 +194,7 @@ public struct AuthContainer: View {
             onSendCode: { store.send(.sendResetCodeTapped) }
         )
     }
-    
+
     private func makeOTPModel() -> OTPView.Model {
         .init(
             code: store.state.otpCode,
@@ -179,7 +206,7 @@ public struct AuthContainer: View {
             onResend: { store.send(.otpResendTapped) }
         )
     }
-    
+
     private func makeSimpleResumeUploadModel() -> SimpleResumeUploadView.Model {
         .init(
             isLoading: store.state.isLoading,
@@ -187,7 +214,7 @@ public struct AuthContainer: View {
             onSkip: { store.send(.resumeSkipTapped) }
         )
     }
-    
+
     private func makeFullResumeUploadModel() -> ResumeUploadView.Model {
         .init(
             uploadStatus: store.state.resumeUploadStatus,
@@ -211,7 +238,7 @@ public struct AuthContainer: View {
             }
         )
     }
-    
+
     private func makeNewPasswordModel() -> NewPasswordView.Model {
         .init(
             password: store.state.newPassword,

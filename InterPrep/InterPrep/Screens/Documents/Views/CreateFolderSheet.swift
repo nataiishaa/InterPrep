@@ -1,17 +1,10 @@
-//
-//  CreateFolderSheet.swift
-//  InterPrep
-//
-//  Create folder sheet
-//
-
 import SwiftUI
 
 struct CreateFolderSheet: View {
     @State private var folderName: String = ""
     let onDismiss: () -> Void
     let onCreate: (String) -> Void
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -29,7 +22,7 @@ struct CreateFolderSheet: View {
                         onDismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Создать") {
                         onCreate(folderName)

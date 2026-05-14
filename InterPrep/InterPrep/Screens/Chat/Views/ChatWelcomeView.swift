@@ -1,10 +1,3 @@
-//
-//  ChatWelcomeView.swift
-//  InterPrep
-//
-//  Onboarding card explaining chat capabilities
-//
-
 import DesignSystem
 import SwiftUI
 

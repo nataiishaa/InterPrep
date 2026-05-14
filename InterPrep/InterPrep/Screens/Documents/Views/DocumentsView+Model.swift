@@ -1,15 +1,9 @@
-//
-//  DocumentsView+Model.swift
-//  InterPrep
-//
-//  Documents view model
-//
-
 import Foundation
 
 extension DocumentsView {
     struct Model {
         let folders: [Folder]
+        let rootDocuments: [Document]
         let recentDocuments: [Document]
         let selectedFolder: Folder?
         let folderContentsFolders: [Folder]

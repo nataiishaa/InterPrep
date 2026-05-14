@@ -1,15 +1,9 @@
-//
-//  DocumentsState.swift
-//  InterPrep
-//
-//  Documents state management
-//
-
 import ArchitectureCore
 import Foundation
 
 public struct DocumentsState {
     public var folders: [Folder] = []
+    public var rootDocuments: [Document] = []
     public var recentDocuments: [Document] = []
     public var selectedFolder: Folder?
     public var folderContentsFolders: [Folder] = []
@@ -25,7 +19,7 @@ public struct DocumentsState {
     public var showingEditNoteSheet: Bool = false
     public var editingNote: Document?
     public var documentURLToOpen: URL?
-    
+
     public init() {}
 }
 
@@ -36,7 +30,7 @@ public struct Folder: Identifiable, Equatable, Sendable, Codable {
     public var documentsCount: Int
     public var createdAt: Date
     public var color: FolderColor
-    
+
     public init(
         id: UUID = UUID(),
         nodeId: UInt32? = nil,
@@ -73,7 +67,7 @@ public struct Document: Identifiable, Equatable, Sendable, Codable {
     public var folderId: UUID?
     public var url: URL?
     public var content: String?
-    
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -95,14 +89,14 @@ public struct Document: Identifiable, Equatable, Sendable, Codable {
         self.url = url
         self.content = content
     }
-    
+
     public var formattedSize: String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useKB, .useMB, .useGB]
         formatter.countStyle = .file
         return formatter.string(fromByteCount: size)
     }
-    
+
     public var isNote: Bool {
         type == .note || type == .txt
     }
@@ -116,7 +110,7 @@ public enum DocumentType: String, CaseIterable, Sendable, Codable {
     case note
     case image
     case other
-    
+
     public var icon: String {
         switch self {
         case .pdf: return "doc.fill"
@@ -166,23 +160,23 @@ extension DocumentsState: FeatureState {
         case confirmDeleteFolder(Folder)
         case dismissDeleteFolderConfirmation
     }
-    
+
     public enum Feedback: Sendable {
         case foldersLoaded([Folder])
         case recentDocumentsLoaded([Document])
-        case foldersAndDocumentsLoaded([Folder], [Document])
-        case foldersAndDocumentsLoadedFromCache([Folder], [Document])
+        case foldersAndDocumentsLoaded(folders: [Folder], rootDocuments: [Document], recentDocuments: [Document])
+        case foldersAndDocumentsLoadedFromCache(folders: [Folder], rootDocuments: [Document], recentDocuments: [Document])
         case folderContentsLoaded([Folder], [Document])
         case folderContentsLoadedFromCache([Folder], [Document])
-        case folderDeletedAndRefreshed(deletedFolderId: UUID, [Folder], [Document])
-        case folderRenamedAndRefreshed(folderId: UUID, newName: String, [Folder], [Document])
-        case noteUpdatedAndRefreshed([Folder], [Document])
+        case folderDeletedAndRefreshed(deletedFolderId: UUID, folders: [Folder], rootDocuments: [Document], recentDocuments: [Document])
+        case folderRenamedAndRefreshed(folderId: UUID, newName: String, folders: [Folder], rootDocuments: [Document], recentDocuments: [Document])
+        case noteUpdatedAndRefreshed(folders: [Folder], rootDocuments: [Document], recentDocuments: [Document])
         case loadingFailed(String)
         case documentDownloaded(URL)
         case documentOpenFailed(String)
         case noteContentLoaded(Document, String)
     }
-    
+
     public enum Effect: Sendable {
         case loadFolders
         case loadRecentDocuments
@@ -197,7 +191,7 @@ extension DocumentsState: FeatureState {
         case openDocument(Document)
         case loadNoteContent(Document)
     }
-    
+
     @MainActor
     // swiftlint:disable:next function_body_length
     public static func reduce(
@@ -208,7 +202,7 @@ extension DocumentsState: FeatureState {
         case .input(.onAppear):
             state.isLoading = true
             return .loadFolders
-            
+
         case .input(.folderTapped(let folder)):
             state.selectedFolder = folder
             state.isLoading = true
@@ -219,25 +213,25 @@ extension DocumentsState: FeatureState {
             state.folderContentsFolders = []
             state.folderContentsDocuments = []
             return nil
-            
+
         case .input(.documentTapped(let document)):
             return .openDocument(document)
-            
+
         case .input(.createFolderTapped):
             state.showingCreateFolderSheet = true
             state.error = nil
             return nil
-            
+
         case .input(.uploadFileTapped):
             state.showingUploadSheet = true
             state.error = nil
             return nil
-            
+
         case .input(.createNoteTapped):
             state.showingCreateNoteSheet = true
             state.error = nil
             return nil
-            
+
         case .input(.dismissSheet):
             state.showingCreateFolderSheet = false
             state.folderToRename = nil
@@ -271,56 +265,57 @@ extension DocumentsState: FeatureState {
         case .input(.dismissDeleteFolderConfirmation):
             state.folderToDelete = nil
             return nil
-            
+
         case .input(.folderCreated(let name)):
             state.showingCreateFolderSheet = false
             return .createFolder(name, parentFolder: state.selectedFolder)
-            
+
         case .input(.fileUploaded(let url, let folderId)):
             state.showingUploadSheet = false
             return .uploadFile(url, folderId: folderId)
-            
+
         case .input(.noteCreated(let title, let content)):
             state.showingCreateNoteSheet = false
             return .createNote(title, content, parentFolder: state.selectedFolder)
-            
+
         case .input(.noteUpdated(let document, let newName, let content)):
             return .updateNote(document, newName, content)
-            
+
         case .input(.editNoteTapped(let document)):
             state.editingNote = document
             return .loadNoteContent(document)
-            
+
         case .input(.documentDeleted(let document)):
             return .deleteDocument(document.id)
-            
+
         case .input(.clearDocumentToOpen):
             state.documentURLToOpen = nil
             return nil
-            
+
         case .input(.clearError):
             state.error = nil
             return nil
-            
+
         case .input(.retryTapped):
             state.error = nil
             state.isLoading = true
             return .loadFolders
-            
+
         case .feedback(.foldersLoaded(let folders)):
             state.folders = folders
             state.isLoading = false
             state.error = nil
             return nil
-            
+
         case .feedback(.recentDocumentsLoaded(let documents)):
             state.recentDocuments = documents
             state.error = nil
             return nil
-            
-        case .feedback(.foldersAndDocumentsLoaded(let folders, let documents)):
+
+        case .feedback(.foldersAndDocumentsLoaded(let folders, let rootDocs, let recentDocs)):
             state.folders = folders
-            state.recentDocuments = documents
+            state.rootDocuments = rootDocs
+            state.recentDocuments = recentDocs
             state.isLoading = false
             state.error = nil
             state.isOfflineMode = false
@@ -328,10 +323,11 @@ extension DocumentsState: FeatureState {
                 return .loadFolderContents(state.selectedFolder!)
             }
             return nil
-            
-        case .feedback(.foldersAndDocumentsLoadedFromCache(let folders, let documents)):
+
+        case .feedback(.foldersAndDocumentsLoadedFromCache(let folders, let rootDocs, let recentDocs)):
             state.folders = folders
-            state.recentDocuments = documents
+            state.rootDocuments = rootDocs
+            state.recentDocuments = recentDocs
             state.isLoading = false
             state.error = nil
             state.isOfflineMode = true
@@ -347,7 +343,7 @@ extension DocumentsState: FeatureState {
             state.error = nil
             state.isOfflineMode = false
             return nil
-            
+
         case .feedback(.folderContentsLoadedFromCache(let folders, let documents)):
             state.folderContentsFolders = folders
             state.folderContentsDocuments = documents
@@ -356,9 +352,10 @@ extension DocumentsState: FeatureState {
             state.isOfflineMode = true
             return nil
 
-        case .feedback(.noteUpdatedAndRefreshed(let folders, let documents)):
+        case .feedback(.noteUpdatedAndRefreshed(let folders, let rootDocs, let recentDocs)):
             state.folders = folders
-            state.recentDocuments = documents
+            state.rootDocuments = rootDocs
+            state.recentDocuments = recentDocs
             state.showingEditNoteSheet = false
             state.editingNote = nil
             state.isLoading = false
@@ -368,9 +365,10 @@ extension DocumentsState: FeatureState {
             }
             return nil
 
-        case .feedback(.folderDeletedAndRefreshed(let deletedFolderId, let folders, let documents)):
+        case .feedback(.folderDeletedAndRefreshed(let deletedFolderId, let folders, let rootDocs, let recentDocs)):
             state.folders = folders
-            state.recentDocuments = documents
+            state.rootDocuments = rootDocs
+            state.recentDocuments = recentDocs
             state.isLoading = false
             state.error = nil
             if state.selectedFolder?.id == deletedFolderId {
@@ -383,9 +381,10 @@ extension DocumentsState: FeatureState {
             }
             return nil
 
-        case .feedback(.folderRenamedAndRefreshed(let folderId, let newName, let folders, let documents)):
+        case .feedback(.folderRenamedAndRefreshed(let folderId, let newName, let folders, let rootDocs, let recentDocs)):
             state.folders = folders
-            state.recentDocuments = documents
+            state.rootDocuments = rootDocs
+            state.recentDocuments = recentDocs
             state.isLoading = false
             state.error = nil
             if state.selectedFolder?.id == folderId {
@@ -400,20 +399,20 @@ extension DocumentsState: FeatureState {
                 return .loadFolderContents(state.selectedFolder!)
             }
             return nil
-            
+
         case .feedback(.loadingFailed(let error)):
             state.isLoading = false
             state.error = error
             return nil
-            
+
         case .feedback(.documentDownloaded(let url)):
             state.documentURLToOpen = url
             return nil
-            
+
         case .feedback(.documentOpenFailed(let message)):
             state.error = message
             return nil
-            
+
         case .feedback(.noteContentLoaded(let document, let content)):
             var updatedDoc = document
             updatedDoc.content = content

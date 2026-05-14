@@ -3,6 +3,7 @@ import SwiftUI
 
 struct TabBarView: View {
     @Binding var selectedTab: TabItem
+    var onInterceptTab: ((TabItem) -> Bool)?
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
@@ -11,7 +12,10 @@ struct TabBarView: View {
                 TabBarButton(
                     tab: tab,
                     isSelected: selectedTab == tab,
-                    action: { selectedTab = tab }
+                    action: {
+                        if onInterceptTab?(tab) == true { return }
+                        selectedTab = tab
+                    }
                 )
             }
         }

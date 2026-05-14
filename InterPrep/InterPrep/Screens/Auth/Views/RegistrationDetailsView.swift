@@ -1,23 +1,15 @@
-//
-//  RegistrationDetailsView.swift
-//  InterPrep
-//
-//  Registration screen view (Step 2 - Email & Password)
-//
-
 import SwiftUI
 
 struct RegistrationDetailsView: View {
     let model: Model
     @FocusState private var focusedField: Field?
-    
+
     enum Field {
         case email, password, passwordConfirm
     }
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Background
             LinearGradient(
                 colors: [
                     Color(red: 0.45, green: 0.5, blue: 0.45),
@@ -27,32 +19,29 @@ struct RegistrationDetailsView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             ScrollView {
                 VStack(spacing: 24) {
-                    // Progress indicator
                     HStack(spacing: 8) {
                         Circle()
                             .fill(Color.white.opacity(0.3))
                             .frame(width: 30, height: 4)
-                        
+
                         Circle()
                             .fill(Color.white)
                             .frame(width: 30, height: 4)
                     }
                     .padding(.top, 60)
-                    
+
                     Spacer()
                         .frame(height: 20)
-                    
-                    // Title
+
                     Text("Регистрация")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
                         .padding(.bottom, 40)
-                    
-                    // Form
+
                     VStack(spacing: 16) {
                         CustomTextField(
                             placeholder: "Почта",
@@ -65,7 +54,7 @@ struct RegistrationDetailsView: View {
                         .focused($focusedField, equals: .email)
                         .submitLabel(.next)
                         .onSubmit { focusedField = .password }
-                        
+
                         CustomTextField(
                             placeholder: "Пароль",
                             text: Binding(
@@ -77,7 +66,7 @@ struct RegistrationDetailsView: View {
                         .focused($focusedField, equals: .password)
                         .submitLabel(.next)
                         .onSubmit { focusedField = .passwordConfirm }
-                        
+
                         CustomTextField(
                             placeholder: "Повторите пароль",
                             text: Binding(
@@ -91,8 +80,7 @@ struct RegistrationDetailsView: View {
                         .onSubmit { model.onSubmit() }
                     }
                     .padding(.horizontal, 32)
-                    
-                    // Error message
+
                     if let errorMessage = model.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
@@ -100,10 +88,9 @@ struct RegistrationDetailsView: View {
                             .padding(.horizontal, 32)
                             .transition(.opacity)
                     }
-                    
+
                     Spacer()
-                    
-                    // Button
+
                     Button {
                         model.onSubmit()
                     } label: {
@@ -128,8 +115,6 @@ struct RegistrationDetailsView: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     RegistrationDetailsView(model: .init(

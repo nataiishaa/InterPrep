@@ -1,10 +1,3 @@
-//
-//  FavoriteVacancyPickerView.swift
-//  InterPrep
-//
-//  Inline picker for selecting a favorite vacancy in chat
-//
-
 import DesignSystem
 import DiscoveryModule
 import SwiftUI

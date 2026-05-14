@@ -1,10 +1,3 @@
-//
-//  MessageBubbleView.swift
-//  InterPrep
-//
-//  Message bubble component
-//
-
 import DesignSystem
 import SwiftUI
 
@@ -15,17 +8,17 @@ struct MessageBubbleView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var showCopiedFeedback = false
     @State private var tappedButtonId: UUID?
-    
+
     private var isUser: Bool {
         message.sender == .user
     }
-    
+
     var body: some View {
         HStack {
             if isUser {
                 Spacer(minLength: 60)
             }
-            
+
             VStack(alignment: isUser ? .trailing : .leading, spacing: 8) {
                 Text(message.text)
                     .font(.body)
@@ -62,7 +55,7 @@ struct MessageBubbleView: View {
                                 .transition(.opacity.combined(with: .scale))
                         }
                     }
-                
+
                 if !message.buttons.isEmpty, let onButtonTap = onButtonTap {
                     VStack(spacing: 6) {
                         ForEach(message.buttons) { button in
@@ -101,24 +94,24 @@ struct MessageBubbleView: View {
                     }
                     .frame(maxWidth: 280)
                 }
-                
+
                 HStack(spacing: 4) {
                     Text(message.timestamp, style: .time)
                         .font(.caption2)
                         .foregroundColor(.secondary)
-                    
+
                     if isUser {
                         statusIcon
                     }
                 }
             }
-            
+
             if !isUser {
                 Spacer(minLength: 60)
             }
         }
     }
-    
+
     @ViewBuilder
     private var statusIcon: some View {
         switch message.status {
@@ -144,7 +137,7 @@ struct MessageBubbleView: View {
                 .foregroundColor(.red)
         }
     }
-    
+
     private var bubbleBackgroundColor: Color {
         colorScheme == .dark ? Color(red: 0.2, green: 0.2, blue: 0.2) : Color(.systemGray5)
     }
@@ -166,7 +159,7 @@ struct MessageBubbleView: View {
             onButtonTap: { _ in },
             isSending: false
         )
-        
+
         MessageBubbleView(
             message: ChatMessage(
                 text: "Привет! Хотел бы обсудить подготовку к интервью",
@@ -176,7 +169,7 @@ struct MessageBubbleView: View {
             onButtonTap: nil,
             isSending: false
         )
-        
+
         MessageBubbleView(
             message: ChatMessage(
                 text: "Хочешь получить независимую оценку своего резюме?",

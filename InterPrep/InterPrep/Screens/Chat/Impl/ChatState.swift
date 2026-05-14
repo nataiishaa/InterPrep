@@ -1,10 +1,3 @@
-//
-//  ChatState.swift
-//  InterPrep
-//
-//  Chat state management
-//
-
 import ArchitectureCore
 import DiscoveryModule
 import Foundation
@@ -30,7 +23,7 @@ public struct ChatState {
         "Помоги с ответом на слабые стороны",
         "Подготовь к техническому интервью"
     ]
-    
+
     public init() {}
 }
 
@@ -41,7 +34,7 @@ public struct ChatMessage: Identifiable, Equatable, Sendable {
     public let timestamp: Date
     public let status: MessageStatus
     public let buttons: [MessageButton]
-    
+
     public init(
         id: UUID = UUID(),
         text: String,
@@ -63,7 +56,7 @@ public struct MessageButton: Identifiable, Equatable, Sendable {
     public let id: UUID
     public let text: String
     public let action: ButtonAction
-    
+
     public init(
         id: UUID = UUID(),
         text: String,
@@ -103,7 +96,7 @@ public struct Consultant: Identifiable, Equatable, Sendable {
     public let avatar: String?
     public let title: String
     public let isOnline: Bool
-    
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -123,9 +116,9 @@ public enum ChatScenario: String, Identifiable, CaseIterable, Sendable {
     case interviewPrep = "interview_prep"
     case resumeConsultation = "resume_consultation"
     case other = "other"
-    
+
     public var id: String { rawValue }
-    
+
     public var title: String {
         switch self {
         case .interviewPrep:
@@ -154,7 +147,7 @@ extension ChatState: FeatureState {
         case selectFavoriteVacancy(DiscoveryState.Vacancy)
         case dismissResumeUploadPrompt
     }
-    
+
     public enum Feedback: Sendable {
         case messagesLoaded([ChatMessage])
         case consultantLoaded(Consultant)
@@ -169,7 +162,7 @@ extension ChatState: FeatureState {
         case favoritesLoaded([DiscoveryState.Vacancy])
         case favoritesLoadFailed
     }
-    
+
     public enum Effect: Sendable {
         case loadMessages
         case loadConsultant
@@ -181,9 +174,9 @@ extension ChatState: FeatureState {
         case reviewResume
         case loadFavorites
     }
-    
+
     @MainActor
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     public static func reduce(
         state: inout Self,
         with message: Message<Input, Feedback>
@@ -193,75 +186,70 @@ extension ChatState: FeatureState {
             state.error = nil
             state.isLoading = true
             return .loadMessages
-            
+
         case .input(.inputTextChanged(let text)):
             state.inputText = text
             return nil
-            
+
         case .input(.systemHintTapped(let hint)):
             state.inputText = hint
             return nil
-            
+
         case .input(.sendMessage):
             guard !state.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 return nil
             }
-            
+
             let message = ChatMessage(
                 text: state.inputText,
                 sender: .user,
                 status: .sent
             )
-            
+
             state.messages.append(message)
             state.inputText = ""
             state.isSending = true
-            
+
             if state.waitingForVacancyId {
                 state.waitingForVacancyId = false
             }
-            
+
             return .sendMessage(message)
-            
+
         case .input(.messageReceived(let message)):
             state.messages.append(message)
             return nil
-            
+
         case .input(.buttonTapped(let button)):
             state.isSending = true
             if case .selectScenario(.interviewPrep) = button.action {
                 state.currentScenario = .interviewPrep
-                state.waitingForVacancyId = true
-                if state.favoriteVacancies.isEmpty {
-                    state.isLoadingFavorites = true
-                }
             }
             return .handleButtonAction(button.action)
-            
+
         case .input(.sendVacancyId(let vacancyId)):
             state.isSending = true
             return .prepareForVacancy(vacancyId)
-            
+
         case .input(.dismissError):
             state.error = nil
             return nil
-            
+
         case .input(.clearHistory):
             state.error = nil
             state.isSending = false
             state.isLoading = true
             return .clearHistory
-            
+
         case .feedback(.messagesLoaded(let messages)):
             state.messages = messages
             state.isLoading = false
             return nil
-            
+
         case .feedback(.consultantResponded(let message)):
             state.messages.append(message)
             state.isSending = false
-            let isVacancyRequest = message.text.contains("из избранного") || state.currentScenario == .interviewPrep
-            if isVacancyRequest {
+            if message.text.contains("из избранного") {
                 state.waitingForVacancyId = true
                 state.showFavoritesPicker = true
                 if state.favoriteVacancies.isEmpty {
@@ -270,7 +258,7 @@ extension ChatState: FeatureState {
                 }
             }
             return nil
-            
+
         case .feedback(.vacancyPreparationReceived(let recommendations)):
             if let lastIndex = state.messages.lastIndex(where: { $0.sender == .user }) {
                 let userMessage = state.messages[lastIndex]
@@ -292,7 +280,7 @@ extension ChatState: FeatureState {
             state.isSending = false
             state.waitingForVacancyId = false
             return nil
-            
+
         case .feedback(.resumeReviewReceived(let score, let recommendations)):
             let message = ChatMessage(
                 text: "Оценка вашего резюме: \(String(format: "%.1f", score))/10\n\n\(recommendations)",
@@ -303,7 +291,7 @@ extension ChatState: FeatureState {
             state.messages.append(message)
             state.isSending = false
             return nil
-            
+
         case .feedback(.consultantChunk(let messageId, let chunk)):
             if let index = state.messages.firstIndex(where: { $0.id == messageId }) {
                 let current = state.messages[index]
@@ -317,7 +305,7 @@ extension ChatState: FeatureState {
                 )
             }
             return nil
-            
+
         case .feedback(.consultantStreamFinished(let messageId)):
             if let index = state.messages.firstIndex(where: { $0.id == messageId }) {
                 let current = state.messages[index]
@@ -331,11 +319,11 @@ extension ChatState: FeatureState {
                 )
             }
             return nil
-            
+
         case .feedback(.consultantLoaded(let consultant)):
             state.consultant = consultant
             return nil
-            
+
         case .feedback(.messageSent(let message, let consultantReply)):
             if let index = state.messages.firstIndex(where: { $0.id == message.id }) {
                 state.messages[index] = ChatMessage(
@@ -351,19 +339,19 @@ extension ChatState: FeatureState {
             }
             state.isSending = false
             return nil
-            
+
         case .feedback(.connectionStatusChanged(let isConnected)):
             state.isConnected = isConnected
             return nil
-            
+
         case .feedback(.loadingFailed(let error)):
             state.isLoading = false
             state.isSending = false
-            let resumeKeywords = ["резюме", "resume", "Загрузите резюме", "Заполните профиль"]
-            if resumeKeywords.contains(where: { error.localizedLowercase.contains($0.lowercased()) }) {
+            let resumeKeywords = ["резюме", "resume", "Загрузите резюме", "Заполните профиль резюме"]
+            if resumeKeywords.contains(where: { error.lowercased().contains($0.lowercased()) }) {
                 state.showResumeUploadPrompt = true
                 let message = ChatMessage(
-                    text: "Для этого действия необходимо загрузить резюме. Загрузите резюме в разделе «Профиль» или «Документы», и я смогу вам помочь.",
+                    text: "Для этой функции нужно загруженное резюме. Перейдите в «Профиль» → «Загрузить резюме», а затем вернитесь сюда.",
                     sender: .consultant,
                     status: .sent
                 )
@@ -372,7 +360,7 @@ extension ChatState: FeatureState {
                 state.error = error
             }
             return nil
-            
+
         case .input(.showFavoritesPicker):
             state.showFavoritesPicker = true
             if state.favoriteVacancies.isEmpty {
@@ -380,11 +368,12 @@ extension ChatState: FeatureState {
                 return .loadFavorites
             }
             return nil
-            
+
         case .input(.hideFavoritesPicker):
             state.showFavoritesPicker = false
+            state.waitingForVacancyId = false
             return nil
-            
+
         case .input(.selectFavoriteVacancy(let vacancy)):
             state.showFavoritesPicker = false
             var parts = ["\(vacancy.title) — \(vacancy.company)"]
@@ -403,16 +392,19 @@ extension ChatState: FeatureState {
             state.isSending = true
             state.waitingForVacancyId = false
             return .prepareForVacancy(vacancy.id)
-            
+
         case .feedback(.favoritesLoaded(let vacancies)):
             state.favoriteVacancies = vacancies
             state.isLoadingFavorites = false
             return nil
-            
+
         case .feedback(.favoritesLoadFailed):
             state.isLoadingFavorites = false
+            state.showFavoritesPicker = false
+            state.waitingForVacancyId = false
+            state.error = "Не удалось загрузить избранные вакансии"
             return nil
-            
+
         case .input(.dismissResumeUploadPrompt):
             state.showResumeUploadPrompt = false
             return nil

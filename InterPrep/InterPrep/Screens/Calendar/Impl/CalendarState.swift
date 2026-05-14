@@ -1,10 +1,3 @@
-//
-//  CalendarState.swift
-//  InterPrep
-//
-//  Calendar feature state
-//
-
 import ArchitectureCore
 import Foundation
 
@@ -16,7 +9,7 @@ public struct CalendarState {
     public var isLoading: Bool = false
     public var errorMessage: String?
     public var isOfflineMode: Bool = false
-    
+
     public var editingEventId: String?
     public var newEventTitle: String = ""
     public var newEventDescription: String = ""
@@ -26,7 +19,7 @@ public struct CalendarState {
     public var newEventType: EventType = .interview
     public var newEventReminderEnabled: Bool = true
     public var newEventReminderMinutes: Int = 30
-    
+
     public init() {}
 }
 
@@ -41,7 +34,7 @@ extension CalendarState {
         public let reminderEnabled: Bool
         public let reminderMinutesBefore: Int
         public var isCompleted: Bool
-        
+
         public init(
             id: String = UUID().uuidString,
             title: String,
@@ -63,12 +56,12 @@ extension CalendarState {
             self.reminderMinutesBefore = reminderMinutesBefore
             self.isCompleted = isCompleted
         }
-        
+
         public var reminderDate: Date {
             date.addingTimeInterval(-Double(reminderMinutesBefore * 60))
         }
     }
-    
+
     public enum EventType: String, CaseIterable, Codable, Sendable {
         case interview = "Собеседование"
         case test = "Тестовое задание"
@@ -76,7 +69,7 @@ extension CalendarState {
         case meeting = "Встреча"
         case deadline = "Дедлайн"
         case other = "Другое"
-        
+
         public var icon: String {
             switch self {
             case .interview: return "person.2.fill"
@@ -87,7 +80,7 @@ extension CalendarState {
             case .other: return "star.fill"
             }
         }
-        
+
         public var color: String {
             switch self {
             case .interview: return "brandPrimary"
@@ -108,7 +101,7 @@ extension CalendarState: FeatureState {
         case monthChanged(Date)
         case createEventTapped
         case cancelEventCreation
-        
+
         case eventTitleChanged(String)
         case eventDescriptionChanged(String)
         case eventDateChanged(Date)
@@ -118,13 +111,13 @@ extension CalendarState: FeatureState {
         case eventReminderToggled(Bool)
         case eventReminderMinutesChanged(Int)
         case saveEventTapped
-        
+
         case deleteEvent(String)
         case editEvent(CalendarEvent)
         case syncCompleted([CalendarEvent])
         case retryTapped
     }
-    
+
     public enum Feedback: Sendable {
         case eventsLoaded([CalendarEvent])
         case eventsLoadedFromCache([CalendarEvent])
@@ -134,7 +127,7 @@ extension CalendarState: FeatureState {
         case loadingFailed(String)
         case reminderScheduled(CalendarEvent)
     }
-    
+
     public enum Effect: Sendable {
         case loadEvents(for: Date)
         case saveEvent(CalendarEvent)
@@ -143,9 +136,9 @@ extension CalendarState: FeatureState {
         case scheduleReminder(CalendarEvent)
         case cancelReminder(String)
     }
-    
+
     @MainActor
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     public static func reduce(
         state: inout Self,
         with message: Message<Input, Feedback>
@@ -154,15 +147,15 @@ extension CalendarState: FeatureState {
         case .input(.onAppear):
             state.isLoading = true
             return .loadEvents(for: state.currentMonth)
-            
+
         case let .input(.dateSelected(date)):
             state.selectedDate = date
-            
+
         case let .input(.monthChanged(date)):
             state.currentMonth = date
             state.isLoading = true
             return .loadEvents(for: date)
-            
+
         case .input(.createEventTapped):
             state.editingEventId = nil
             state.isCreatingEvent = true
@@ -184,59 +177,103 @@ extension CalendarState: FeatureState {
             state.newEventType = .interview
             state.newEventReminderEnabled = true
             state.newEventReminderMinutes = 30
-            
+
         case .input(.cancelEventCreation):
             state.editingEventId = nil
             state.isCreatingEvent = false
             state.errorMessage = nil
-            
+
         case let .input(.eventTitleChanged(title)):
             state.newEventTitle = title
-            state.errorMessage = nil
-            
+            if state.errorMessage != "Время окончания должно быть позже времени начала" {
+                state.errorMessage = nil
+            }
+
         case let .input(.eventDescriptionChanged(description)):
             state.newEventDescription = description
-            
+
         case let .input(.eventDateChanged(date)):
             state.newEventDate = date
-            
+            let calDate = Calendar.current
+            let dComps = calDate.dateComponents([.year, .month, .day], from: date)
+            let tComps = calDate.dateComponents([.hour, .minute], from: state.newEventTime)
+            var comb = DateComponents()
+            comb.year = dComps.year; comb.month = dComps.month; comb.day = dComps.day
+            comb.hour = tComps.hour; comb.minute = tComps.minute
+            if let newStart = calDate.date(from: comb), state.newEventEndDate <= newStart {
+                state.errorMessage = "Время окончания должно быть позже времени начала"
+            } else {
+                state.errorMessage = nil
+            }
+
         case let .input(.eventTimeChanged(time)):
             state.newEventTime = time
-            
+            let calTime = Calendar.current
+            let dComps2 = calTime.dateComponents([.year, .month, .day], from: state.newEventDate)
+            let tComps2 = calTime.dateComponents([.hour, .minute], from: time)
+            var comb2 = DateComponents()
+            comb2.year = dComps2.year; comb2.month = dComps2.month; comb2.day = dComps2.day
+            comb2.hour = tComps2.hour; comb2.minute = tComps2.minute
+            if let newStart = calTime.date(from: comb2), state.newEventEndDate <= newStart {
+                state.errorMessage = "Время окончания должно быть позже времени начала"
+            } else {
+                state.errorMessage = nil
+            }
+
         case let .input(.eventEndDateChanged(date)):
             state.newEventEndDate = date
-            
+            let calendar = Calendar.current
+            let dateComps = calendar.dateComponents([.year, .month, .day], from: state.newEventDate)
+            let timeComps = calendar.dateComponents([.hour, .minute], from: state.newEventTime)
+            var combined = DateComponents()
+            combined.year = dateComps.year
+            combined.month = dateComps.month
+            combined.day = dateComps.day
+            combined.hour = timeComps.hour
+            combined.minute = timeComps.minute
+            let currentStart = calendar.date(from: combined) ?? Date()
+            if date <= currentStart {
+                state.errorMessage = "Время окончания должно быть позже времени начала"
+            } else {
+                state.errorMessage = nil
+            }
+
         case let .input(.eventTypeChanged(type)):
             state.newEventType = type
-            
+
         case let .input(.eventReminderToggled(enabled)):
             state.newEventReminderEnabled = enabled
-            
+
         case let .input(.eventReminderMinutesChanged(minutes)):
             state.newEventReminderMinutes = minutes
-            
+
         case .input(.saveEventTapped):
             guard !state.newEventTitle.isEmpty else {
                 state.errorMessage = "Введите название события"
                 return nil
             }
-            
+
             let calendar = Calendar.current
             let dateComponents = calendar.dateComponents([.year, .month, .day], from: state.newEventDate)
             let timeComponents = calendar.dateComponents([.hour, .minute], from: state.newEventTime)
-            
+
             var combinedComponents = DateComponents()
             combinedComponents.year = dateComponents.year
             combinedComponents.month = dateComponents.month
             combinedComponents.day = dateComponents.day
             combinedComponents.hour = timeComponents.hour
             combinedComponents.minute = timeComponents.minute
-            
+
             guard let eventDate = calendar.date(from: combinedComponents) else {
                 state.errorMessage = "Неверная дата"
                 return nil
             }
-            
+
+            guard state.newEventEndDate > eventDate else {
+                state.errorMessage = "Время окончания должно быть позже времени начала"
+                return nil
+            }
+
             let eventId = state.editingEventId ?? UUID().uuidString
             let isCompleted: Bool
             if let editingId = state.editingEventId,
@@ -256,17 +293,17 @@ extension CalendarState: FeatureState {
                 reminderMinutesBefore: state.newEventReminderMinutes,
                 isCompleted: isCompleted
             )
-            
+
             state.isLoading = true
             if state.editingEventId != nil {
                 state.editingEventId = nil
                 return .updateEvent(event)
             }
             return .saveEvent(event)
-            
+
         case let .input(.deleteEvent(id)):
             return .deleteEvent(id)
-            
+
         case let .input(.editEvent(event)):
             state.editingEventId = event.id
             state.isCreatingEvent = true
@@ -278,27 +315,27 @@ extension CalendarState: FeatureState {
             state.newEventType = event.type
             state.newEventReminderEnabled = event.reminderEnabled
             state.newEventReminderMinutes = event.reminderMinutesBefore
-            
+
         case let .input(.syncCompleted(events)):
             state.events = events
-            
+
         case .input(.retryTapped):
             state.errorMessage = nil
             state.isLoading = true
             return .loadEvents(for: state.currentMonth)
-            
+
         case let .feedback(.eventsLoaded(events)):
             state.isLoading = false
             state.events = events
             state.isOfflineMode = false
             state.errorMessage = nil
-            
+
         case let .feedback(.eventsLoadedFromCache(events)):
             state.isLoading = false
             state.events = events
             state.isOfflineMode = true
             state.errorMessage = nil
-            
+
         case let .feedback(.eventCreated(event)):
             state.editingEventId = nil
             state.isLoading = false
@@ -307,25 +344,25 @@ extension CalendarState: FeatureState {
             if event.reminderEnabled {
                 return .scheduleReminder(event)
             }
-            
+
         case let .feedback(.eventUpdated(event)):
             state.editingEventId = nil
             if let index = state.events.firstIndex(where: { $0.id == event.id }) {
                 state.events[index] = event
             }
-            
+
         case let .feedback(.eventDeleted(id)):
             state.events.removeAll { $0.id == id }
             return .cancelReminder(id)
-            
+
         case let .feedback(.loadingFailed(error)):
             state.isLoading = false
             state.errorMessage = error
-            
+
         case let .feedback(.reminderScheduled(event)):
             break
         }
-        
+
         return nil
     }
 }
@@ -334,15 +371,15 @@ extension Date {
     var startOfMonth: Date {
         Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: self))!
     }
-    
+
     var endOfMonth: Date {
         Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
     }
-    
+
     func isSameDay(as date: Date) -> Bool {
         Calendar.current.isDate(self, inSameDayAs: date)
     }
-    
+
     func isSameMonth(as date: Date) -> Bool {
         Calendar.current.isDate(self, equalTo: date, toGranularity: .month)
     }

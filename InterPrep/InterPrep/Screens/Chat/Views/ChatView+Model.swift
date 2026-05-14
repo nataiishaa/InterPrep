@@ -1,10 +1,3 @@
-//
-//  ChatView+Model.swift
-//  InterPrep
-//
-//  Chat view model
-//
-
 import DiscoveryModule
 import Foundation
 
@@ -37,32 +30,24 @@ extension ChatView {
 }
 
 #if DEBUG
+private struct NoopCallbacks {
+    let onInputTextChanged: (String) -> Void = { _ in }
+    let onSendMessage: () -> Void = {}
+    let onHintTapped: (String) -> Void = { _ in }
+    let onButtonTapped: (MessageButton) -> Void = { _ in }
+    let onDismissError: () -> Void = {}
+    let onClearHistory: () -> Void = {}
+    let onShowFavoritesPicker: () -> Void = {}
+    let onHideFavoritesPicker: () -> Void = {}
+    let onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void = { _ in }
+    let onRetry: () -> Void = {}
+    let onClose: (() -> Void)? = nil
+}
+
+private let fixtureDate = Date(timeIntervalSince1970: 1704067200)
+
 extension ChatView.Model {
-    private static let noopCallbacks: (
-        onInputTextChanged: (String) -> Void,
-        onSendMessage: () -> Void,
-        onHintTapped: (String) -> Void,
-        onButtonTapped: (MessageButton) -> Void,
-        onDismissError: () -> Void,
-        onClearHistory: () -> Void,
-        onShowFavoritesPicker: () -> Void,
-        onHideFavoritesPicker: () -> Void,
-        onSelectFavoriteVacancy: (DiscoveryState.Vacancy) -> Void,
-        onRetry: () -> Void,
-        onClose: (() -> Void)?
-    ) = (
-        onInputTextChanged: { _ in },
-        onSendMessage: {},
-        onHintTapped: { _ in },
-        onButtonTapped: { _ in },
-        onDismissError: {},
-        onClearHistory: {},
-        onShowFavoritesPicker: {},
-        onHideFavoritesPicker: {},
-        onSelectFavoriteVacancy: { _ in },
-        onRetry: {},
-        onClose: nil
-    )
+    private static let noopCallbacks = NoopCallbacks()
 
     static var fixtureWelcome: Self {
         .init(
@@ -70,6 +55,7 @@ extension ChatView.Model {
                 ChatMessage(
                     text: "Здравствуйте! Я карьерный консультант, чем могу помочь?",
                     sender: .consultant,
+                    timestamp: fixtureDate,
                     buttons: [
                         MessageButton(text: "Помощь в подготовке к собеседованию", action: .selectScenario(.interviewPrep)),
                         MessageButton(text: "Консультация по резюме", action: .selectScenario(.resumeConsultation)),
@@ -101,14 +87,14 @@ extension ChatView.Model {
             onClose: noopCallbacks.onClose
         )
     }
-    
+
     static var fixtureWithMessages: Self {
         .init(
             messages: [
-                ChatMessage(text: "Здравствуйте! Я карьерный консультант, чем могу помочь?", sender: .consultant),
-                ChatMessage(text: "Привет! Хочу подготовиться к интервью", sender: .user, status: .read),
-                ChatMessage(text: "Отлично! На какую позицию готовитесь?", sender: .consultant),
-                ChatMessage(text: "iOS разработчик", sender: .user, status: .delivered)
+                ChatMessage(text: "Здравствуйте! Я карьерный консультант, чем могу помочь?", sender: .consultant, timestamp: fixtureDate),
+                ChatMessage(text: "Привет! Хочу подготовиться к интервью", sender: .user, timestamp: fixtureDate, status: .read),
+                ChatMessage(text: "Отлично! На какую позицию готовитесь?", sender: .consultant, timestamp: fixtureDate),
+                ChatMessage(text: "iOS разработчик", sender: .user, timestamp: fixtureDate, status: .delivered)
             ],
             consultant: Consultant(name: "Карьерный консультант", title: "AI помощник", isOnline: true),
             inputText: "",
@@ -134,13 +120,14 @@ extension ChatView.Model {
             onClose: noopCallbacks.onClose
         )
     }
-    
+
     static var fixtureWithButtons: Self {
         .init(
             messages: [
                 ChatMessage(
                     text: "Выберите тип собеседования:",
                     sender: .consultant,
+                    timestamp: fixtureDate,
                     buttons: [
                         MessageButton(text: "Техническое интервью", action: .selectScenario(.interviewPrep)),
                         MessageButton(text: "Поведенческое интервью", action: .selectScenario(.resumeConsultation)),
@@ -172,7 +159,7 @@ extension ChatView.Model {
             onClose: noopCallbacks.onClose
         )
     }
-    
+
     static var fixtureLoading: Self {
         .init(
             messages: [],
@@ -200,12 +187,12 @@ extension ChatView.Model {
             onClose: noopCallbacks.onClose
         )
     }
-    
+
     static var fixtureSending: Self {
         .init(
             messages: [
-                ChatMessage(text: "Здравствуйте!", sender: .consultant),
-                ChatMessage(text: "Привет!", sender: .user, status: .sending)
+                ChatMessage(text: "Здравствуйте!", sender: .consultant, timestamp: fixtureDate),
+                ChatMessage(text: "Привет!", sender: .user, timestamp: fixtureDate, status: .sending)
             ],
             consultant: Consultant(name: "Карьерный консультант", title: "AI помощник", isOnline: true),
             inputText: "",

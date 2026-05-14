@@ -1,94 +1,135 @@
-//
-//  DiscoveryEffectHandler.swift
-//  InterPrep
-//
-//  Discovery effect handler
-//
-
+import AnalyticsService
 import ArchitectureCore
 import CacheService
 import Foundation
+import NetworkMonitorService
 import NetworkService
 
 public actor DiscoveryEffectHandler: EffectHandler {
     public typealias StateType = DiscoveryState
-    
-    private let resumeService: ResumeService
-    private let vacancyService: VacancyService
+
+    private let resumeService: ResumeServicing
+    private let vacancyService: VacancyServicing
     private let cacheManager = CacheManager.shared
-    
+
     public init(
-        resumeService: ResumeService,
-        vacancyService: VacancyService
+        resumeService: ResumeServicing,
+        vacancyService: VacancyServicing
     ) {
         self.resumeService = resumeService
         self.vacancyService = vacancyService
     }
-    
+
+    // swiftlint:disable:next cyclomatic_complexity
     public func handle(effect: StateType.Effect) async -> StateType.Feedback? {
         switch effect {
         case .checkResume:
             let hasResume = await resumeService.hasResume()
             return .resumeCheckCompleted(hasResume: hasResume)
-            
+
         case let .loadVacancies(filter, searchQuery):
-            do {
-                let vacancies = try await vacancyService.fetchVacancies(filter: filter, searchQuery: searchQuery)
-                try? await cacheManager.save(vacancies, forKey: CacheKey.discoveryVacancies)
-                return .vacanciesLoaded(vacancies)
-            } catch {
+            if !searchQuery.isEmpty {
+                var filterParams: [String: String] = [:]
+                filterParams["filter"] = String(describing: filter)
+                await trackEvent(.vacancySearched(query: searchQuery, filters: filterParams))
+            }
+            let isConnected = await MainActor.run { NetworkMonitor.shared.isConnected }
+            if !isConnected {
                 if let cached = try? await cacheManager.load(
                     forKey: CacheKey.discoveryVacancies,
                     as: [DiscoveryState.Vacancy].self
                 ) {
                     return .vacanciesLoadedFromCache(cached)
                 }
-                if let ne = error as? NetworkError, ne.isConnectionError {
-                    return .loadingFailed("Нет подключения к интернету")
-                }
-                return .loadingFailed(error.localizedDescription)
+                return .loadingFailed("Нет интернета. Проверьте подключение и попробуйте снова")
             }
-            
+
+            var lastError: Error?
+            for attempt in 0..<2 {
+                if attempt > 0 {
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
+                }
+                do {
+                    let vacancies = try await vacancyService.fetchVacancies(filter: filter, searchQuery: searchQuery)
+                    try? await cacheManager.save(vacancies, forKey: CacheKey.discoveryVacancies)
+                    return .vacanciesLoaded(vacancies)
+                } catch {
+                    lastError = error
+                    if let ne = error as? NetworkError, ne.isConnectionError, attempt == 0 {
+                        continue
+                    }
+                    break
+                }
+            }
+            let finalError = lastError!
+            if let cached = try? await cacheManager.load(
+                forKey: CacheKey.discoveryVacancies,
+                as: [DiscoveryState.Vacancy].self
+            ) {
+                return .vacanciesLoadedFromCache(cached)
+            }
+            if let ne = finalError as? NetworkError, ne.isConnectionError {
+                let isConnected = await MainActor.run { NetworkMonitor.shared.isConnected }
+                return .loadingFailed(isConnected
+                    ? "Не удалось подключиться к серверу. Возможно, включён VPN — попробуйте отключить его"
+                    : "Нет интернета. Проверьте подключение и попробуйте снова")
+            }
+            if let api = (finalError as? NetworkError)?.asAPIError {
+                return .loadingFailed(api.userMessage)
+            }
+            return .loadingFailed("Не удалось загрузить вакансии")
+
         case let .toggleFavorite(id):
             do {
                 let isFavorite = try await vacancyService.toggleFavorite(id: id)
+                if isFavorite {
+                    await trackEvent(.vacancyFavorited(vacancyId: id))
+                } else {
+                    await trackEvent(.vacancyUnfavorited(vacancyId: id))
+                }
                 return .favoriteToggled(id, isFavorite)
             } catch {
-                return .loadingFailed(error.localizedDescription)
+                if let ne = error as? NetworkError, ne.isConnectionError {
+                    let isConnected = await MainActor.run { NetworkMonitor.shared.isConnected }
+                    return .loadingFailed(isConnected
+                        ? "Не удалось подключиться к серверу. Возможно, включён VPN — попробуйте отключить его"
+                        : "Нет интернета. Проверьте подключение и попробуйте снова")
+                }
+                return .loadingFailed("Не удалось обновить избранное")
             }
-            
-        case .navigateToResumeUpload,
-             .navigateToVacancyDetail:
+
+        case .navigateToResumeUpload:
+            return nil
+
+        case let .navigateToVacancyDetail(vacancy):
+            await trackEvent(.vacancyViewed(vacancyId: vacancy.id, company: vacancy.company))
             return nil
         }
     }
+
+    @MainActor
+    private func trackEvent(_ event: AnalyticsEvent) {
+        AnalyticsManager.shared.track(event)
+    }
 }
 
-public protocol ResumeService: Actor {
-    func hasResume() async -> Bool
-    func invalidateCache() async
-}
+#if DEBUG
 
-public protocol VacancyService: Actor {
-    func fetchVacancies(filter: DiscoveryState.FilterType, searchQuery: String) async throws -> [DiscoveryState.Vacancy]
-    func toggleFavorite(id: String) async throws -> Bool
-}
-
-public final actor ResumeServiceMock: ResumeService {
+public final actor ResumeServiceMock: ResumeServicing {
     public init() {}
-    
+
     public func hasResume() async -> Bool {
         try? await Task.sleep(nanoseconds: 500_000_000)
         return true
     }
-    
+
     public func invalidateCache() async {
     }
 }
 
-public final actor VacancyServiceMock: VacancyService {
+public final actor VacancyServiceMock: VacancyServicing {
     public init() {}
-    
+
     public func fetchVacancies(filter: DiscoveryState.FilterType, searchQuery: String) async throws -> [DiscoveryState.Vacancy] {
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         let allVacancies: [DiscoveryState.Vacancy] = [
@@ -165,8 +206,10 @@ public final actor VacancyServiceMock: VacancyService {
             return filteredVacancies.filter { $0.isFavorite }
         }
     }
-    
+
     public func toggleFavorite(id: String) async throws -> Bool {
         return true
     }
 }
+
+#endif

@@ -1,10 +1,3 @@
-//
-//  CreateNoteSheet.swift
-//  InterPrep
-//
-//  Create note sheet
-//
-
 import SwiftUI
 
 struct CreateNoteSheet: View {
@@ -12,18 +5,18 @@ struct CreateNoteSheet: View {
     @State private var noteContent: String = ""
     let onDismiss: () -> Void
     let onCreate: (String, String) -> Void
-    
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack(spacing: .zero) {
                 TextField("Название заметки", text: $noteTitle)
                     .font(.title2)
                     .fontWeight(.bold)
                     .padding()
                     .background(Color(.systemBackground))
-                
+
                 Divider()
-                
+
                 TextEditor(text: $noteContent)
                     .font(.body)
                     .padding()
@@ -37,7 +30,7 @@ struct CreateNoteSheet: View {
                         onDismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Создать") {
                         onCreate(noteTitle, noteContent)

@@ -27,22 +27,23 @@ struct TabBarButton: View {
                 }
                 .frame(height: TabBarLayout.iconStackHeight)
                 .clipped()
+                .animation(
+                    .spring(
+                        response: TabBarLayout.springResponse,
+                        dampingFraction: TabBarLayout.springDamping
+                    ),
+                    value: isSelected
+                )
 
                 Text(tab.title)
                     .font(.caption2)
                     .fontWeight(isSelected ? .semibold : .regular)
                     .foregroundColor(isSelected ? .tabBarActive : .tabBarInactive)
+                    .animation(.none, value: isSelected)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
-        .animation(
-            .spring(
-                response: TabBarLayout.springResponse,
-                dampingFraction: TabBarLayout.springDamping
-            ),
-            value: isSelected
-        )
     }
 }

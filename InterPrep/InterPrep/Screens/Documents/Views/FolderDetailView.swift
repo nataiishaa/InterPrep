@@ -1,10 +1,3 @@
-//
-//  FolderDetailView.swift
-//  InterPrep
-//
-//  Folder detail view with documents
-//
-
 import SwiftUI
 
 struct FolderDetailView: View {
@@ -12,28 +5,27 @@ struct FolderDetailView: View {
     let documents: [Document]
     let onDocumentTap: (Document) -> Void
     let onDocumentDelete: (Document) -> Void
-    
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
+            VStack(spacing: 0) {
                 if documents.isEmpty {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         Image(systemName: "folder")
-                            .font(.system(size: 60))
-                            .foregroundColor(.secondary)
-                        
+                            .font(.system(size: 48))
+                            .foregroundColor(.secondary.opacity(0.4))
+
                         Text("Папка пуста")
-                            .font(.headline)
                             .foregroundColor(.secondary)
-                        
+
                         Text("Добавьте документы в эту папку")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.secondary.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 60)
+                    .padding(.vertical, 60)
                 } else {
-                    ForEach(documents) { document in
+                    ForEach(Array(documents.enumerated()), id: \.element.id) { index, document in
                         DocumentRowView(document: document)
                             .onTapGesture {
                                 onDocumentTap(document)
@@ -45,10 +37,13 @@ struct FolderDetailView: View {
                                     Label("Удалить", systemImage: "trash")
                                 }
                             }
+                        if index < documents.count - 1 {
+                            Divider()
+                                .padding(.leading, 56)
+                        }
                     }
                 }
             }
-            .padding()
         }
         .navigationTitle(folder.name)
         .navigationBarTitleDisplayMode(.large)

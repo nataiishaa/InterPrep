@@ -1,16 +1,9 @@
-//
-//  ChatListView.swift
-//  InterPrep
-//
-//  Chat list view (for future multiple chats)
-//
-
 import SwiftUI
 
 struct ChatListView: View {
     let chats: [ChatPreview]
     let onChatTap: (ChatPreview) -> Void
-    
+
     var body: some View {
         NavigationStack {
             List {
@@ -33,7 +26,7 @@ struct ChatPreview: Identifiable {
     let lastMessage: String
     let lastMessageTime: Date
     let unreadCount: Int
-    
+
     init(
         id: UUID = UUID(),
         consultant: Consultant,
@@ -51,7 +44,7 @@ struct ChatPreview: Identifiable {
 
 struct ChatPreviewRow: View {
     let chat: ChatPreview
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Circle()
@@ -69,27 +62,27 @@ struct ChatPreviewRow: View {
                         .frame(width: 12, height: 12)
                         .offset(x: 18, y: 18)
                 )
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(chat.consultant.name)
                         .font(.headline)
-                    
+
                     Spacer()
-                    
+
                     Text(chat.lastMessageTime, style: .relative)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
+
                 HStack {
                     Text(chat.lastMessage)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
-                    
+
                     Spacer()
-                    
+
                     if chat.unreadCount > 0 {
                         Text("\(chat.unreadCount)")
                             .font(.caption2)

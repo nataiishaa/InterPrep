@@ -1,30 +1,24 @@
-//
-//  CalendarContainer.swift
-//  InterPrep
-//
-//  Calendar feature container
-//
-
 import ArchitectureCore
 import NetworkMonitorService
 import SwiftUI
 
 public struct CalendarContainer: View {
-    @StateObject private var store: CalendarStore
+    @State private var store: CalendarStore
     @ObservedObject private var networkMonitor = NetworkMonitor.shared
-    
-    public init(store: CalendarStore) {
-        _store = StateObject(wrappedValue: store)
-    }
-    
-    public init() {
 
-        _store = StateObject(wrappedValue: Store(
+    public init(store: CalendarStore) {
+        self.store = store
+    }
+
+    #if DEBUG
+    public init() {
+        self.store = Store(
             state: CalendarState(),
             effectHandler: CalendarEffectHandler(calendarService: MockCalendarService())
-        ))
+        )
     }
-    
+    #endif
+
     public var body: some View {
         CalendarView(model: makeModel())
             .onAppear {
@@ -36,7 +30,7 @@ public struct CalendarContainer: View {
                 }
             }
     }
-    
+
     private func makeModel() -> CalendarView.Model {
         .init(
             selectedDate: store.state.selectedDate,
@@ -72,21 +66,21 @@ public struct CalendarContainer: View {
             eventCreationModel: makeEventCreationModel()
         )
     }
-    
+
     private func makeEventCreationModel() -> EventCreationView.Model {
         let calendar = Calendar.current
         let dateComponents = calendar.dateComponents([.year, .month, .day], from: store.state.newEventDate)
         let timeComponents = calendar.dateComponents([.hour, .minute], from: store.state.newEventTime)
-        
+
         var combinedComponents = DateComponents()
         combinedComponents.year = dateComponents.year
         combinedComponents.month = dateComponents.month
         combinedComponents.day = dateComponents.day
         combinedComponents.hour = timeComponents.hour
         combinedComponents.minute = timeComponents.minute
-        
+
         let startDateTime = calendar.date(from: combinedComponents) ?? Date()
-        
+
         return .init(
             isEditing: store.state.editingEventId != nil,
             title: store.state.newEventTitle,
@@ -129,8 +123,8 @@ public struct CalendarContainer: View {
     }
 }
 
-// MARK: - Preview
-
+#if DEBUG
 #Preview {
     CalendarContainer()
 }
+#endif

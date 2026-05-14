@@ -18,6 +18,10 @@ let project = Project(
         .remote(
             url: "https://github.com/grpc/grpc-swift.git",
             requirement: .upToNextMajor(from: "1.21.0")
+        ),
+        .remote(
+            url: "https://github.com/appmetrica/appmetrica-sdk-ios",
+            requirement: .upToNextMajor(from: "5.0.0")
         )
     ],
     settings: .settings(
@@ -26,8 +30,7 @@ let project = Project(
         ]
     ),
     targets: [
-        // MARK: - App Target
-        
+
         .target(
             name: "InterPrep",
             destinations: .iOS,
@@ -50,11 +53,8 @@ let project = Project(
                 "InterPrep/AppDelegate.swift",
                 "InterPrep/AppGraph.swift",
                 "InterPrep/ContentView.swift",
-                "InterPrep/Services/AuthServiceImpl.swift",
-                "InterPrep/Services/ResumeServiceImpl.swift",
-                "InterPrep/Services/VacancyServiceImpl.swift",
-                "InterPrep/Services/ChatServiceImpl.swift",
-                "InterPrep/Services/CalendarServiceImpl.swift",
+                "InterPrep/Config/Secrets.swift",
+                "InterPrep/Services/VacancyService.swift",
                 "InterPrep/Components/Navigation/MainTabView.swift",
                 "InterPrep/Components/Navigation/ResumeProfileDetailView.swift",
                 "InterPrep/Components/Navigation/TabBarView.swift",
@@ -75,6 +75,7 @@ let project = Project(
                 .target(name: "NotificationService"),
                 .target(name: "CacheService"),
                 .target(name: "NetworkMonitorService"),
+                .target(name: "AnalyticsService"),
                 .target(name: "DiscoveryModule"),
                 .target(name: "VacancyCardFeature"),
                 .target(name: "AuthFeature"),
@@ -86,9 +87,7 @@ let project = Project(
                 .target(name: "ChatFeature")
             ]
         ),
-        
-        // MARK: - Architecture Core
-        
+
         .target(
             name: "ArchitectureCore",
             destinations: .iOS,
@@ -100,9 +99,7 @@ let project = Project(
             ],
             dependencies: []
         ),
-        
-        // MARK: - Network Service
-        
+
         .target(
             name: "NetworkService",
             destinations: .iOS,
@@ -117,9 +114,7 @@ let project = Project(
                 .package(product: "GRPC")
             ]
         ),
-        
-        // MARK: - Design System
-        
+
         .target(
             name: "DesignSystem",
             destinations: .iOS,
@@ -137,9 +132,20 @@ let project = Project(
             ],
             dependencies: []
         ),
-        
-        // MARK: - Notification Service
-        
+
+        .target(
+            name: "AnalyticsService",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.interprep.analytics",
+            sources: [
+                "InterPrep/Services/Analytics/*.swift"
+            ],
+            dependencies: [
+                .package(product: "AppMetricaCore")
+            ]
+        ),
+
         .target(
             name: "NotificationService",
             destinations: .iOS,
@@ -150,22 +156,21 @@ let project = Project(
             ],
             dependencies: []
         ),
-        
-        // MARK: - Cache Service
-        
+
         .target(
             name: "CacheService",
             destinations: .iOS,
             product: .framework,
             bundleId: "com.interprep.cache",
             sources: [
-                "InterPrep/Services/CacheManager.swift"
+                "InterPrep/Services/CacheManager.swift",
+                "InterPrep/Services/AreasCache.swift"
             ],
-            dependencies: []
+            dependencies: [
+                .target(name: "NetworkService")
+            ]
         ),
-        
-        // MARK: - Network Monitor Service
-        
+
         .target(
             name: "NetworkMonitorService",
             destinations: .iOS,
@@ -176,12 +181,11 @@ let project = Project(
                 "InterPrep/Services/OfflineSyncManager.swift"
             ],
             dependencies: [
-                .target(name: "CacheService")
+                .target(name: "CacheService"),
+                .target(name: "NetworkService")
             ]
         ),
-        
-        // MARK: - Discovery Module (Base)
-        
+
         .target(
             name: "DiscoveryModule",
             destinations: .iOS,
@@ -196,12 +200,11 @@ let project = Project(
                 .target(name: "CacheService"),
                 .target(name: "NetworkService"),
                 .target(name: "NetworkMonitorService"),
+                .target(name: "AnalyticsService"),
                 .sdk(name: "WebKit", type: .framework)
             ]
         ),
-        
-        // MARK: - Auth Feature
-        
+
         .target(
             name: "AuthFeature",
             destinations: .iOS,
@@ -214,12 +217,12 @@ let project = Project(
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
                 .target(name: "NetworkService"),
-                .target(name: "ResumeUploadFeature")
+                .target(name: "CacheService"),
+                .target(name: "ResumeUploadFeature"),
+                .target(name: "AnalyticsService")
             ]
         ),
-        
-        // MARK: - Onboarding Feature
-        
+
         .target(
             name: "OnboardingFeature",
             destinations: .iOS,
@@ -233,9 +236,7 @@ let project = Project(
                 .target(name: "DesignSystem")
             ]
         ),
-        
-        // MARK: - Vacancy Card Feature
-        
+
         .target(
             name: "VacancyCardFeature",
             destinations: .iOS,
@@ -250,9 +251,7 @@ let project = Project(
                 .target(name: "DiscoveryModule")
             ]
         ),
-        
-        // MARK: - Resume Upload Feature
-        
+
         .target(
             name: "ResumeUploadFeature",
             destinations: .iOS,
@@ -265,12 +264,11 @@ let project = Project(
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
                 .target(name: "NetworkService"),
-                .target(name: "DiscoveryModule")
+                .target(name: "DiscoveryModule"),
+                .target(name: "AnalyticsService")
             ]
         ),
-        
-        // MARK: - Calendar Feature
-        
+
         .target(
             name: "CalendarFeature",
             destinations: .iOS,
@@ -285,12 +283,11 @@ let project = Project(
                 .target(name: "NetworkService"),
                 .target(name: "NotificationService"),
                 .target(name: "CacheService"),
-                .target(name: "NetworkMonitorService")
+                .target(name: "NetworkMonitorService"),
+                .target(name: "AnalyticsService")
             ]
         ),
 
-        // MARK: - Profile Feature
-        
         .target(
             name: "ProfileFeature",
             destinations: .iOS,
@@ -302,16 +299,16 @@ let project = Project(
             dependencies: [
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
+                .target(name: "AuthFeature"),
                 .target(name: "CalendarFeature"),
                 .target(name: "NetworkService"),
                 .target(name: "NotificationService"),
                 .target(name: "CacheService"),
-                .target(name: "NetworkMonitorService")
+                .target(name: "NetworkMonitorService"),
+                .target(name: "AnalyticsService")
             ]
         ),
 
-        // MARK: - Documents Feature
-        
         .target(
             name: "DocumentsFeature",
             destinations: .iOS,
@@ -325,12 +322,11 @@ let project = Project(
                 .target(name: "DesignSystem"),
                 .target(name: "NetworkService"),
                 .target(name: "CacheService"),
-                .target(name: "NetworkMonitorService")
+                .target(name: "NetworkMonitorService"),
+                .target(name: "AnalyticsService")
             ]
         ),
 
-        // MARK: - Chat Feature
-        
         .target(
             name: "ChatFeature",
             destinations: .iOS,
@@ -343,12 +339,11 @@ let project = Project(
                 .target(name: "ArchitectureCore"),
                 .target(name: "DesignSystem"),
                 .target(name: "DiscoveryModule"),
-                .target(name: "NetworkMonitorService")
+                .target(name: "NetworkMonitorService"),
+                .target(name: "AnalyticsService")
             ]
         ),
-        
-        // MARK: - Tests
-        
+
         .target(
             name: "InterPrepTests",
             destinations: .iOS,
@@ -365,6 +360,8 @@ let project = Project(
                 .target(name: "CalendarFeature"),
                 .target(name: "DocumentsFeature"),
                 .target(name: "ProfileFeature"),
+                .target(name: "VacancyCardFeature"),
+                .target(name: "DiscoveryModule"),
                 .package(product: "SnapshotTesting")
             ]
         ),
@@ -381,9 +378,7 @@ let project = Project(
                 .target(name: "InterPrep")
             ]
         ),
-        
-        // MARK: - Feature Tests
-        
+
         .target(
             name: "AuthFeatureTests",
             destinations: .iOS,
@@ -400,7 +395,7 @@ let project = Project(
                 .package(product: "SnapshotTesting")
             ]
         ),
-        
+
         .target(
             name: "OnboardingFeatureTests",
             destinations: .iOS,
@@ -417,7 +412,7 @@ let project = Project(
                 .package(product: "SnapshotTesting")
             ]
         ),
-        
+
         .target(
             name: "DiscoveryModuleTests",
             destinations: .iOS,
@@ -434,7 +429,7 @@ let project = Project(
                 .package(product: "SnapshotTesting")
             ]
         ),
-        
+
         .target(
             name: "ResumeUploadFeatureTests",
             destinations: .iOS,
@@ -451,7 +446,7 @@ let project = Project(
                 .package(product: "SnapshotTesting")
             ]
         ),
-        
+
         .target(
             name: "ChatFeatureTests",
             destinations: .iOS,

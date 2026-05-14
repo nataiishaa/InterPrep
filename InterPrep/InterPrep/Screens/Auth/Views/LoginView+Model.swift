@@ -1,10 +1,3 @@
-//
-//  LoginView+Model.swift
-//  InterPrep
-//
-//  Login view model
-//
-
 import Foundation
 
 extension LoginView {
@@ -43,15 +36,15 @@ extension LoginView.Model {
             onForgotPassword: onForgotPassword
         )
     }
-    
+
     static var loading: Self {
         .fixture(isLoading: true)
     }
-    
+
     static var fixtureWithError: Self {
         .fixture(errorMessage: "Неверный email или пароль")
     }
-    
+
     static var filled: Self {
         .fixture(
             email: "user@example.com",

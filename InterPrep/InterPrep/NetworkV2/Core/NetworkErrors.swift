@@ -1,8 +1,6 @@
 import Foundation
 import GRPC
 
-// MARK: - Network Error
-
 public enum NetworkError: Error, LocalizedError {
     case invalidURL
     case encodingFailed(Error)
@@ -12,8 +10,9 @@ public enum NetworkError: Error, LocalizedError {
     case unauthorized
     case noData
     case transportError(Error)
+    case timeout(vpnLikely: Bool)
     case unknown
-    
+
     public var errorDescription: String? {
         switch self {
         case .invalidURL:
@@ -31,29 +30,42 @@ public enum NetworkError: Error, LocalizedError {
         case .noData:
             return "No data received"
         case .transportError(let error):
+            let desc = String(describing: error).lowercased()
+            if desc.contains("413") || desc.contains("payload too large") || desc.contains("request entity too large") {
+                return "Файл слишком большой. Максимальный размер — 25 МБ"
+            }
             return (error as NSError).localizedDescription
+        case .timeout(let vpnLikely):
+            if vpnLikely {
+                return "Не удалось подключиться к серверу. Возможно, включён VPN — попробуйте отключить его"
+            }
+            return "Нет интернета. Проверьте подключение и попробуйте снова"
         case .unknown:
             return "Unknown error"
         }
     }
-    
-    /// True when failure is likely due to no connectivity, DNS, TLS handshake, or server unreachable.
+
+    public var isTimeoutError: Bool {
+        if case .timeout = self { return true }
+        return false
+    }
+
     public var isConnectionError: Bool {
+        if case .timeout = self { return true }
         if case .transportError(let error) = self {
             return Self.isTransportLikelyConnectionFailure(error)
         }
         return false
     }
 
-    /// Shared so call sites (e.g. chat) can classify underlying transport errors without wrapping in `NetworkError`.
     public static func isTransportLikelyConnectionFailure(_ error: Error) -> Bool {
         if let status = error as? GRPCStatus {
             switch status.code {
             case .unavailable, .deadlineExceeded, .cancelled:
                 return true
             case .unknown, .aborted:
-                let m = (status.message ?? "").lowercased()
-                if m.contains("connection") || m.contains("network") || m.contains("reset") || m.contains("refused") {
+                let msg = (status.message ?? "").lowercased()
+                if msg.contains("connection") || msg.contains("network") || msg.contains("reset") || msg.contains("refused") {
                     return true
                 }
                 return false
@@ -81,12 +93,12 @@ public enum NetworkError: Error, LocalizedError {
             }
         }
         if ns.domain == NSPOSIXErrorDomain {
-            // ECONNREFUSED, ENETUNREACH, EHOSTUNREACH, EPIPE (typical on Apple platforms)
             if [32, 50, 51, 54, 61, 64, 65].contains(ns.code) { return true }
         }
         let low = String(describing: error).lowercased()
         if low.contains("connection refused")
             || low.contains("connection reset")
+            || low.contains("connection interrupted")
             || low.contains("network is unreachable")
             || low.contains("could not connect")
             || low.contains("broken pipe")
@@ -98,8 +110,6 @@ public enum NetworkError: Error, LocalizedError {
         return false
     }
 }
-
-// MARK: - API Error Code (gRPC status codes used by backend)
 
 public enum APIErrorCode: String, Sendable {
     case unauthenticated = "Unauthenticated"
@@ -113,8 +123,6 @@ public enum APIErrorCode: String, Sendable {
     case unknown = "Unknown"
 }
 
-// MARK: - API Error
-
 public struct APIError: Error, LocalizedError, Sendable {
     public let code: APIErrorCode
     public let serverMessage: String
@@ -124,7 +132,6 @@ public struct APIError: Error, LocalizedError, Sendable {
         self.serverMessage = serverMessage
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public var userMessage: String {
         let msg = serverMessage.lowercased()
         switch code {
@@ -141,8 +148,14 @@ public struct APIError: Error, LocalizedError, Sendable {
             if msg.contains("invalid refresh token") {
                 return "Сессия истекла. Войдите снова"
             }
-            if msg.contains("user not found in context") {
+            if msg.contains("user not found in context") || msg.contains("user id not found in context") {
                 return "Войдите в аккаунт"
+            }
+            if msg.contains("missing user id") {
+                return "Войдите в аккаунт"
+            }
+            if msg.contains("invalid internal api key") {
+                return "Ошибка авторизации. Попробуйте позже"
             }
             return "Требуется авторизация"
 
@@ -155,26 +168,54 @@ public struct APIError: Error, LocalizedError, Sendable {
             if msg.contains("invalid email format") { return "Неверный формат email" }
             if msg.contains("invalid code format") { return "Неверный формат кода" }
             if msg.contains("invalid code") || msg.contains("code expired or used") { return "Неверный или просроченный код" }
+            if msg.contains("invalid user id") { return "Ошибка авторизации" }
+            if msg.contains("user_id required") { return "Ошибка авторизации" }
             if msg.contains("file_content is required") { return "Выберите файл" }
-            if msg.contains("file too large") { return "Файл слишком большой" }
+            if msg.contains("file too large") { return "Файл слишком большой (максимум 20 МБ)" }
             if msg.contains("filename is required") { return "Укажите имя файла" }
+            if msg.contains("filename is too long") { return "Имя файла слишком длинное (максимум 120 символов)" }
+            if msg.contains("unsupported file extension") { return "Неподдерживаемый формат файла" }
+            if msg.contains("file content does not match") { return "Содержимое файла не соответствует расширению" }
+            if msg.contains("mime_type does not match") { return "Тип файла не соответствует расширению" }
+            if msg.contains("mime_type is required") { return "Укажите тип файла" }
+            if msg.contains("unsupported image type") { return "Неподдерживаемый формат изображения. Используйте JPEG, PNG или WebP" }
             if msg.contains("name is required") { return "Укажите название" }
+            if msg.contains("name is too long") { return "Название слишком длинное (максимум 120 символов)" }
+            if msg.contains("name contains forbidden characters") { return "Название содержит недопустимые символы" }
             if msg.contains("url is required") { return "Укажите ссылку" }
             if msg.contains("node_id is required") { return "Укажите элемент" }
             if msg.contains("new_name is required") { return "Укажите новое имя" }
-            if msg.contains("question is required") { return "Введите вопрос" }
-            if msg.contains("session_id is required") || msg.contains("session_id must be a valid uuid") { return "Неверный идентификатор сессии" }
-            if msg.contains("vacancy_id is required") { return "Укажите вакансию" }
             if msg.contains("material_id is required") { return "Укажите материал" }
             if msg.contains("material is not a file") { return "Это не файл" }
+            if msg.contains("question is required") { return "Введите вопрос" }
+            if msg.contains("question is too long") { return "Вопрос слишком длинный (максимум 2000 символов)" }
+            if msg.contains("question contains unsupported control characters") { return "Вопрос содержит недопустимые символы" }
+            if msg.contains("too many context chunks") { return "Слишком много элементов контекста" }
+            if msg.contains("context chunk content is too long") { return "Элемент контекста слишком длинный" }
+            if msg.contains("context chunk content is required") { return "Элемент контекста не может быть пустым" }
+            if msg.contains("context chunk contains unsupported control characters") { return "Контекст содержит недопустимые символы" }
+            if msg.contains("content is too long") { return "Сообщение слишком длинное (максимум 4000 символов)" }
+            if msg.contains("content is required") { return "Введите сообщение" }
+            if msg.contains("content contains unsupported control characters") { return "Сообщение содержит недопустимые символы" }
+            if msg.contains("owner must be user or assistant") { return "Ошибка отправки сообщения" }
+            if msg.contains("session_id is required") || msg.contains("session_id must be a valid uuid") { return "Неверный идентификатор сессии" }
+            if msg.contains("vacancy_id is required") { return "Укажите вакансию" }
+            if msg.contains("vacancy_id must be numeric") { return "Неверный формат вакансии" }
+            if msg.contains("page must be >= 0") { return "Неверный номер страницы" }
+            if msg.contains("per_page must be between") { return "Неверное количество элементов на странице" }
             if msg.contains("profile required") { return "Заполните профиль" }
+            if msg.contains(".doc format is not supported") || msg.contains("legacy doc format") { return "Формат .doc не поддерживается. Сохраните файл как .docx или .pdf" }
+            if msg.contains("failed to extract text") { return "Не удалось извлечь текст из файла" }
             if msg.contains("event is required") { return "Укажите событие" }
             if msg.contains("start_time is required") { return "Укажите время начала" }
             if msg.contains("end_time is required") { return "Укажите время окончания" }
-            if msg.contains("title is required") { return "Укажите название" }
+            if msg.contains("title is required") || msg.contains("title cannot be empty") { return "Укажите название" }
+            if msg.contains("title is too long") { return "Название слишком длинное (максимум 200 символов)" }
+            if msg.contains("description is too long") { return "Описание слишком длинное (максимум 5000 символов)" }
+            if msg.contains("location is too long") { return "Место слишком длинное (максимум 255 символов)" }
+            if msg.contains("invalid timezone") { return "Неверный формат часового пояса" }
             if msg.contains("start_time must be before end_time") { return "Время начала должно быть раньше окончания" }
             if msg.contains("patch is required") { return "Укажите изменения" }
-            if msg.contains("title cannot be empty") { return "Название не может быть пустым" }
             if msg.contains("from_time and to_time are required") { return "Укажите период" }
             if msg.contains("from_time must be before to_time") { return "Начало периода должно быть раньше конца" }
             if msg.contains("time range cannot exceed 1 year") { return "Период не более года" }
@@ -188,6 +229,7 @@ public struct APIError: Error, LocalizedError, Sendable {
             if msg.contains("profile photo not set") { return "Фото не задано" }
             if msg.contains("file not found") { return "Файл не найден" }
             if msg.contains("session not found") { return "Сессия не найдена" }
+            if msg.contains("vacancy not found") { return "Вакансия не найдена" }
             return "Не найдено"
 
         case .alreadyExists:
@@ -201,16 +243,19 @@ public struct APIError: Error, LocalizedError, Sendable {
             if msg.contains("invalid password") { return "Неверный пароль" }
             if msg.contains("invalid or expired code") || msg.contains("invalid code") { return "Неверный или просроченный код" }
             if msg.contains("access denied") { return "Нет доступа" }
+            if msg.contains("unauthorized") { return "Нет доступа" }
             return "Доступ запрещён"
 
         case .resourceExhausted:
             if msg.contains("please wait before requesting another code") { return "Подождите перед повторной отправкой кода" }
             if msg.contains("too many attempts") { return "Слишком много попыток. Подождите" }
+            if msg.contains("user storage limit exceeded") { return "Превышен лимит хранилища (максимум 25 МБ)" }
             return "Превышен лимит. Попробуйте позже"
 
         case .failedPrecondition:
             if msg.contains("resume profile not available") { return "Загрузите резюме" }
             if msg.contains("resume profile incomplete") { return "Заполните профиль резюме" }
+            if msg.contains("resume is not uploaded") { return "Резюме не загружено. Загрузите резюме в разделе «Профиль»" }
             return "Выполните требуемые условия"
 
         case .internalError:
@@ -221,8 +266,34 @@ public struct APIError: Error, LocalizedError, Sendable {
             if msg.contains("failed to create refresh token") { return "Ошибка авторизации. Попробуйте позже" }
             if msg.contains("user not found") { return "Ошибка сервера. Попробуйте позже" }
             if msg.contains("materials client not configured") { return "Сервис временно недоступен" }
+            if msg.contains("failed to send email") { return "Не удалось отправить письмо. Попробуйте позже" }
             if msg.contains("failed to upload") || msg.contains("failed to save") { return "Не удалось загрузить. Попробуйте позже" }
-            if msg.contains("failed to load") { return "Не удалось загрузить данные" }
+            if msg.contains("failed to load") || msg.contains("failed to read") { return "Не удалось загрузить данные" }
+            if msg.contains("failed to update password") || msg.contains("failed to mark code") || msg.contains("failed to invalidate") {
+                return "Не удалось сменить пароль. Попробуйте позже"
+            }
+            if msg.contains("failed to begin transaction") || msg.contains("failed to commit transaction") {
+                return "Ошибка сервера. Попробуйте позже"
+            }
+            if msg.contains("failed to mark user as deleted") || msg.contains("failed to revoke refresh tokens") {
+                return "Не удалось удалить аккаунт. Попробуйте позже"
+            }
+            if msg.contains("failed to validate user storage") { return "Не удалось проверить хранилище. Попробуйте позже" }
+            if msg.contains("failed to create") { return "Не удалось создать. Попробуйте позже" }
+            if msg.contains("failed to update") { return "Не удалось обновить. Попробуйте позже" }
+            if msg.contains("failed to delete") { return "Не удалось удалить. Попробуйте позже" }
+            if msg.contains("failed to rename") { return "Не удалось переименовать. Попробуйте позже" }
+            if msg.contains("failed to search") { return "Не удалось выполнить поиск. Попробуйте позже" }
+            if msg.contains("failed to get") || msg.contains("failed to list") { return "Не удалось загрузить данные" }
+            if msg.contains("failed to process") { return "Не удалось обработать запрос. Попробуйте позже" }
+            if msg.contains("failed to parse") { return "Не удалось обработать файл. Попробуйте позже" }
+            if msg.contains("failed to add") || msg.contains("failed to remove") { return "Не удалось выполнить операцию. Попробуйте позже" }
+            if msg.contains("failed to generate") || msg.contains("failed to save") || msg.contains("failed to check") || msg.contains("failed to increment") {
+                return "Ошибка сервера. Попробуйте позже"
+            }
+            if msg.contains("upsert resume profile") || msg.contains("patch resume profile") {
+                return "Не удалось обновить профиль резюме. Попробуйте позже"
+            }
             return "Ошибка сервера. Попробуйте позже"
 
         case .unknown:
@@ -234,8 +305,6 @@ public struct APIError: Error, LocalizedError, Sendable {
         userMessage
     }
 }
-
-// MARK: - Parse from HTTP status (backward compat for .httpError case)
 
 extension APIError {
     public static func from(httpStatusCode: Int, body: Data?) -> APIError {
@@ -268,8 +337,6 @@ extension APIError {
     }
 }
 
-// MARK: - NetworkError → APIError
-
 extension NetworkError {
     public var asAPIError: APIError? {
         switch self {
@@ -279,7 +346,7 @@ extension NetworkError {
             return APIError.from(httpStatusCode: statusCode, body: data)
         case .apiError(let apiError):
             return apiError
-        case .invalidURL, .encodingFailed, .decodingFailed, .noData, .transportError, .unknown:
+        case .invalidURL, .encodingFailed, .decodingFailed, .noData, .transportError, .timeout, .unknown:
             return nil
         }
     }

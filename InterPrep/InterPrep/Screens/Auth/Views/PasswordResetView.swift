@@ -1,23 +1,15 @@
-//
-//  PasswordResetView.swift
-//  InterPrep
-//
-//  Password reset screen
-//
-
 import SwiftUI
 
 struct PasswordResetView: View {
     let model: Model
     @FocusState private var isFocused: Bool
-    
+
     init(model: Model) {
         self.model = model
     }
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Background
             LinearGradient(
                 colors: [
                     Color(red: 0.45, green: 0.5, blue: 0.45),
@@ -27,27 +19,25 @@ struct PasswordResetView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             ScrollView {
                 VStack(spacing: 24) {
                     Spacer()
                         .frame(height: 40)
-                    
-                    // Title
+
                     VStack(spacing: 8) {
                         Text("InterPrep")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
-                        
+
                         Text("На какую почту был\nзарегистрирован аккаунт?")
                             .font(.title3)
                             .multilineTextAlignment(.center)
                             .foregroundColor(.white.opacity(0.9))
                     }
                     .padding(.bottom, 40)
-                    
-                    // Email field
+
                     CustomTextField(
                         placeholder: "Почта",
                         text: Binding(
@@ -60,8 +50,7 @@ struct PasswordResetView: View {
                     .submitLabel(.send)
                     .onSubmit { model.onSendCode() }
                     .padding(.horizontal, 32)
-                    
-                    // Error message
+
                     if let errorMessage = model.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
@@ -69,10 +58,9 @@ struct PasswordResetView: View {
                             .padding(.horizontal, 32)
                             .transition(.opacity)
                     }
-                    
+
                     Spacer()
-                    
-                    // Button
+
                     Button {
                         model.onSendCode()
                     } label: {
@@ -97,8 +85,6 @@ struct PasswordResetView: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     PasswordResetView(model: .init(

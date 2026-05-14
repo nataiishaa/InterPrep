@@ -1,27 +1,19 @@
-//
-//  RegistrationView.swift
-//  InterPrep
-//
-//  Registration screen view (Step 1 - Name)
-//
-
 import SwiftUI
 
 struct RegistrationView: View {
     let model: Model
     @FocusState private var focusedField: Field?
-    
+
     enum Field {
         case firstName, lastName
     }
-    
+
     init(model: Model) {
         self.model = model
     }
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Background
             LinearGradient(
                 colors: [
                     Color(red: 0.45, green: 0.5, blue: 0.45),
@@ -31,33 +23,30 @@ struct RegistrationView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             ScrollView {
                 VStack(spacing: 24) {
-                    // Progress indicator
                     HStack(spacing: 8) {
                         Circle()
                             .fill(Color.white)
                             .frame(width: 30, height: 4)
-                        
+
                         Circle()
                             .fill(Color.white.opacity(0.3))
                             .frame(width: 30, height: 4)
                     }
                     .padding(.top, 60)
-                    
+
                     Spacer()
                         .frame(height: 20)
-                    
-                    // Title
+
                     Text("Давайте знакомиться!\nКак вас зовут?")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white)
                         .padding(.bottom, 40)
-                    
-                    // Form
+
                     VStack(spacing: 16) {
                         CustomTextField(
                             placeholder: "Имя",
@@ -69,7 +58,7 @@ struct RegistrationView: View {
                         .focused($focusedField, equals: .firstName)
                         .submitLabel(.next)
                         .onSubmit { focusedField = .lastName }
-                        
+
                         CustomTextField(
                             placeholder: "Фамилия",
                             text: Binding(
@@ -82,8 +71,7 @@ struct RegistrationView: View {
                         .onSubmit { model.onContinue() }
                     }
                     .padding(.horizontal, 32)
-                    
-                    // Error message
+
                     if let errorMessage = model.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
@@ -91,10 +79,9 @@ struct RegistrationView: View {
                             .padding(.horizontal, 32)
                             .transition(.opacity)
                     }
-                    
+
                     Spacer()
-                    
-                    // Button
+
                     Button {
                         model.onContinue()
                     } label: {
@@ -113,8 +100,6 @@ struct RegistrationView: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     RegistrationView(model: .init(

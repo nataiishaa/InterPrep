@@ -76,7 +76,6 @@ User Action → Input → reduce(state, input) → Effect
 Клиент общается с единым бекенд-сервисом `BackendGateway` (Go) через два транспорта:
 
 - **gRPC (HTTP/2, TLS)** — основной, через grpc-swift
-- **HTTPS + Protobuf** — запасной, через URLSession
 
 Контракт описан в `.proto` файлах → кодогенерация Swift-типов через `protoc`.
 

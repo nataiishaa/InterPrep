@@ -1,59 +1,82 @@
-//
-//  ResumeUploadState.swift
-//  InterPrep
-//
-//  Resume upload state
-//
-
 import ArchitectureCore
 import Foundation
 import UniformTypeIdentifiers
+
+public struct ResumeQuestion: Equatable, Sendable, Identifiable {
+    public let id: String
+    public let text: String
+    public let type: String
+    public let options: [String]
+
+    public init(id: String, text: String, type: String, options: [String]) {
+        self.id = id
+        self.text = text
+        self.type = type
+        self.options = options
+    }
+}
+
+public struct ResumeSessionInfo: Sendable {
+    public let sessionId: String
+    public let questions: [ResumeQuestion]
+    public let status: String
+
+    public init(sessionId: String, questions: [ResumeQuestion], status: String) {
+        self.sessionId = sessionId
+        self.questions = questions
+        self.status = status
+    }
+}
 
 public struct ResumeUploadState: FeatureState {
     public var uploadStatus: UploadStatus = .idle
     public var selectedFile: SelectedFile?
     public var uploadProgress: Double = 0.0
     public var errorMessage: String?
-    
+    public var sessionId: String?
+    public var pendingQuestions: [ResumeQuestion] = []
+
     public init() {}
-    
+
     public enum UploadStatus: Sendable {
         case idle
         case selected
         case uploading
+        case awaitingQuestions
         case success
         case failed
     }
-    
+
     public struct SelectedFile: Equatable, Sendable {
         public let name: String
         public let size: Int64
         public let url: URL
         public let type: FileType
-        
+
         public init(name: String, size: Int64, url: URL, type: FileType) {
             self.name = name
             self.size = size
             self.url = url
             self.type = type
         }
-        
+
         // swiftlint:disable:next nesting
         public enum FileType: String, Sendable {
             case pdf = "PDF"
-            case doc = "DOC"
             case docx = "DOCX"
+            case rtf = "RTF"
             case txt = "TXT"
-            
+
             var icon: String {
                 switch self {
                 case .pdf: return "doc.fill"
-                case .doc, .docx: return "doc.text.fill"
+                case .docx: return "doc.text.fill"
+                case .rtf: return "doc.richtext.fill"
                 case .txt: return "doc.plaintext.fill"
                 }
             }
         }
-        
+
         var formattedSize: String {
             let formatter = ByteCountFormatter()
             formatter.allowedUnits = [.useKB, .useMB]
@@ -61,7 +84,7 @@ public struct ResumeUploadState: FeatureState {
             return formatter.string(fromByteCount: size)
         }
     }
-    
+
     public enum Input: Sendable {
         case selectFileTapped
         case fileSelected(URL)
@@ -70,15 +93,15 @@ public struct ResumeUploadState: FeatureState {
         case skipTapped
         case removeFileTapped
     }
-    
+
     public enum Feedback: Sendable {
         case fileValidated(SelectedFile)
         case fileValidationFailed(String)
         case uploadProgress(Double)
-        case uploadCompleted
+        case uploadCompleted(ResumeSessionInfo)
         case uploadFailed(String)
     }
-    
+
     public enum Effect: Sendable {
         case validateFile(URL)
         case uploadFile(SelectedFile)
@@ -86,7 +109,7 @@ public struct ResumeUploadState: FeatureState {
         case navigateBack
         case navigateToMain
     }
-    
+
     @MainActor
     public static func reduce(
         state: inout Self,
@@ -95,55 +118,57 @@ public struct ResumeUploadState: FeatureState {
         switch message {
         case .input(.selectFileTapped):
             return nil
-            
+
         case let .input(.fileSelected(url)):
             state.uploadStatus = .idle
             state.errorMessage = nil
             return .validateFile(url)
-            
+
         case .input(.uploadTapped):
             guard let file = state.selectedFile else { return nil }
             state.uploadStatus = .uploading
             state.uploadProgress = 0.0
             state.errorMessage = nil
             return .uploadFile(file)
-            
+
         case .input(.cancelTapped):
             if state.uploadStatus == .uploading {
                 return .cancelUpload
             }
             return .navigateBack
-            
+
         case .input(.skipTapped):
             return .navigateToMain
-            
+
         case .input(.removeFileTapped):
             state.selectedFile = nil
             state.uploadStatus = .idle
             state.uploadProgress = 0.0
             state.errorMessage = nil
-            
+
         case let .feedback(.fileValidated(file)):
             state.selectedFile = file
             state.uploadStatus = .selected
-            
+
         case let .feedback(.fileValidationFailed(error)):
             state.errorMessage = error
             state.uploadStatus = .failed
-            
+
         case let .feedback(.uploadProgress(progress)):
             state.uploadProgress = progress
-            
-        case .feedback(.uploadCompleted):
+
+        case let .feedback(.uploadCompleted(session)):
+            state.sessionId = session.sessionId
+            state.pendingQuestions = []
             state.uploadStatus = .success
             state.uploadProgress = 1.0
-            
+
         case let .feedback(.uploadFailed(error)):
             state.uploadStatus = .failed
             state.errorMessage = error
             state.uploadProgress = 0.0
         }
-        
+
         return nil
     }
 }

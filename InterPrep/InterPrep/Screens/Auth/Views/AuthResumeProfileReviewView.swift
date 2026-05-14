@@ -1,18 +1,20 @@
-//
-//  AuthResumeProfileReviewView.swift
-//  InterPrep
-//
-//  Profile review view for auth flow after resume upload
-//
-
+import CacheService
 import DesignSystem
 import NetworkService
+import ResumeUploadFeature
 import SwiftUI
 
-struct AuthResumeProfileReviewView: View {
-    let onConfirm: () -> Void
-    let onBack: () -> Void
-    
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
+public struct AuthResumeProfileReviewView: View {
+    public let onConfirm: () -> Void
+    public let onBack: () -> Void
+
+    public init(onConfirm: @escaping () -> Void, onBack: @escaping () -> Void) {
+        self.onConfirm = onConfirm
+        self.onBack = onBack
+    }
+
     @State private var profile: User_ResumeProfile?
     @State private var status: User_ResumeProfileStatus = .draft
     @State private var isLoading = true
@@ -20,25 +22,27 @@ struct AuthResumeProfileReviewView: View {
     @State private var isEditing = false
     @State private var isSaving = false
     @State private var saveError: String?
-    
+
+    private let experienceOptions = ["Нет опыта", "1-3 года", "3-6 лет", "6+ лет"]
+
     @State private var targetRolesText = ""
     @State private var experienceLevel = ""
-    @State private var areasText = ""
+    @State private var selectedAreas: Set<String> = []
     @State private var salaryMinText = ""
     @State private var currencyText = "₽"
     @State private var workFormatText = ""
     @State private var skillsTopText = ""
     @State private var educationLevel = ""
     @State private var notesText = ""
-    
-    var body: some View {
+
+    public var body: some View {
         ZStack {
             LinearGradient.brandBackground
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 header
-                
+
                 if isLoading {
                     loadingView
                 } else if let error = errorMessage {
@@ -54,7 +58,7 @@ struct AuthResumeProfileReviewView: View {
             await loadProfile()
         }
     }
-    
+
     @ViewBuilder
     private var header: some View {
         HStack {
@@ -71,15 +75,15 @@ struct AuthResumeProfileReviewView: View {
                     .foregroundColor(.white)
                     .padding()
             }
-            
+
             Spacer()
-            
+
             Text(isEditing ? "Редактирование" : "Проверьте данные")
                 .font(.headline)
                 .foregroundColor(.white)
-            
+
             Spacer()
-            
+
             if !isLoading && errorMessage == nil && profile != nil {
                 Button {
                     if isEditing {
@@ -102,33 +106,25 @@ struct AuthResumeProfileReviewView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var loadingView: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.2)
-                .tint(.white)
-            Text("Загружаем данные резюме...")
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.8))
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ResumeUploadProgressView(isComplete: false)
     }
-    
+
     @ViewBuilder
     private func errorView(_ error: String) -> some View {
         VStack(spacing: 20) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.yellow)
-            
+
             Text(error)
                 .font(.body)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
-            
+
             Button {
                 Task { await loadProfile() }
             } label: {
@@ -141,7 +137,7 @@ struct AuthResumeProfileReviewView: View {
                     .cornerRadius(12)
             }
             .padding(.horizontal, 32)
-            
+
             Button {
                 onConfirm()
             } label: {
@@ -152,7 +148,7 @@ struct AuthResumeProfileReviewView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     @ViewBuilder
     private var editForm: some View {
         ScrollView {
@@ -169,17 +165,17 @@ struct AuthResumeProfileReviewView: View {
                     .background(Color.red.opacity(0.2))
                     .cornerRadius(12)
                 }
-                
+
                 editSection(title: "Целевые роли", placeholder: "iOS Developer, Team Lead", text: $targetRolesText)
-                editSection(title: "Уровень опыта", placeholder: "Junior / Middle / Senior / Lead", text: $experienceLevel)
-                editSection(title: "Регионы", placeholder: "Москва, Санкт-Петербург", text: $areasText)
-                
-                HStack(spacing: 12) {
-                    editSection(title: "Зарплата от", placeholder: "150000", text: $salaryMinText, keyboardType: .decimalPad)
-                    editSection(title: "Валюта", placeholder: "₽", text: $currencyText)
-                        .frame(width: 80)
+                experienceLevelPickerSection
+
+                areasPickerSection
+
+                HStack(alignment: .bottom, spacing: 12) {
+                    salarySection
+                    currencyPickerSection
                 }
-                
+
                 editSection(title: "Формат работы", placeholder: "Удалённо, Офис, Гибрид", text: $workFormatText)
                 editSection(title: "Ключевые навыки", placeholder: "Swift, UIKit, SwiftUI", text: $skillsTopText)
                 editSection(title: "Образование", placeholder: "Высшее", text: $educationLevel)
@@ -197,7 +193,92 @@ struct AuthResumeProfileReviewView: View {
             }
         }
     }
-    
+
+    @ViewBuilder
+    private var experienceLevelPickerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Уровень опыта")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+
+            FlowLayoutAuth(spacing: 8) {
+                ForEach(experienceOptions, id: \.self) { option in
+                    Button {
+                        experienceLevel = experienceLevel == option ? "" : option
+                    } label: {
+                        Text(option)
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(experienceLevel == option ? Color.white.opacity(0.35) : Color.white.opacity(0.1))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(experienceLevel == option ? Color.white.opacity(0.5) : Color.clear, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var areasPickerSection: some View {
+        RegionPickerView(selectedRegions: $selectedAreas, style: RegionPickerView.Style.dark)
+    }
+
+    @ViewBuilder
+    private var salarySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Зарплата от")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+
+            TextField("150000", text: $salaryMinText)
+                .font(.body)
+                .padding()
+                .background(Color.white.opacity(0.15))
+                .cornerRadius(12)
+                .foregroundColor(.white)
+                .keyboardType(.numberPad)
+                .onChange(of: salaryMinText) { _, newValue in
+                    salaryMinText = newValue.filter { $0.isNumber }
+                }
+        }
+    }
+
+    @ViewBuilder
+    private var currencyPickerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Валюта")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+
+            HStack(spacing: 6) {
+                ForEach(["₽", "$", "€"], id: \.self) { currency in
+                    Button {
+                        currencyText = currency
+                    } label: {
+                        Text(currency)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .frame(width: 36, height: 36)
+                            .background(currencyText == currency ? Color.white.opacity(0.35) : Color.white.opacity(0.1))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(currencyText == currency ? Color.white.opacity(0.5) : Color.clear, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
     @ViewBuilder
     private func editSection(
         title: String,
@@ -209,7 +290,7 @@ struct AuthResumeProfileReviewView: View {
             Text(title)
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.7))
-            
+
             TextField(placeholder, text: text, axis: .vertical)
                 .font(.body)
                 .padding()
@@ -220,20 +301,20 @@ struct AuthResumeProfileReviewView: View {
                 .lineLimit(1...4)
         }
     }
-    
+
     @ViewBuilder
     private func profileContent(profile: User_ResumeProfile) -> some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     statusBanner
-                    
+
                     Text("Мы распознали следующие данные из вашего резюме.\nПроверьте и подтвердите их.")
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.8))
                         .multilineTextAlignment(.leading)
                         .padding(.bottom, 8)
-                    
+
                     if !profile.targetRoles.isEmpty {
                         profileSection(title: "Целевые роли", items: profile.targetRoles)
                     }
@@ -259,70 +340,71 @@ struct AuthResumeProfileReviewView: View {
                     if profile.hasNotes && !profile.notes.isEmpty {
                         profileSection(title: "Дополнительно", text: profile.notes)
                     }
-                    
+
                     if isProfileEmpty(profile) {
                         emptyProfileView
                     }
                 }
                 .padding()
             }
-            
+
             bottomButton
         }
     }
-    
+
     @ViewBuilder
     private var statusBanner: some View {
         HStack(spacing: 12) {
             Image(systemName: "pencil.circle.fill")
                 .font(.title3)
                 .foregroundColor(.orange)
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text("Данные из резюме")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
-                
+
                 Text("Проверьте правильность и подтвердите")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.7))
             }
-            
+
             Spacer()
         }
         .padding()
         .background(Color.white.opacity(0.15))
         .cornerRadius(12)
     }
-    
+
     @ViewBuilder
     private var emptyProfileView: some View {
         VStack(spacing: 16) {
             Image(systemName: "doc.text.fill")
                 .font(.system(size: 40))
                 .foregroundColor(.white.opacity(0.5))
-            
-            Text("Не удалось распознать данные из резюме")
+
+            Text("Данные обрабатываются")
                 .font(.body)
                 .foregroundColor(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
-            
-            Text("Вы можете заполнить профиль вручную")
+
+            Text("Профиль будет доступен через несколько минут")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.6))
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
     }
-    
+
     @ViewBuilder
     private var bottomButton: some View {
         VStack(spacing: 12) {
             Button {
                 Task { await confirmProfile() }
             } label: {
-                Text("Подтвердить и продолжить")
+                Text(isProfileEmpty(profile ?? User_ResumeProfile()) ? "Продолжить" : "Подтвердить и продолжить")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
@@ -330,20 +412,22 @@ struct AuthResumeProfileReviewView: View {
                     .foregroundColor(.brandPrimary)
                     .cornerRadius(16)
             }
-            
-            Button {
-                copyProfileToEditState()
-                isEditing = true
-            } label: {
-                Text("Редактировать данные")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+
+            if !isProfileEmpty(profile ?? User_ResumeProfile()) {
+                Button {
+                    copyProfileToEditState()
+                    isEditing = true
+                } label: {
+                    Text("Редактировать данные")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                }
             }
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 32)
     }
-    
+
     @ViewBuilder
     private func profileSection(title: String, text: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -359,14 +443,14 @@ struct AuthResumeProfileReviewView: View {
         .background(Color.white.opacity(0.1))
         .cornerRadius(12)
     }
-    
+
     @ViewBuilder
     private func profileSection(title: String, items: [String]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.7))
-            
+
             FlowLayoutAuth(spacing: 8) {
                 ForEach(items, id: \.self) { item in
                     Text(item)
@@ -384,7 +468,7 @@ struct AuthResumeProfileReviewView: View {
         .background(Color.white.opacity(0.1))
         .cornerRadius(12)
     }
-    
+
     private func isProfileEmpty(_ profile: User_ResumeProfile) -> Bool {
         profile.targetRoles.isEmpty &&
         !profile.hasExperienceLevel &&
@@ -395,12 +479,12 @@ struct AuthResumeProfileReviewView: View {
         !profile.hasEducationLevel &&
         !profile.hasNotes
     }
-    
+
     private func copyProfileToEditState() {
         guard let currentProfile = profile else { return }
         targetRolesText = currentProfile.targetRoles.joined(separator: ", ")
         experienceLevel = currentProfile.hasExperienceLevel ? currentProfile.experienceLevel : ""
-        areasText = currentProfile.areas.map { $0.name }.joined(separator: ", ")
+        selectedAreas = Set(currentProfile.areas.map { $0.name })
         if currentProfile.hasSalaryMin && currentProfile.salaryMin > 0 {
             salaryMinText = String(Int(currentProfile.salaryMin))
         } else {
@@ -412,14 +496,14 @@ struct AuthResumeProfileReviewView: View {
         educationLevel = currentProfile.hasEducationLevel ? currentProfile.educationLevel : ""
         notesText = currentProfile.hasNotes ? currentProfile.notes : ""
     }
-    
-    private func loadProfile() async {
-        isLoading = true
+
+    private func loadProfile(showLoading: Bool = true) async {
+        if showLoading { isLoading = true }
         errorMessage = nil
-        
+
         let result = await NetworkServiceV2.shared.getUser_ResumeProfile()
-        isLoading = false
-        
+        if showLoading { isLoading = false }
+
         switch result {
         case .success(let response):
             status = response.status
@@ -432,14 +516,14 @@ struct AuthResumeProfileReviewView: View {
             errorMessage = error.localizedDescription
         }
     }
-    
+
     private func saveProfile() async {
         let getMeResult = await NetworkServiceV2.shared.getMe()
         guard case .success(let meResponse) = getMeResult else {
             saveError = "Не удалось определить пользователя"
             return
         }
-        
+
         isSaving = true
         saveError = nil
         let updated = buildProfileFromEditState()
@@ -448,51 +532,47 @@ struct AuthResumeProfileReviewView: View {
             profile: updated
         )
         isSaving = false
-        
+
         switch result {
         case .success:
-            profile = updated
-            status = .confirmed
             isEditing = false
+            await loadProfile(showLoading: false)
         case .failure(let error):
             saveError = error.localizedDescription
         }
     }
-    
+
     private func confirmProfile() async {
         guard let currentProfile = profile else {
             onConfirm()
             return
         }
-        
+
         let getMeResult = await NetworkServiceV2.shared.getMe()
         guard case .success(let meResponse) = getMeResult else {
             onConfirm()
             return
         }
-        
+
         _ = await NetworkServiceV2.shared.updateUser_ResumeProfile(
             userId: meResponse.user.id,
             profile: currentProfile
         )
-        
+
         onConfirm()
     }
-    
+
     private func buildProfileFromEditState() -> User_ResumeProfile {
         var profile = User_ResumeProfile()
         profile.targetRoles = splitTrim(targetRolesText)
         if !experienceLevel.isEmpty {
             profile.experienceLevel = experienceLevel.trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        profile.areas = areasText
-            .components(separatedBy: CharacterSet(charactersIn: ",\n"))
-            .map { line in
-                var area = User_Area()
-                area.name = String(line).trimmingCharacters(in: .whitespaces)
-                return area
-            }
-            .filter { !$0.name.isEmpty }
+        profile.areas = selectedAreas.sorted().map { name in
+            var area = User_Area()
+            area.name = name
+            return area
+        }
         if let salary = Double(salaryMinText.trimmingCharacters(in: .whitespaces)), salary > 0 {
             profile.salaryMin = salary
         }
@@ -509,7 +589,7 @@ struct AuthResumeProfileReviewView: View {
         }
         return profile
     }
-    
+
     private func splitTrim(_ text: String) -> [String] {
         text.components(separatedBy: CharacterSet(charactersIn: ",\n"))
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -519,12 +599,12 @@ struct AuthResumeProfileReviewView: View {
 
 private struct FlowLayoutAuth: Layout {
     var spacing: CGFloat = 8
-    
+
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let result = arrange(proposal: proposal, subviews: subviews)
         return result.size
     }
-    
+
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let result = arrange(proposal: proposal, subviews: subviews)
         for (index, subview) in subviews.enumerated() {
@@ -534,14 +614,14 @@ private struct FlowLayoutAuth: Layout {
             )
         }
     }
-    
+
     private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, positions: [CGPoint]) {
         let maxWidth = proposal.width ?? .infinity
         var positions: [CGPoint] = []
         var x: CGFloat = 0
         var y: CGFloat = 0
         var rowHeight: CGFloat = 0
-        
+
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
             if x + size.width > maxWidth && x > 0 {
@@ -553,7 +633,7 @@ private struct FlowLayoutAuth: Layout {
             rowHeight = max(rowHeight, size.height)
             x += size.width + spacing
         }
-        
+
         let totalHeight = y + rowHeight
         return (CGSize(width: maxWidth, height: totalHeight), positions)
     }

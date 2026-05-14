@@ -1,10 +1,3 @@
-//
-//  OTPView+Model.swift
-//  InterPrep
-//
-//  OTP view model
-//
-
 import Foundation
 
 extension OTPView {

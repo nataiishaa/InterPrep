@@ -1,10 +1,3 @@
-//
-//  AppGraph.swift
-//  InterPrep
-//
-//  Main dependency injection graph
-//
-
 import ArchitectureCore
 import AuthFeature
 import CalendarFeature
@@ -19,49 +12,55 @@ import SwiftUI
 
 @MainActor
 final class AppGraph {
-    
-    private lazy var onboardingStorageService: OnboardingStorageService = OnboardingStorageServiceImpl()
-    private lazy var authService: AuthService = AuthServiceImpl()
-    private lazy var resumeService: ResumeService = ResumeServiceImpl()
-    private lazy var vacancyService: VacancyServiceImpl = VacancyServiceImpl()
-    private lazy var fileUploadService: FileUploadService = {
-        FileUploadServiceImpl(resumeService: self.resumeService)
+
+    private lazy var onboardingStorageService: OnboardingStorageServicing = OnboardingStorageService()
+    private lazy var authService: AuthServicing = AuthService()
+    private lazy var resumeService: ResumeServicing = ResumeService()
+    private lazy var vacancyService: VacancyService = VacancyService()
+    private lazy var fileUploadService: FileUploading = {
+        FileUploadService(resumeService: self.resumeService)
     }()
-    private lazy var documentService: DocumentServicing = DocumentServiceImpl()
-    private lazy var chatService: ChatServicing = ChatServiceImpl()
-    private lazy var calendarService: CalendarServicing = CalendarServiceImpl()
-    
+    private lazy var documentService: DocumentServicing = DocumentService()
+    private lazy var chatService: ChatServicing = ChatService()
+    private lazy var calendarService: CalendarServicing = CalendarService()
+
     func shouldShowOnboarding() -> Bool {
         return !onboardingStorageService.isOnboardingCompleted()
     }
-    
-    func makeOnboardingContainer(onComplete: @escaping () -> Void) -> some View {
+
+    func makeOnboardingContainer(
+        onComplete: @escaping () -> Void,
+        onRegister: @escaping () -> Void
+    ) -> some View {
         let effectHandler = OnboardingEffectHandler(
             storageService: onboardingStorageService
         )
-        
+
         let store = Store(
             state: OnboardingState(),
             effectHandler: effectHandler
         )
-        
-        return OnboardingContainer(store: store, onComplete: onComplete)
+
+        return OnboardingContainer(store: store, onComplete: onComplete, onRegister: onRegister)
     }
-    
-    func makeAuthContainer(onComplete: @escaping () -> Void) -> some View {
+
+    func makeAuthContainer(
+        initialFlow: AuthState.AuthFlow = .login,
+        onComplete: @escaping () -> Void
+    ) -> some View {
         let effectHandler = AuthEffectHandler(
             authService: authService,
             fileUploadService: fileUploadService
         )
-        
+
         let store = Store(
-            state: AuthState(),
+            state: AuthState(initialFlow: initialFlow),
             effectHandler: effectHandler
         )
-        
+
         return AuthContainer(store: store, onAuthComplete: onComplete)
     }
-    
+
     func makeMainContainer(onLogout: @escaping () -> Void) -> some View {
         MainTabView(
             appGraph: self,
@@ -69,7 +68,7 @@ final class AppGraph {
             profileSessionService: AppProfileSessionService()
         )
     }
-    
+
     func makeDiscoveryStore() -> DiscoveryStore {
         let effectHandler = DiscoveryEffectHandler(
             resumeService: self.resumeService,
@@ -80,14 +79,14 @@ final class AppGraph {
             effectHandler: effectHandler
         )
     }
-    
+
     func makeDiscoveryContainer(onNavigateToResumeUpload: (() -> Void)? = nil) -> some View {
         return DiscoveryContainer(
             store: self.makeDiscoveryStore(),
             onNavigateToResumeUpload: onNavigateToResumeUpload
         )
     }
-    
+
     func makeResumeUploadContainer(
         onComplete: @escaping () -> Void,
         onCancel: @escaping () -> Void
@@ -104,7 +103,7 @@ final class AppGraph {
             onCancel: onCancel
         )
     }
-    
+
     func makeDocumentsContainer() -> some View {
         let effectHandler = DocumentsEffectHandler(
             documentService: self.documentService
@@ -114,7 +113,7 @@ final class AppGraph {
             effectHandler: effectHandler
         ))
     }
-    
+
     func makeCalendarContainer() -> some View {
         let effectHandler = CalendarEffectHandler(
             calendarService: self.calendarService
@@ -124,11 +123,11 @@ final class AppGraph {
             effectHandler: effectHandler
         ))
     }
-    
+
     func makeChatContainer() -> some View {
         makeChatContainer(store: makeChatStore())
     }
-    
+
     func makeChatStore() -> ChatStore {
         let effectHandler = ChatEffectHandler(
             chatService: self.chatService,
@@ -139,13 +138,13 @@ final class AppGraph {
             effectHandler: effectHandler
         )
     }
-    
+
     private func makeChatContainer(store: ChatStore) -> some View {
         ChatContainer(store: store)
     }
 }
 
-private struct AppProfileSessionService: ProfileSessionService {
+private struct AppProfileSessionService: ProfileSessionServicing {
     func clearTokens() async {
         await NetworkServiceV2.shared.clearTokens()
     }
@@ -164,6 +163,10 @@ private struct AppProfileSessionService: ProfileSessionService {
                 message = "Неверный пароль"
             case .httpError(let code, _):
                 message = code == 401 ? "Неверный пароль" : "Ошибка сервера. Попробуйте позже."
+            case .timeout(let vpnLikely):
+                message = vpnLikely
+                    ? "Не удалось подключиться к серверу. Возможно, включён VPN — попробуйте отключить его"
+                    : "Нет интернета. Проверьте подключение и попробуйте снова"
             case .transportError, .decodingFailed, .noData, .invalidURL, .encodingFailed, .unknown:
                 message = (error as? LocalizedError)?.errorDescription ?? "Ошибка сети. Проверьте подключение."
             }

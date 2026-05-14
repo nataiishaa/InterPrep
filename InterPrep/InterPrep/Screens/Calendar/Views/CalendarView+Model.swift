@@ -1,10 +1,3 @@
-//
-//  CalendarView+Model.swift
-//  InterPrep
-//
-//  Calendar view model
-//
-
 import Foundation
 
 extension CalendarView {

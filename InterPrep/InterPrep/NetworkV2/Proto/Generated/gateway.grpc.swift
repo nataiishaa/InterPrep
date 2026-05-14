@@ -23,7 +23,7 @@ public enum Gateway_BackendGatewayClientMetadata {
       Gateway_BackendGatewayClientMetadata.Methods.verifyPasswordReset,
       Gateway_BackendGatewayClientMetadata.Methods.getResumeProfile,
       Gateway_BackendGatewayClientMetadata.Methods.searchJobs,
-      Gateway_BackendGatewayClientMetadata.Methods.listFavorites,
+      Gateway_BackendGatewayClientMetadata.Methods.listFavorites
     ]
   )
 

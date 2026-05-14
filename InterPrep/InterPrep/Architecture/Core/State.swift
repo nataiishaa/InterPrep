@@ -1,10 +1,3 @@
-//
-//  State.swift
-//  InterPrep
-//
-//  Created by Architecture Core
-//
-
 import Foundation
 
 public enum Message<Input, Feedback> {
@@ -16,7 +9,7 @@ public protocol FeatureState {
     associatedtype Input
     associatedtype Feedback
     associatedtype Effect
-    
+
     @MainActor
     static func reduce(
         state: inout Self,

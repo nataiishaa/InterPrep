@@ -1,10 +1,3 @@
-//
-//  ProfileView.swift
-//  InterPrep
-//
-//  Profile screen with settings and statistics
-//
-
 import CalendarFeature
 import DesignSystem
 import NotificationService
@@ -23,7 +16,7 @@ struct ProfileView: View {
     @State private var deletePassword = ""
     @State private var showNotificationAlert = false
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -76,18 +69,13 @@ struct ProfileView: View {
                 }
             )
         }
-        .alert("Разрешить уведомления?", isPresented: $showNotificationAlert) {
+        .alert("Уведомления отключены", isPresented: $showNotificationAlert) {
             Button("Отмена", role: .cancel) {}
-            Button("Разрешить") {
-                Task {
-                    let granted = await notificationManager.requestAuthorization()
-                    if granted {
-                        model.onNotificationsToggled(true)
-                    }
-                }
+            Button("Открыть настройки") {
+                notificationManager.openSettings()
             }
         } message: {
-            Text("Приложение будет напоминать вам о предстоящих событиях и собеседованиях.")
+            Text("Вы ранее запретили уведомления. Чтобы включить их, перейдите в Настройки → InterPrep → Уведомления.")
         }
         .onAppear {
             Task {
@@ -95,9 +83,7 @@ struct ProfileView: View {
             }
         }
     }
-    
-    // MARK: - Profile Header
-    
+
     @ViewBuilder
     private var profileHeader: some View {
         VStack(spacing: 16) {
@@ -105,7 +91,7 @@ struct ProfileView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.clockwise.icloud")
                         .font(.caption)
-                    Text("Данные из кеша")
+                    Text("Нет интернета")
                         .font(.caption)
                 }
                 .foregroundColor(.secondary)
@@ -114,7 +100,7 @@ struct ProfileView: View {
                 .background(Color.secondary.opacity(0.1))
                 .cornerRadius(12)
             }
-            
+
             ZStack(alignment: .bottomTrailing) {
                 if let localURL = model.cachedProfilePhotoURL {
                     avatarImageFromURL(localURL)
@@ -137,7 +123,7 @@ struct ProfileView: View {
                 } else {
                     avatarPlaceholder
                 }
-                
+
                 Button {
                     model.onEditProfileTapped?()
                     showEditProfile = true
@@ -152,19 +138,18 @@ struct ProfileView: View {
                         )
                 }
             }
-            
-            // Имя и почта (почта только просмотр)
+
             VStack(spacing: 4) {
                 Text(model.user?.fullName ?? "Пользователь")
                     .font(.title2)
                     .fontWeight(.bold)
-                
+
                 if let position = model.user?.position, !position.isEmpty {
                     Text(position)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                
+
                 if let email = model.user?.email, !email.isEmpty {
                     Text(email)
                         .font(.subheadline)
@@ -178,10 +163,9 @@ struct ProfileView: View {
         .cornerRadius(16)
         .shadow(color: shadowColor, radius: 8, x: 0, y: 2)
     }
-    
+
     @ViewBuilder
     private func avatarImageFromURL(_ url: URL) -> some View {
-        // Strip query parameters for file path since they're only used for cache busting
         let filePath = url.path
         if let uiImage = UIImage(contentsOfFile: filePath) {
             Image(uiImage: uiImage)
@@ -194,7 +178,7 @@ struct ProfileView: View {
             avatarPlaceholder
         }
     }
-    
+
     private var avatarPlaceholder: some View {
         Circle()
             .fill(
@@ -211,16 +195,14 @@ struct ProfileView: View {
                     .foregroundColor(.white)
             )
     }
-    
-    // MARK: - Resume Section
-    
+
     @ViewBuilder
     private var resumeSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Резюме")
                 .font(.headline)
                 .padding(.horizontal, 4)
-            
+
             VStack(spacing: 0) {
                 HStack(spacing: 12) {
                     Image(systemName: "doc.text.fill")
@@ -235,12 +217,12 @@ struct ProfileView: View {
                             )
                         )
                         .cornerRadius(12)
-                    
+
                     VStack(alignment: .leading, spacing: 4) {
                         Text(model.hasResumeData ? "Ваше резюме загружено" : "Резюме не загружено")
                             .font(.body)
                             .fontWeight(.medium)
-                        
+
                         Text(model.hasResumeData
                              ? "Посмотрите данные на основе которых мы предлагаем вам вакансии."
                              : "Загрузите резюме, чтобы мы могли подбирать подходящие вакансии.")
@@ -248,13 +230,13 @@ struct ProfileView: View {
                             .foregroundColor(.secondary)
                             .lineLimit(2)
                     }
-                    
+
                     Spacer()
                 }
                 .padding()
-                
+
                 Divider()
-                
+
                 if model.hasResumeData {
                     Button {
                         model.onViewResume()
@@ -273,10 +255,10 @@ struct ProfileView: View {
                         .foregroundColor(.primary)
                         .padding()
                     }
-                    
+
                     Divider()
                 }
-                
+
                 Button {
                     model.onChangeResume()
                 } label: {
@@ -300,16 +282,14 @@ struct ProfileView: View {
             .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
         }
     }
-    
-    // MARK: - Statistics Section (с бэкенда: запланировано / предстоит)
-    
+
     @ViewBuilder
     private var statisticsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Статистика")
                 .font(.headline)
                 .padding(.horizontal, 4)
-            
+
             HStack(spacing: 12) {
                 StatCard(
                     title: "Собеседований запланировано",
@@ -326,16 +306,14 @@ struct ProfileView: View {
             }
         }
     }
-    
-    // MARK: - Settings Section
-    
+
     @ViewBuilder
     private var settingsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Настройки")
                 .font(.headline)
                 .padding(.horizontal, 4)
-            
+
             VStack(spacing: 0) {
                 VStack(spacing: 0) {
                     SettingsRow(
@@ -347,7 +325,16 @@ struct ProfileView: View {
                             get: { model.settings.notificationsEnabled },
                             set: { newValue in
                                 if newValue && !notificationManager.isAuthorized {
-                                    showNotificationAlert = true
+                                    if notificationManager.isDenied {
+                                        showNotificationAlert = true
+                                    } else {
+                                        Task {
+                                            let granted = await notificationManager.requestAuthorization()
+                                            if granted {
+                                                model.onNotificationsToggled(true)
+                                            }
+                                        }
+                                    }
                                 } else {
                                     model.onNotificationsToggled(newValue)
                                 }
@@ -355,19 +342,19 @@ struct ProfileView: View {
                         ))
                         .tint(.brandPrimary)
                     }
-                    
+
                     if model.settings.notificationsEnabled && !notificationManager.isAuthorized {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .font(.caption)
                                 .foregroundColor(.orange)
-                            
+
                             Text("Разрешите уведомления в настройках iOS")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            
+
                             Spacer()
-                            
+
                             Button("Открыть") {
                                 notificationManager.openSettings()
                             }
@@ -379,9 +366,9 @@ struct ProfileView: View {
                         .background(Color.orange.opacity(0.1))
                     }
                 }
-                
+
                 Divider().padding(.leading, 52)
-                
+
                 SettingsRow(
                     icon: "paintbrush.fill",
                     title: "Тема",
@@ -403,9 +390,9 @@ struct ProfileView: View {
                         }
                     }
                 }
-                
+
                 Divider().padding(.leading, 52)
-                
+
                 SettingsRow(
                     icon: "calendar.badge.clock",
                     title: "Синхронизация с календарём",
@@ -424,16 +411,14 @@ struct ProfileView: View {
             .cornerRadius(12)
         }
     }
-    
-    // MARK: - Actions Section
-    
+
     @ViewBuilder
     private var actionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Действия")
                 .font(.headline)
                 .padding(.horizontal, 4)
-            
+
             VStack(spacing: 0) {
                 ActionRow(
                     icon: "envelope.badge.fill",
@@ -442,9 +427,9 @@ struct ProfileView: View {
                 ) {
                     showContactDevelopers = true
                 }
-                
+
                 Divider().padding(.leading, 52)
-                
+
                 ActionRow(
                     icon: "arrow.right.square",
                     title: "Выйти",
@@ -452,9 +437,9 @@ struct ProfileView: View {
                 ) {
                     showLogoutAlert = true
                 }
-                
+
                 Divider().padding(.leading, 52)
-                
+
                 ActionRow(
                     icon: "trash",
                     title: "Удалить аккаунт",
@@ -467,15 +452,13 @@ struct ProfileView: View {
             .cornerRadius(12)
         }
     }
-    
-    // MARK: - About Section
-    
+
     @ViewBuilder
     private var aboutSection: some View {
         VStack(spacing: 8) {
             Text("InterPrep")
                 .font(.headline)
-            
+
             Text("Версия 1.0.0")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -485,13 +468,11 @@ struct ProfileView: View {
         .background(Color.cardBackground)
         .cornerRadius(12)
     }
-    
+
     private var shadowColor: Color {
         colorScheme == .dark ? .clear : .black.opacity(0.05)
     }
 }
-
-// MARK: - Stat Card
 
 struct StatCard: View {
     let title: String
@@ -499,17 +480,17 @@ struct StatCard: View {
     let icon: String
     let color: Color
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundColor(color)
-            
+
             Text(value)
                 .font(.title)
                 .fontWeight(.bold)
-            
+
             Text(title)
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -520,20 +501,18 @@ struct StatCard: View {
         .cornerRadius(12)
         .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
     }
-    
+
     private var shadowColor: Color {
         colorScheme == .dark ? .clear : .black.opacity(0.05)
     }
 }
-
-// MARK: - Settings Row
 
 struct SettingsRow<Content: View>: View {
     let icon: String
     let title: String
     let color: Color
     let content: Content
-    
+
     init(
         icon: String,
         title: String,
@@ -545,7 +524,7 @@ struct SettingsRow<Content: View>: View {
         self.color = color
         self.content = content()
     }
-    
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
@@ -554,43 +533,39 @@ struct SettingsRow<Content: View>: View {
                 .frame(width: 32, height: 32)
                 .background(color)
                 .cornerRadius(8)
-            
+
             Text(title)
                 .font(.body)
-            
+
             Spacer()
-            
+
             content
         }
         .padding()
     }
 }
 
-// MARK: - Interview Row
-
 struct InterviewRow: View {
     let interview: ProfileState.Interview
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                // Icon
                 Image(systemName: interview.isCompleted ? "checkmark.circle.fill" : "calendar")
                     .font(.body)
                     .foregroundColor(.white)
                     .frame(width: 32, height: 32)
                     .background(interview.isCompleted ? Color.green : Color.brandPrimary)
                     .cornerRadius(8)
-                
-                // Content
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(interview.title)
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
                         .lineLimit(1)
-                    
+
                     HStack(spacing: 8) {
                         if !interview.company.isEmpty {
                             Text(interview.company)
@@ -598,23 +573,23 @@ struct InterviewRow: View {
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
                         }
-                        
+
                         Text("•")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        
+
                         Text(interview.date, style: .date)
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        
+
                         Text(interview.date, style: .time)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -624,14 +599,12 @@ struct InterviewRow: View {
     }
 }
 
-// MARK: - Action Row
-
 struct ActionRow: View {
     let icon: String
     let title: String
     let color: Color
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
@@ -641,13 +614,13 @@ struct ActionRow: View {
                     .frame(width: 32, height: 32)
                     .background(color)
                     .cornerRadius(8)
-                
+
                 Text(title)
                     .font(.body)
                     .foregroundColor(.primary)
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -657,32 +630,32 @@ struct ActionRow: View {
     }
 }
 
-// MARK: - Delete Account Sheet
-
 private struct DeleteAccountSheet: View {
     @Binding var password: String
     let errorMessage: String?
     let onConfirm: () -> Void
     let onDismiss: () -> Void
-    
+
+    @State private var showConfirmationAlert = false
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Введите пароль для подтверждения. Это действие нельзя отменить, все данные будут удалены.")
                     .font(.body)
                     .foregroundColor(.secondary)
-                
+
                 SecureField("Пароль", text: $password)
                     .textFieldStyle(.roundedBorder)
                     .textContentType(.password)
                     .autocapitalization(.none)
-                
+
                 if let errorMessage = errorMessage, !errorMessage.isEmpty {
                     Text(errorMessage)
                         .font(.caption)
                         .foregroundColor(.red)
                 }
-                
+
                 Spacer()
             }
             .padding()
@@ -696,21 +669,30 @@ private struct DeleteAccountSheet: View {
                 }
                 ToolbarItem(placement: .destructiveAction) {
                     Button("Удалить") {
-                        onConfirm()
+                        showConfirmationAlert = true
                     }
                     .disabled(password.isEmpty)
                 }
+            }
+            .alert("Удалить аккаунт?", isPresented: $showConfirmationAlert) {
+                Button("Отмена", role: .cancel) {}
+                Button("Удалить", role: .destructive) {
+                    onConfirm()
+                }
+            } message: {
+                Text("Это действие необратимо. После удаления аккаунта все ваши данные будут безвозвратно утеряны и восстановить аккаунт будет невозможно.")
             }
         }
     }
 }
 
-// MARK: - Contact Developers (inline to avoid scope issues)
-
 private struct ProfileContactDevelopersView: View {
     let onDismiss: () -> Void
-    private let supportEmail = "InterPrepSupport@mail.ru"
-    
+    private let supportEmail = "interprepiosapp@gmail.com"
+
+    @Environment(\.openURL) private var openURL
+    @State private var showCopiedAlert = false
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -720,18 +702,18 @@ private struct ProfileContactDevelopersView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.primary)
-                        
+
                         Text("По всем вопросам по работе приложения InterPrep вы можете написать нам на почту. Мы постараемся ответить в ближайшее время.")
                             .font(.body)
                             .foregroundColor(.secondary)
                     }
-                    
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Email для обратной связи:")
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.secondary)
-                        
+
                         Button {
                             openMail(to: supportEmail)
                         } label: {
@@ -768,18 +750,27 @@ private struct ProfileContactDevelopersView: View {
                     .fontWeight(.medium)
                 }
             }
+            .alert("Email скопирован", isPresented: $showCopiedAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Адрес \(supportEmail) скопирован в буфер обмена.")
+            }
         }
     }
-    
+
     private func openMail(to email: String) {
         let subject = "InterPrep — обратная связь"
-        let encoded = "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
-        guard let url = URL(string: encoded) else { return }
-        UIApplication.shared.open(url)
+        let encodedSubject = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        guard let url = URL(string: "mailto:\(email)?subject=\(encodedSubject)") else { return }
+
+        openURL(url) { accepted in
+            if !accepted {
+                UIPasteboard.general.string = email
+                showCopiedAlert = true
+            }
+        }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     ProfileView(model: .init(
@@ -787,10 +778,10 @@ private struct ProfileContactDevelopersView: View {
             id: "1",
             firstName: "Иван",
             lastName: "Иванов",
-            email: "ivan@example.com",
+            email: "ivanov@mail.ru",
             phone: "+7 999 123-45-67",
             avatarURL: nil,
-            position: "iOS Developer",
+            position: "iOS-разработчик",
             experience: "3 года",
             registeredDate: nil
         ),
@@ -806,7 +797,7 @@ private struct ProfileContactDevelopersView: View {
         deleteAccountError: nil,
         selectedInterviewTab: .upcoming,
         upcomingInterviews: [
-            .init(id: "1", title: "iOS Developer", company: "Яндекс", date: Date().addingTimeInterval(86400), type: "Собеседование", isCompleted: false),
+            .init(id: "1", title: "iOS-разработчик", company: "Яндекс", date: Date().addingTimeInterval(86400), type: "Собеседование", isCompleted: false),
             .init(id: "2", title: "Senior iOS", company: "Сбер", date: Date().addingTimeInterval(172800), type: "Собеседование", isCompleted: false)
         ],
         completedInterviews: [
@@ -828,7 +819,9 @@ private struct ProfileContactDevelopersView: View {
         editModel: .init(
             firstName: "Иван",
             lastName: "Иванов",
-            email: "ivan@example.com",
+            email: "ivanov@mail.ru",
+            cachedProfilePhotoURL: nil,
+            avatarURL: nil,
             errorMessage: nil,
             onPhotoSelected: { _ in },
             onFirstNameChanged: { _ in },

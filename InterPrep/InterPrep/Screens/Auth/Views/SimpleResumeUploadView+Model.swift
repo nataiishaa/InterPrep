@@ -1,10 +1,3 @@
-//
-//  SimpleResumeUploadView+Model.swift
-//  InterPrep
-//
-//  Simple resume upload view model
-//
-
 import Foundation
 
 extension SimpleResumeUploadView {

@@ -1,10 +1,3 @@
-//
-//  CalDAVSettingsView.swift
-//  InterPrep
-//
-//  CalDAV connection settings UI
-//
-
 import DesignSystem
 import SwiftUI
 
@@ -15,31 +8,48 @@ public struct CalDAVSettingsView: View {
     @State private var isTestingConnection = false
     @State private var connectionStatus: ConnectionStatus?
     @State private var showPassword = false
-    
+
     private let onSave: (CalDAVSettings) -> Void
-    
+
     enum ConnectionStatus {
         case success
         case failure(String)
     }
-    
+
     public init(settings: CalDAVSettings, onSave: @escaping (CalDAVSettings) -> Void) {
         _settings = State(initialValue: settings)
         self.onSave = onSave
     }
-    
+
     public var body: some View {
         NavigationStack {
             Form {
                 Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Зачем это нужно?")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+
+                        Text("Собеседования из InterPrep появятся в вашем обычном календаре: Apple Calendar, iCloud, Fastmail или Nextcloud. Если вы измените время или удалите событие в приложении, календарь тоже обновится.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        Text("Так вы не пропустите встречу и будете видеть расписание там, где уже привыкли смотреть дела.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                Section {
                     Toggle("Включить синхронизацию", isOn: $settings.isEnabled)
                         .tint(.brandPrimary)
                 } header: {
-                    Text("Что это?")
+                    Text("Синхронизация с календарём")
                 } footer: {
-                    Text("Подключите ваш календарь (Google, iCloud и др.) — события и собеседования из календаря будут отображаться в приложении. Укажите сервер календаря и данные для входа.")
+                    Text("Можно оставить выключенным: тогда события будут храниться только внутри InterPrep.")
                 }
-                
+
                 if settings.isEnabled {
                     Section("Сервис календаря") {
                         ForEach(CalDAVSettings.presets, id: \.name) { preset in
@@ -61,7 +71,7 @@ public struct CalDAVSettingsView: View {
                             }
                         }
                     }
-                    
+
                     if let preset = selectedPreset {
                         Section {
                             Text(preset.instructions)
@@ -69,26 +79,27 @@ public struct CalDAVSettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                    
-                    Section("Данные для входа") {
+
+                    Section {
                         TextField("Адрес сервера календаря", text: $settings.serverURL)
                             .textContentType(.URL)
                             .keyboardType(.URL)
                             .autocapitalization(.none)
-                        
-                        TextField("Имя пользователя", text: $settings.username)
+
+                        TextField("Имя пользователя (email)", text: $settings.username)
                             .textContentType(.username)
                             .autocapitalization(.none)
-                        
+                            .keyboardType(.emailAddress)
+
                         HStack {
                             if showPassword {
-                                TextField("Пароль", text: $settings.password)
+                                TextField("Пароль приложения", text: $settings.password)
                                     .textContentType(.password)
                             } else {
-                                SecureField("Пароль", text: $settings.password)
+                                SecureField("Пароль приложения", text: $settings.password)
                                     .textContentType(.password)
                             }
-                            
+
                             Button {
                                 showPassword.toggle()
                             } label: {
@@ -96,8 +107,13 @@ public struct CalDAVSettingsView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+                    } header: {
+                        Text("Данные для входа")
+                    } footer: {
+                        Text("Используйте пароль приложения, не основной пароль от аккаунта. Для iCloud: appleid.apple.com → Пароли для приложений")
+                            .font(.caption)
                     }
-                    
+
                     Section {
                         Button {
                             testConnection()
@@ -113,7 +129,7 @@ public struct CalDAVSettingsView: View {
                             }
                         }
                         .disabled(isTestingConnection || !isFormValid)
-                        
+
                         if let status = connectionStatus {
                             switch status {
                             case .success:
@@ -125,7 +141,7 @@ public struct CalDAVSettingsView: View {
                             }
                         }
                     }
-                    
+
                     if let lastSync = settings.lastSyncDate {
                         Section("Информация") {
                             HStack {
@@ -138,7 +154,7 @@ public struct CalDAVSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Календарь")
+            .navigationTitle("CalDAV")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -146,7 +162,7 @@ public struct CalDAVSettingsView: View {
                         dismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Сохранить") {
                         onSave(settings)
@@ -158,26 +174,36 @@ public struct CalDAVSettingsView: View {
             }
         }
     }
-    
+
     private var isFormValid: Bool {
         !settings.serverURL.isEmpty &&
         !settings.username.isEmpty &&
         !settings.password.isEmpty
     }
-    
+
     func testConnection() {
         isTestingConnection = true
         connectionStatus = nil
-        
+
         Task {
             do {
+                var settingsToSave = settings
+                settingsToSave.selectedCalendarURL = nil
+                CalDAVSettingsManager.shared.saveSettings(settingsToSave)
+
                 let manager = CalDAVSyncManager()
-                CalDAVSettingsManager.shared.saveSettings(settings)
                 try await manager.setup()
-                let success = try await manager.testConnection()
-                
+
+                let updatedSettings = CalDAVSettingsManager.shared.loadSettings()
+
                 await MainActor.run {
-                    connectionStatus = success ? .success : .failure("Не удалось подключиться")
+                    settings = updatedSettings
+                    connectionStatus = .success
+                    isTestingConnection = false
+                }
+            } catch let caldavError as CalDAVError {
+                await MainActor.run {
+                    connectionStatus = .failure(caldavError.errorDescription ?? "Не удалось подключиться")
                     isTestingConnection = false
                 }
             } catch {

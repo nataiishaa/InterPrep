@@ -1,25 +1,18 @@
-//
-//  DiscoveryState.swift
-//  InterPrep
-//
-//  Discovery screen state
-//
-
 import ArchitectureCore
 import Foundation
 
 public struct DiscoveryState {
     public var selectedFilter: FilterType = .all
     public var isLoading = false
-    public var hasResume = false 
+    public var hasResume = false
     public var vacancies: [Vacancy] = []
     public var selectedVacancy: Vacancy?
     public var searchQuery: String = ""
     public var errorMessage: String?
     public var isOfflineMode = false
-    
+
     public init() {}
-    
+
     public enum FilterType: Sendable {
         case all
         case favorites
@@ -38,7 +31,7 @@ extension DiscoveryState {
         public let salaryText: String?
         public let experienceText: String?
         public let companyLogoURL: String?
-        
+
         public init(
             id: String,
             title: String,
@@ -76,7 +69,7 @@ extension DiscoveryState: FeatureState {
         case searchSubmitted
         case retryTapped
     }
-    
+
     public enum Feedback: Sendable {
         case vacanciesLoaded([Vacancy])
         case vacanciesLoadedFromCache([Vacancy])
@@ -84,7 +77,7 @@ extension DiscoveryState: FeatureState {
         case favoriteToggled(String, Bool)
         case resumeCheckCompleted(hasResume: Bool)
     }
-    
+
     public enum Effect: Sendable {
         case checkResume
         case loadVacancies(FilterType, searchQuery: String)
@@ -92,7 +85,7 @@ extension DiscoveryState: FeatureState {
         case navigateToVacancyDetail(Vacancy)
         case toggleFavorite(String)
     }
-    
+
     @MainActor
     public static func reduce(
         state: inout Self,
@@ -102,34 +95,34 @@ extension DiscoveryState: FeatureState {
         case .input(.onAppear):
             state.isLoading = true
             return .checkResume
-            
+
         case let .input(.filterChanged(filter)):
             state.selectedFilter = filter
             state.isLoading = true
             return .loadVacancies(filter, searchQuery: state.searchQuery)
-            
+
         case .input(.uploadResumeTapped):
             return .navigateToResumeUpload
-            
+
         case let .input(.vacancyTapped(vacancy)):
             state.selectedVacancy = vacancy
             return .navigateToVacancyDetail(vacancy)
-            
+
         case let .input(.toggleFavorite(id)):
             return .toggleFavorite(id)
-            
+
         case let .input(.searchQueryChanged(query)):
             state.searchQuery = query
-            
+
         case .input(.searchSubmitted):
             state.isLoading = true
             return .loadVacancies(state.selectedFilter, searchQuery: state.searchQuery)
-            
+
         case .input(.retryTapped):
             state.errorMessage = nil
             state.isLoading = true
             return .checkResume
-            
+
         case let .feedback(.resumeCheckCompleted(hasResume)):
             state.hasResume = hasResume
             if hasResume {
@@ -138,23 +131,23 @@ extension DiscoveryState: FeatureState {
             } else {
                 state.isLoading = false
             }
-            
+
         case let .feedback(.vacanciesLoaded(vacancies)):
             state.isLoading = false
             state.vacancies = vacancies
             state.errorMessage = nil
             state.isOfflineMode = false
-            
+
         case let .feedback(.vacanciesLoadedFromCache(vacancies)):
             state.isLoading = false
             state.vacancies = vacancies
             state.errorMessage = nil
             state.isOfflineMode = true
-            
+
         case let .feedback(.loadingFailed(error)):
             state.isLoading = false
             state.errorMessage = error
-            
+
         case let .feedback(.favoriteToggled(id, isFavorite)):
             if let index = state.vacancies.firstIndex(where: { $0.id == id }) {
                 let vacancy = state.vacancies[index]
@@ -171,13 +164,13 @@ extension DiscoveryState: FeatureState {
                     companyLogoURL: vacancy.companyLogoURL
                 )
             }
-            
+
             if state.selectedFilter == .favorites {
                 state.isLoading = true
                 return .loadVacancies(.favorites, searchQuery: state.searchQuery)
             }
         }
-        
+
         return nil
     }
 }

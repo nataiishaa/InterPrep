@@ -1,10 +1,5 @@
-//
-//  ResumeProfileDetailView.swift
-//  InterPrep
-//
-//  Просмотр и редактирование резюме (профиль из API)
-//
-
+import AuthFeature
+import CacheService
 import DesignSystem
 import NetworkService
 import SwiftUI
@@ -21,23 +16,24 @@ struct ResumeProfileDetailView: View {
     @State private var isEditing = false
     @State private var isSaving = false
     @State private var saveError: String?
-    
-    // Редактируемые поля (комма/перенос строки — разделители списков)
+
     @State private var targetRolesText = ""
     @State private var experienceLevel = ""
-    @State private var areasText = ""
+    @State private var selectedAreas: Set<String> = []
     @State private var salaryMinText = ""
     @State private var currencyText = "₽"
     @State private var workFormatText = ""
     @State private var skillsTopText = ""
     @State private var educationLevel = ""
     @State private var notesText = ""
-    
+
+    private let experienceOptions = ["Нет опыта", "1-3 года", "3-6 лет", "6+ лет"]
+
     init(userId: String? = nil, onUploadNewResume: (() -> Void)? = nil) {
         self.userId = userId
         self.onUploadNewResume = onUploadNewResume
     }
-    
+
     var body: some View {
         NavigationStack {
             Group {
@@ -46,7 +42,10 @@ struct ResumeProfileDetailView: View {
                         ProgressView()
                             .scaleEffect(1.2)
                             .tint(.brandPrimary)
-                        Text("Загрузка резюме...")
+                        Text("Загружаем данные резюме")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text("Осталось чуть-чуть")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -56,13 +55,13 @@ struct ResumeProfileDetailView: View {
                         Image(systemName: "doc.text.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.secondary.opacity(0.5))
-                        
+
                         Text(error)
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
-                        
+
                         if onUploadNewResume != nil {
                             Button {
                                 if let callback = onUploadNewResume {
@@ -92,7 +91,7 @@ struct ResumeProfileDetailView: View {
                 }
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Моё резюме")
+            .navigationTitle(isEditing ? "Редактирование" : "Моё резюме")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -132,7 +131,7 @@ struct ResumeProfileDetailView: View {
             }
         }
     }
-    
+
     private var editForm: some View {
         Form {
             if let err = saveError {
@@ -147,18 +146,60 @@ struct ResumeProfileDetailView: View {
                     .lineLimit(2...6)
             }
             Section("Уровень опыта") {
-                TextField("Junior / Middle / Senior / Lead", text: $experienceLevel)
+                FlowLayout(spacing: 8) {
+
+                    ForEach(experienceOptions, id: \.self) { option in
+                        Button {
+                            experienceLevel = experienceLevel == option ? "" : option
+                        } label: {
+                            Text(option)
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(experienceLevel == option ? Color.brandPrimary.opacity(0.2) : Color(.systemGray6))
+                                .foregroundColor(experienceLevel == option ? .brandPrimary : .primary)
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(experienceLevel == option ? Color.brandPrimary.opacity(0.5) : Color.clear, lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 4)
             }
-            Section("Регионы") {
-                TextField("Город или регион, с новой строки", text: $areasText, axis: .vertical)
-                    .lineLimit(2...6)
+            Section {
+                RegionPickerView(selectedRegions: $selectedAreas, style: RegionPickerView.Style.light)
             }
             Section("Зарплатные ожидания") {
                 HStack {
-                    TextField("От (число)", text: $salaryMinText)
-                        .keyboardType(.decimalPad)
-                    TextField("₽", text: $currencyText)
-                        .frame(width: 50)
+                    TextField("От", text: $salaryMinText)
+                        .keyboardType(.numberPad)
+                        .onChange(of: salaryMinText) { _, newValue in
+                            salaryMinText = newValue.filter { $0.isNumber }
+                        }
+
+                    HStack(spacing: 4) {
+                        ForEach(["₽", "$", "€"], id: \.self) { currency in
+                            Button {
+                                currencyText = currency
+                            } label: {
+                                Text(currency)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .frame(width: 36, height: 36)
+                                    .background(currencyText == currency ? Color.brandPrimary.opacity(0.2) : Color(.systemGray6))
+                                    .foregroundColor(currencyText == currency ? .brandPrimary : .primary)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(currencyText == currency ? Color.brandPrimary.opacity(0.5) : Color.clear, lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
             }
             Section("Формат работы") {
@@ -187,7 +228,7 @@ struct ResumeProfileDetailView: View {
             }
         }
     }
-    
+
     private func readOnlyContent(profile: User_ResumeProfile) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -225,19 +266,19 @@ struct ResumeProfileDetailView: View {
             .padding()
         }
     }
-    
+
     @ViewBuilder
     private var emptyStateView: some View {
         VStack(spacing: 16) {
             Image(systemName: "doc.text.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.secondary.opacity(0.5))
-            
+
             Text("Данные резюме пока не заполнены")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
+
             Text("Загрузите файл резюме или заполните форму вручную")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -246,7 +287,7 @@ struct ResumeProfileDetailView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
     }
-    
+
     @ViewBuilder
     private var uploadNewResumeButton: some View {
         VStack(spacing: 0) {
@@ -272,12 +313,12 @@ struct ResumeProfileDetailView: View {
         }
         .background(Color(.systemBackground))
     }
-    
+
     private func copyProfileToEditState() {
         guard let currentProfile = profile else { return }
         targetRolesText = currentProfile.targetRoles.joined(separator: ", ")
         experienceLevel = currentProfile.hasExperienceLevel ? currentProfile.experienceLevel : ""
-        areasText = currentProfile.areas.map { $0.name }.joined(separator: "\n")
+        selectedAreas = Set(currentProfile.areas.map { $0.name })
         if currentProfile.hasSalaryMin && currentProfile.salaryMin > 0 {
             salaryMinText = String(Int(currentProfile.salaryMin))
         } else {
@@ -289,7 +330,7 @@ struct ResumeProfileDetailView: View {
         educationLevel = currentProfile.hasEducationLevel ? currentProfile.educationLevel : ""
         notesText = currentProfile.hasNotes ? currentProfile.notes : ""
     }
-    
+
     private func saveProfile() async {
         guard let uidString = userId, let uid = UInt32(uidString), uid > 0 else {
             saveError = "Не удалось определить пользователя"
@@ -302,26 +343,24 @@ struct ResumeProfileDetailView: View {
         isSaving = false
         switch result {
         case .success:
-            profile = updated
             isEditing = false
+            await loadProfile(showLoading: false)
         case .failure(let error):
             saveError = error.localizedDescription
         }
     }
-    
+
     private func buildProfileFromEditState() -> User_ResumeProfile {
         var profile = User_ResumeProfile()
         profile.targetRoles = splitTrim(targetRolesText)
         if !experienceLevel.isEmpty {
             profile.experienceLevel = experienceLevel.trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        profile.areas = areasText
-            .split(separator: "\n", omittingEmptySubsequences: true)
-            .map { line in
-                var area = User_Area()
-                area.name = String(line).trimmingCharacters(in: .whitespaces)
-                return area
-            }
+        profile.areas = selectedAreas.sorted().map { name in
+            var area = User_Area()
+            area.name = name
+            return area
+        }
         if let salary = Double(salaryMinText.trimmingCharacters(in: .whitespaces)), salary > 0 {
             profile.salaryMin = salary
         }
@@ -338,22 +377,22 @@ struct ResumeProfileDetailView: View {
         }
         return profile
     }
-    
+
     private func splitTrim(_ text: String) -> [String] {
         text.components(separatedBy: CharacterSet(charactersIn: ",\n"))
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
     }
-    
-    private func loadProfile() async {
-        isLoading = true
+
+    private func loadProfile(showLoading: Bool = true) async {
+        if showLoading { isLoading = true }
         errorMessage = nil
         let result = await NetworkServiceV2.shared.getUser_ResumeProfile()
-        isLoading = false
+        if showLoading { isLoading = false }
         switch result {
         case .success(let response):
             sourceMaterialId = response.hasSourceMaterialID ? response.sourceMaterialID : nil
-            
+
             if response.hasProfile {
                 profile = response.profile
             } else if response.hasSourceMaterialID && !response.sourceMaterialID.isEmpty {
@@ -366,7 +405,7 @@ struct ResumeProfileDetailView: View {
             errorMessage = error.localizedDescription
         }
     }
-    
+
     @ViewBuilder
     private func section(title: String, text: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -383,7 +422,7 @@ struct ResumeProfileDetailView: View {
         .background(Color.cardBackground)
         .cornerRadius(12)
     }
-    
+
     @ViewBuilder
     private func section(title: String, items: [String]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -410,22 +449,21 @@ struct ResumeProfileDetailView: View {
     }
 }
 
-// Простой flow layout для тегов
 private struct FlowLayout: Layout {
     var spacing: CGFloat = 8
-    
+
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let result = arrange(proposal: proposal, subviews: subviews)
         return result.size
     }
-    
+
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let result = arrange(proposal: proposal, subviews: subviews)
         for (index, subview) in subviews.enumerated() {
             subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x, y: bounds.minY + result.positions[index].y), proposal: .unspecified)
         }
     }
-    
+
     private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, positions: [CGPoint]) {
         let maxWidth = proposal.width ?? .infinity
         var positions: [CGPoint] = []

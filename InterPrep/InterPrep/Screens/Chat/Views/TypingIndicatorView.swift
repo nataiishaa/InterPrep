@@ -1,10 +1,3 @@
-//
-//  TypingIndicatorView.swift
-//  InterPrep
-//
-//  Animated "processing request" indicator for chat
-//
-
 import DesignSystem
 import SwiftUI
 

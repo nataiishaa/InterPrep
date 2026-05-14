@@ -1,10 +1,3 @@
-//
-//  DocumentsView.swift
-//  InterPrep
-//
-//  Documents main view
-//
-
 import DesignSystem
 import NetworkMonitorService
 import QuickLook
@@ -17,13 +10,13 @@ struct DocumentsView: View {
     @Environment(\.colorScheme) var colorScheme
 
     private var hasAnyData: Bool {
-        !model.folders.isEmpty || !model.recentDocuments.isEmpty
+        !model.folders.isEmpty || !model.rootDocuments.isEmpty || !model.recentDocuments.isEmpty
     }
-    
+
     private var isOffline: Bool {
         !networkMonitor.isConnected || model.isOfflineMode
     }
-    
+
     private func guardOffline(action: @escaping () -> Void) {
         if isOffline {
             showOfflineToast = true
@@ -35,16 +28,20 @@ struct DocumentsView: View {
             action()
         }
     }
-    
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack(spacing: Layout.rootStackSpacing) {
                 if model.isOfflineMode {
                     OfflineBanner(showCachedHint: true)
                 }
                 Group {
-                    if model.error != nil && !hasAnyData {
-                        NoConnectionView(onRetry: model.onRetry)
+                    if let errorMessage = model.error, !hasAnyData {
+                        NoConnectionView(
+                            onRetry: model.onRetry,
+                            message: errorMessage,
+                            subtitle: "Попробуйте позже"
+                        )
                     } else if let folder = model.selectedFolder {
                         folderContentView(folder: folder)
                     } else {
@@ -74,14 +71,13 @@ struct DocumentsView: View {
                             Label("Создать заметку", systemImage: "note.text.badge.plus")
                         }
                         .disabled(isOffline)
-                        Button { guardOffline { model.onCreateFolderTap() } } label: {
+                        Button { model.onCreateFolderTap() } label: {
                             Label("Создать папку", systemImage: "folder.badge.plus")
                         }
-                        .disabled(isOffline)
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
-                            .foregroundColor(isOffline ? .secondary : .brandPrimary)
+                            .foregroundColor(.brandPrimary)
                     }
                 }
             }
@@ -92,28 +88,28 @@ struct DocumentsView: View {
                 Text("Нет интернета — действие недоступно")
                     .font(.subheadline.weight(.medium))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, Layout.toastHorizontalPadding)
+                    .padding(.vertical, Layout.toastVerticalPadding)
                     .background(Color.black.opacity(0.8))
-                    .cornerRadius(12)
-                    .padding(.bottom, 80)
+                    .cornerRadius(Layout.toastCornerRadius)
+                    .padding(.bottom, Layout.toastBottomPadding)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: showOfflineToast)
-        .sheet(isPresented: .constant(model.showingCreateFolderSheet)) {
+        .animation(.easeInOut(duration: Layout.overlayAnimationDuration), value: showOfflineToast)
+        .sheet(isPresented: Binding(get: { model.showingCreateFolderSheet }, set: { if !$0 { model.onDismissSheet() } })) {
             CreateFolderSheet(onDismiss: model.onDismissSheet, onCreate: model.onFolderCreate)
         }
         .sheet(isPresented: Binding(get: { model.folderToRename != nil }, set: { if !$0 { model.onCancelFolderRename() } })) {
             renameFolderSheet
         }
-        .sheet(isPresented: .constant(model.showingUploadSheet)) {
+        .sheet(isPresented: Binding(get: { model.showingUploadSheet }, set: { if !$0 { model.onDismissSheet() } })) {
             UploadFileSheet(onDismiss: model.onDismissSheet, onFileSelected: model.onFileUpload)
         }
-        .sheet(isPresented: .constant(model.showingCreateNoteSheet)) {
+        .sheet(isPresented: Binding(get: { model.showingCreateNoteSheet }, set: { if !$0 { model.onDismissSheet() } })) {
             CreateNoteSheet(onDismiss: model.onDismissSheet, onCreate: model.onNoteCreate)
         }
-        .sheet(isPresented: .constant(model.showingEditNoteSheet)) {
+        .sheet(isPresented: Binding(get: { model.showingEditNoteSheet }, set: { if !$0 { model.onDismissSheet() } })) {
             if let note = model.editingNote {
                 EditNoteSheet(
                     document: note,
@@ -158,145 +154,132 @@ struct DocumentsView: View {
     }
 
     private var rootContentView: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(spacing: 24) {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Мое хранилище")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.textOnBackground)
-                    if model.isLoading && model.folders.isEmpty {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    } else {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                            ForEach(model.folders) { folder in
-                                FolderCardView(folder: folder)
-                                    .onTapGesture(count: 2) { if !isOffline { model.onRenameFolderTap(folder) } }
-                                    .onTapGesture(count: 1) { model.onFolderTap(folder) }
-                                    .contextMenu {
-                                    Button { model.onRenameFolderTap(folder) } label: {
-                                        Label("Переименовать", systemImage: "pencil")
-                                    }
-                                    .disabled(isOffline)
-                                    Button(role: .destructive) { model.onDeleteFolderTap(folder) } label: {
-                                        Label("Удалить папку", systemImage: "trash")
-                                    }
-                                    .disabled(isOffline)
-                                }
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal)
-
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Недавнее")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.textOnBackground)
-                    if model.recentDocuments.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "doc.text.fill")
-                                .font(.system(size: 36))
-                                .foregroundColor(.secondary.opacity(0.5))
-                            Text("Нет документов")
-                                .foregroundColor(.secondary)
-                            Text("Загрузите файл или создайте заметку")
-                                .font(.caption)
-                                .foregroundColor(.secondary.opacity(0.7))
-                        }
+        ScrollView {
+            VStack(spacing: 0) {
+                if model.isLoading && model.folders.isEmpty && model.rootDocuments.isEmpty {
+                    ProgressView()
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
-                    } else {
-                        VStack(spacing: 12) {
-                            ForEach(model.recentDocuments) { document in
-                                documentRow(document)
-                            }
-                        }
+                        .padding(.vertical, 40)
+                } else if model.folders.isEmpty && model.rootDocuments.isEmpty && model.recentDocuments.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "folder.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.secondary.opacity(0.4))
+                        Text("Хранилище пусто")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                        Text("Создайте папку или загрузите файл")
+                            .font(.caption)
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 60)
+                } else {
+                    if !model.folders.isEmpty {
+                        folderGridSection(title: "Папки", folders: model.folders)
+                    }
+
+                    if !model.rootDocuments.isEmpty {
+                        documentListSection(title: model.folders.isEmpty ? nil : "Файлы", documents: model.rootDocuments)
+                    }
+
+                    if !model.recentDocuments.isEmpty {
+                        documentListSection(title: "Недавнее", documents: model.recentDocuments, showDate: true)
                     }
                 }
-                .padding(.horizontal)
-                }
-                .padding(.vertical)
             }
         }
     }
 
     private func folderContentView(folder: Folder) -> some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: 0) {
                 if model.isLoading && model.folderContentsFolders.isEmpty && model.folderContentsDocuments.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 40)
+                } else if model.folderContentsFolders.isEmpty && model.folderContentsDocuments.isEmpty {
+                    Text("Папка пуста")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 60)
                 } else {
                     if !model.folderContentsFolders.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Папки")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.textOnBackground)
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                                ForEach(model.folderContentsFolders) { folder in
-                                    FolderCardView(folder: folder)
-                                        .onTapGesture(count: 2) { if !isOffline { model.onRenameFolderTap(folder) } }
-                                        .onTapGesture(count: 1) { model.onFolderTap(folder) }
-                                        .contextMenu {
-                                        Button { model.onRenameFolderTap(folder) } label: {
-                                            Label("Переименовать", systemImage: "pencil")
-                                        }
-                                        .disabled(isOffline)
-                                        Button(role: .destructive) { model.onDeleteFolderTap(folder) } label: {
-                                            Label("Удалить папку", systemImage: "trash")
-                                        }
-                                        .disabled(isOffline)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
+                        folderGridSection(title: nil, folders: model.folderContentsFolders)
                     }
+
                     if !model.folderContentsDocuments.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Файлы")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.textOnBackground)
-                            VStack(spacing: 12) {
-                                ForEach(model.folderContentsDocuments) { document in
-                                    documentRow(document)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                    if model.folderContentsFolders.isEmpty && model.folderContentsDocuments.isEmpty && !model.isLoading {
-                        Text("Папка пуста")
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
+                        documentListSection(title: model.folderContentsFolders.isEmpty ? nil : "Файлы", documents: model.folderContentsDocuments)
                     }
                 }
             }
-            .padding(.vertical)
         }
     }
 
-    private func documentRow(_ document: Document) -> some View {
-        let canEditAsNote = document.isNote || document.type == .other
-        return DocumentRowView(document: document)
-            .onTapGesture {
-                if isOffline && !canEditAsNote {
-                    guardOffline {}
-                } else {
-                    model.onDocumentTap(document)
+    @ViewBuilder
+    private func folderGridSection(title: String?, folders: [Folder]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let title {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+            }
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
+                ForEach(folders) { folder in
+                    FolderCardView(folder: folder)
+                        .onTapGesture(count: 2) { if !isOffline { model.onRenameFolderTap(folder) } }
+                        .onTapGesture(count: 1) { model.onFolderTap(folder) }
+                        .contextMenu {
+                            Button { model.onRenameFolderTap(folder) } label: {
+                                Label("Переименовать", systemImage: "pencil")
+                            }
+                            .disabled(isOffline)
+                            Button(role: .destructive) { model.onDeleteFolderTap(folder) } label: {
+                                Label("Удалить папку", systemImage: "trash")
+                            }
+                            .disabled(isOffline)
+                        }
                 }
             }
+            .padding(.horizontal, 8)
+        }
+    }
+
+    @ViewBuilder
+    private func documentListSection(title: String?, documents: [Document], showDate: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let title {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .padding(.horizontal)
+                    .padding(.top, 20)
+                    .padding(.bottom, 8)
+            }
+
+            ForEach(Array(documents.enumerated()), id: \.element.id) { index, document in
+                documentRow(document, showDate: showDate)
+                if index < documents.count - 1 {
+                    Divider()
+                        .padding(.leading, 56)
+                }
+            }
+        }
+    }
+
+    private func documentRow(_ document: Document, showDate: Bool = false) -> some View {
+        return DocumentRowView(document: document, showDate: showDate)
+            .onTapGesture {
+                model.onDocumentTap(document)
+            }
             .contextMenu {
-                if canEditAsNote {
+                if document.isNote {
                     Button { model.onEditNoteTap(document) } label: {
                         Label("Редактировать", systemImage: "pencil")
                     }
@@ -310,87 +293,14 @@ struct DocumentsView: View {
     }
 }
 
-private struct DocumentsRenameFolderSheet: View {
-    let folder: Folder
-    let onSave: (String) -> Void
-    let onDismiss: () -> Void
-    @State private var name: String
-    @FocusState private var isFieldFocused: Bool
-
-    init(folder: Folder, onSave: @escaping (String) -> Void, onDismiss: @escaping () -> Void) {
-        self.folder = folder
-        self.onSave = onSave
-        self.onDismiss = onDismiss
-        _name = State(initialValue: folder.name)
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Название папки", text: $name)
-                    .focused($isFieldFocused)
-                    .onAppear { isFieldFocused = true }
-            }
-            .navigationTitle("Переименовать папку")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { onDismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") {
-                        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !trimmed.isEmpty { onSave(trimmed) }
-                    }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-        }
-    }
-}
-
-struct DocumentPreviewSheet: View {
-    let url: URL
-    let onDismiss: () -> Void
-    
-    var body: some View {
-        NavigationStack {
-            QuickLookPreview(url: url)
-                .navigationTitle(url.lastPathComponent)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Готово") {
-                            onDismiss()
-                        }
-                    }
-                }
-        }
-    }
-}
-
-struct QuickLookPreview: UIViewControllerRepresentable {
-    let url: URL
-    
-    func makeUIViewController(context: Context) -> QLPreviewController {
-        let controller = QLPreviewController()
-        controller.dataSource = context.coordinator
-        return controller
-    }
-    
-    func updateUIViewController(_ uiViewController: QLPreviewController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(url: url)
-    }
-    
-    class Coordinator: NSObject, QLPreviewControllerDataSource {
-        let url: URL
-        init(url: URL) { self.url = url }
-        func numberOfPreviewItems(in controller: QLPreviewController) -> Int { 1 }
-        func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
-            url as QLPreviewItem
-        }
+extension DocumentsView {
+    enum Layout {
+        static let rootStackSpacing = CGFloat.zero
+        static let toastHorizontalPadding: CGFloat = 20
+        static let toastVerticalPadding: CGFloat = 12
+        static let toastCornerRadius: CGFloat = 12
+        static let toastBottomPadding: CGFloat = 80
+        static let overlayAnimationDuration: Double = 0.3
     }
 }
 
@@ -401,6 +311,9 @@ struct QuickLookPreview: UIViewControllerRepresentable {
                 Folder(name: "Базы данных", documentsCount: 12, color: .blue),
                 Folder(name: "Резюме", documentsCount: 5, color: .green),
                 Folder(name: "Проекты", documentsCount: 8, color: .orange)
+            ],
+            rootDocuments: [
+                Document(name: "Сопроводительное письмо.txt", type: .txt, size: 8_192)
             ],
             recentDocuments: [
                 Document(name: "Резюме iOS Developer.pdf", type: .pdf, size: 245_760),

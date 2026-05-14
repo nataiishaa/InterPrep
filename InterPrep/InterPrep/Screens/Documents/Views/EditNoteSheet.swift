@@ -1,10 +1,3 @@
-//
-//  EditNoteSheet.swift
-//  InterPrep
-//
-//  Edit note sheet
-//
-
 import SwiftUI
 
 struct EditNoteSheet: View {
@@ -26,7 +19,7 @@ struct EditNoteSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack(spacing: .zero) {
                 TextField("Название заметки", text: $noteName)
                     .font(.title2)
                     .fontWeight(.bold)

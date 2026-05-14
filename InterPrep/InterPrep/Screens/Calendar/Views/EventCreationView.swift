@@ -1,17 +1,10 @@
-//
-//  EventCreationView.swift
-//  InterPrep
-//
-//  Event creation form
-//
-
 import DesignSystem
 import SwiftUI
 
 struct EventCreationView: View {
     let model: Model
     @Environment(\.dismiss) private var dismiss
-    
+
     private static let reminderOptions: [(Int, String)] = [
         (5, "5 минут"),
         (15, "15 минут"),
@@ -20,7 +13,7 @@ struct EventCreationView: View {
         (120, "2 часа"),
         (1440, "1 день")
     ]
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -29,14 +22,14 @@ struct EventCreationView: View {
                         get: { model.title },
                         set: { model.onTitleChanged($0) }
                     ), prompt: Text("Название"))
-                    
+
                     TextField("Адрес или ссылка на встречу", text: Binding(
                         get: { model.description },
                         set: { model.onDescriptionChanged($0) }
                     ), axis: .vertical)
                     .lineLimit(3...6)
                 }
-                
+
                 Section {
                     Picker(selection: Binding(
                         get: { model.type },
@@ -49,27 +42,28 @@ struct EventCreationView: View {
                     } label: {
                         Text("Тип события")
                     }
-                    
+
                     DatePicker("Начало", selection: Binding(
                         get: { model.startDateTime },
                         set: { model.onStartDateTimeChanged($0) }
                     ), displayedComponents: [.date, .hourAndMinute])
                     .environment(\.locale, Locale(identifier: "ru_RU"))
-                    
+
                     DatePicker("Конец", selection: Binding(
                         get: { model.endDate },
                         set: { model.onEndDateChanged($0) }
                     ), displayedComponents: [.date, .hourAndMinute])
                     .environment(\.locale, Locale(identifier: "ru_RU"))
+                    .foregroundStyle(model.hasDateError ? .red : .primary)
                 }
-                
+
                 Section {
                     Toggle("Напоминание", isOn: Binding(
                         get: { model.reminderEnabled },
                         set: { model.onReminderToggled($0) }
                     ))
                     .tint(.brandPrimary)
-                    
+
                     if model.reminderEnabled {
                         Picker(selection: Binding(
                             get: { model.reminderMinutes },
@@ -83,7 +77,7 @@ struct EventCreationView: View {
                         }
                     }
                 }
-                
+
                 if let error = model.errorMessage {
                     Section {
                         HStack(spacing: 8) {
@@ -113,14 +107,12 @@ struct EventCreationView: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
-                    .disabled(model.title.isEmpty)
+                    .disabled(model.isSaveBlocked)
                 }
             }
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     EventCreationView(model: .init(

@@ -1,10 +1,3 @@
-//
-//  ChatView.swift
-//  InterPrep
-//
-//  Chat main view
-//
-
 import DesignSystem
 import NetworkMonitorService
 import SwiftUI
@@ -14,21 +7,14 @@ struct ChatView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject private var networkMonitor = NetworkMonitor.shared
     @State private var showClearConfirmation = false
-    
-    private var hasSubstantiveThread: Bool {
-        let hasUser = model.messages.contains { $0.sender == .user }
-        return hasUser || model.messages.count > 1
-    }
-    
-    /// No saved thread and (offline or load failed) — show full-screen placeholder, not a half-broken welcome.
+
     private var shouldShowNoConnection: Bool {
-        if model.isLoading { return false }
-        if hasSubstantiveThread { return false }
         if !networkMonitor.isConnected { return true }
+        if model.isLoading { return false }
         if model.error != nil && model.messages.isEmpty { return true }
         return false
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -49,7 +35,7 @@ struct ChatView: View {
                     .padding(.vertical, 10)
                     .background(Color.red.opacity(0.12))
                 }
-                
+
                 if shouldShowNoConnection {
                     NoConnectionView(onRetry: { model.onRetry() })
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -60,12 +46,8 @@ struct ChatView: View {
                 } else {
                     chatScrollContent
                 }
-                
+
                 if !shouldShowNoConnection {
-                    if !networkMonitor.isConnected && hasSubstantiveThread {
-                        OfflineBanner()
-                    }
-                    
                     if model.showFavoritesPicker {
                         FavoriteVacancyPickerView(
                             vacancies: model.favoriteVacancies,
@@ -75,7 +57,7 @@ struct ChatView: View {
                         )
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
-                    
+
                     ChatInputBar(
                         text: model.inputText,
                         isSending: model.isSending || !networkMonitor.isConnected,
@@ -126,7 +108,7 @@ struct ChatView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var chatScrollContent: some View {
         ScrollViewReader { proxy in
@@ -140,7 +122,7 @@ struct ChatView: View {
                         )
                         .id(message.id)
                     }
-                    
+
                     if model.isSending {
                         HStack(alignment: .bottom, spacing: 8) {
                             TypingIndicatorView()

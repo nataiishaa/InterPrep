@@ -1,15 +1,7 @@
-//
-//  Colors.swift
-//  InterPrep
-//
-//  Design system colors with dark mode support
-//
-
 import SwiftUI
 
 public extension Color {
-    // MARK: - Brand Colors
-    
+
     static var brandPrimary: Color {
         Color("BrandPrimary", bundle: .main)
             .fallback(
@@ -17,7 +9,7 @@ public extension Color {
                 dark: Color(red: 0.5, green: 0.55, blue: 0.5)
             )
     }
-    
+
     static var brandSecondary: Color {
         Color("BrandSecondary", bundle: .main)
             .fallback(
@@ -25,9 +17,7 @@ public extension Color {
                 dark: Color(red: 0.4, green: 0.45, blue: 0.4)
             )
     }
-    
-    // MARK: - Background
-    
+
     static var backgroundPrimary: Color {
         Color("BackgroundPrimary", bundle: .main)
             .fallback(
@@ -35,7 +25,7 @@ public extension Color {
                 dark: Color(UIColor.systemBackground)
             )
     }
-    
+
     static var backgroundSecondary: Color {
         Color("BackgroundSecondary", bundle: .main)
             .fallback(
@@ -43,7 +33,7 @@ public extension Color {
                 dark: Color(UIColor.secondarySystemBackground)
             )
     }
-    
+
     static var backgroundGradientStart: Color {
         Color("BackgroundGradientStart", bundle: .main)
             .fallback(
@@ -51,7 +41,7 @@ public extension Color {
                 dark: Color(red: 0.15, green: 0.18, blue: 0.15)
             )
     }
-    
+
     static var backgroundGradientEnd: Color {
         Color("BackgroundGradientEnd", bundle: .main)
             .fallback(
@@ -59,9 +49,7 @@ public extension Color {
                 dark: Color(red: 0.08, green: 0.1, blue: 0.08)
             )
     }
-    
-    // MARK: - Text
-    
+
     static var textPrimary: Color {
         Color("TextPrimary", bundle: .main)
             .fallback(
@@ -69,7 +57,7 @@ public extension Color {
                 dark: Color(UIColor.label)
             )
     }
-    
+
     static var textSecondary: Color {
         Color("TextSecondary", bundle: .main)
             .fallback(
@@ -77,7 +65,7 @@ public extension Color {
                 dark: Color(UIColor.secondaryLabel)
             )
     }
-    
+
     static var textTertiary: Color {
         Color("TextTertiary", bundle: .main)
             .fallback(
@@ -85,7 +73,7 @@ public extension Color {
                 dark: Color(UIColor.tertiaryLabel)
             )
     }
-    
+
     static var textOnBackground: Color {
         Color("TextOnBackground", bundle: .main)
             .fallback(
@@ -93,9 +81,7 @@ public extension Color {
                 dark: Color(UIColor.label)
             )
     }
-    
-    // MARK: - UI Elements
-    
+
     static var cardBackground: Color {
         Color("CardBackground", bundle: .main)
             .fallback(
@@ -103,7 +89,7 @@ public extension Color {
                 dark: Color(red: 0.15, green: 0.15, blue: 0.15)
             )
     }
-    
+
     static var fieldBackground: Color {
         Color("FieldBackground", bundle: .main)
             .fallback(
@@ -111,7 +97,7 @@ public extension Color {
                 dark: Color(UIColor.tertiarySystemBackground)
             )
     }
-    
+
     static var buttonBackground: Color {
         Color("ButtonBackground", bundle: .main)
             .fallback(
@@ -119,7 +105,7 @@ public extension Color {
                 dark: Color(red: 0.2, green: 0.22, blue: 0.2)
             )
     }
-    
+
     static var buttonText: Color {
         Color("ButtonText", bundle: .main)
             .fallback(
@@ -127,7 +113,7 @@ public extension Color {
                 dark: Color(red: 0.6, green: 0.65, blue: 0.6)
             )
     }
-    
+
     static var divider: Color {
         Color("Divider", bundle: .main)
             .fallback(
@@ -135,9 +121,7 @@ public extension Color {
                 dark: Color(UIColor.separator)
             )
     }
-    
-    // MARK: - Semantic Colors
-    
+
     static var errorText: Color {
         Color("ErrorText", bundle: .main)
             .fallback(
@@ -145,7 +129,7 @@ public extension Color {
                 dark: Color(red: 1.0, green: 0.3, blue: 0.3)
             )
     }
-    
+
     static var successText: Color {
         Color("SuccessText", bundle: .main)
             .fallback(
@@ -153,7 +137,7 @@ public extension Color {
                 dark: Color(red: 0.3, green: 0.9, blue: 0.3)
             )
     }
-    
+
     static var iconTint: Color {
         Color("IconTint", bundle: .main)
             .fallback(
@@ -162,8 +146,6 @@ public extension Color {
             )
     }
 }
-
-// MARK: - Color Fallback Helper
 
 private extension Color {
     func fallback(light: Color, dark: Color) -> Color {
@@ -177,8 +159,6 @@ private extension Color {
         })
     }
 }
-
-// MARK: - LinearGradient Extensions
 
 public extension LinearGradient {
     static var brandBackground: LinearGradient {

@@ -1,10 +1,3 @@
-//
-//  Vacancy.swift
-//  VacancyCardModule
-//
-//  Модель данных для вакансии
-//
-
 import Foundation
 
 public struct Vacancy: Identifiable, Codable, Equatable {
@@ -23,7 +16,7 @@ public struct Vacancy: Identifiable, Codable, Equatable {
     public let applicationDeadline: Date?
     public let isRemote: Bool
     public let companyLogo: String?
-    
+
     public init(
         id: String,
         title: String,
@@ -64,22 +57,22 @@ public struct SalaryRange: Codable, Equatable {
     public let max: Int
     public let currency: String
     public let period: SalaryPeriod
-    
+
     public init(min: Int, max: Int, currency: String = "₽", period: SalaryPeriod = .monthly) {
         self.min = min
         self.max = max
         self.currency = currency
         self.period = period
     }
-    
+
     public var formatted: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = " "
-        
+
         let minFormatted = formatter.string(from: NSNumber(value: min)) ?? "\(min)"
         let maxFormatted = formatter.string(from: NSNumber(value: max)) ?? "\(max)"
-        
+
         return "\(minFormatted)–\(maxFormatted) \(currency)"
     }
 }
@@ -90,7 +83,7 @@ public enum EmploymentType: String, Codable, CaseIterable {
     case contract = "contract"
     case internship = "internship"
     case freelance = "freelance"
-    
+
     public var displayName: String {
         switch self {
         case .fullTime: return "Полная занятость"
@@ -108,7 +101,7 @@ public enum ExperienceLevel: String, Codable, CaseIterable {
     case middle
     case senior
     case lead
-    
+
     public var displayName: String {
         switch self {
         case .intern: return "Стажёр"
@@ -124,7 +117,7 @@ public enum SalaryPeriod: String, Codable {
     case hourly
     case monthly
     case yearly
-    
+
     public var displayName: String {
         switch self {
         case .hourly: return "в час"
@@ -153,7 +146,7 @@ extension Vacancy {
         isRemote: false,
         companyLogo: nil
     )
-    
+
     public static let mock2 = Vacancy(
         id: "2",
         title: "Senior Swift Developer",
@@ -170,7 +163,7 @@ extension Vacancy {
         isRemote: true,
         companyLogo: nil
     )
-    
+
     public static let mock3 = Vacancy(
         id: "3",
         title: "Junior iOS Developer",
@@ -187,7 +180,7 @@ extension Vacancy {
         isRemote: false,
         companyLogo: nil
     )
-    
+
     public static let mocks: [Vacancy] = [mock1, mock2, mock3]
 }
 #endif

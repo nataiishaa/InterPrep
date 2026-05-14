@@ -1,35 +1,28 @@
-//
-//  ChatContainer.swift
-//  InterPrep
-//
-//  Chat container
-//
-
 import ArchitectureCore
 import NetworkMonitorService
 import SwiftUI
 
 public struct ChatContainer: View {
-    @StateObject private var store: ChatStore
+    @State private var store: ChatStore
     @ObservedObject private var networkMonitor = NetworkMonitor.shared
     @Environment(\.dismiss) private var dismiss
-    
-    public init(store: @autoclosure @escaping () -> ChatStore) {
-        _store = StateObject(wrappedValue: store())
+
+    public init(store: ChatStore) {
+        self.store = store
     }
-    
+
     public var body: some View {
         ChatView(model: makeModel())
             .task {
                 store.send(.onAppear)
             }
             .onChange(of: networkMonitor.isConnected) { _, isConnected in
-                if isConnected && store.state.error != nil {
+                if isConnected {
                     store.send(.onAppear)
                 }
             }
     }
-    
+
     private func makeModel() -> ChatView.Model {
         .init(
             messages: store.state.messages,
@@ -81,6 +74,7 @@ public struct ChatContainer: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ChatContainer(store: Store(
         state: ChatState(),
@@ -89,3 +83,4 @@ public struct ChatContainer: View {
         )
     ))
 }
+#endif

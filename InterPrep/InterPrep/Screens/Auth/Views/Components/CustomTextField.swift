@@ -1,10 +1,3 @@
-//
-//  CustomTextField.swift
-//  InterPrep
-//
-//  Custom text field component
-//
-
 import SwiftUI
 
 struct CustomTextField: View {
@@ -12,9 +5,9 @@ struct CustomTextField: View {
     @Binding var text: String
     let isSecure: Bool
     let keyboardType: UIKeyboardType
-    
+
     @State private var isSecureVisible: Bool = false
-    
+
     init(
         placeholder: String,
         text: Binding<String>,
@@ -26,7 +19,7 @@ struct CustomTextField: View {
         self.isSecure = isSecure
         self.keyboardType = keyboardType
     }
-    
+
     var body: some View {
         HStack {
             if isSecure && !isSecureVisible {
@@ -40,7 +33,7 @@ struct CustomTextField: View {
                     .autocapitalization(keyboardType == .emailAddress ? .none : .words)
                     .autocorrectionDisabled(keyboardType == .emailAddress)
             }
-            
+
             if isSecure {
                 Button(action: {
                     isSecureVisible.toggle()
@@ -56,18 +49,16 @@ struct CustomTextField: View {
     }
 }
 
-// MARK: - Preview
-
 #Preview {
     VStack(spacing: 16) {
         CustomTextField(
-            placeholder: "Email",
+            placeholder: "Электронная почта",
             text: .constant(""),
             keyboardType: .emailAddress
         )
-        
+
         CustomTextField(
-            placeholder: "Password",
+            placeholder: "Пароль",
             text: .constant(""),
             isSecure: true
         )

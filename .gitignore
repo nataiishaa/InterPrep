@@ -20,3 +20,14 @@ Tuist/Dependencies/
 
 # macOS
 .DS_Store
+
+# Secrets (API keys, tokens, etc.)
+**/Secrets.swift
+!**/Secrets.example.swift
+
+# Test snapshots (tracked for CI snapshot testing)
+
+# Generated reports and graphs
+*.dot
+*-coverage-report.html
+test-coverage-report.html

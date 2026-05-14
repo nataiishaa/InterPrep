@@ -1,22 +1,15 @@
-//
-//  DocumentsContainer.swift
-//  InterPrep
-//
-//  Documents container
-//
-
 import ArchitectureCore
 import NetworkMonitorService
 import SwiftUI
 
 public struct DocumentsContainer: View {
-    @StateObject private var store: DocumentsStore
+    @State private var store: DocumentsStore
     @ObservedObject private var networkMonitor = NetworkMonitor.shared
-    
-    public init(store: @autoclosure @escaping () -> DocumentsStore) {
-        _store = StateObject(wrappedValue: store())
+
+    public init(store: DocumentsStore) {
+        self.store = store
     }
-    
+
     public var body: some View {
         DocumentsView(model: makeModel())
             .task {
@@ -27,12 +20,18 @@ public struct DocumentsContainer: View {
                     store.send(.retryTapped)
                 }
             }
+            .onChange(of: store.state.isOfflineMode) { _, isOffline in
+                if isOffline && networkMonitor.isConnected {
+                    store.send(.retryTapped)
+                }
+            }
     }
-    
+
     // swiftlint:disable:next function_body_length
     private func makeModel() -> DocumentsView.Model {
         .init(
             folders: store.state.folders,
+            rootDocuments: store.state.rootDocuments,
             recentDocuments: store.state.recentDocuments,
             selectedFolder: store.state.selectedFolder,
             folderContentsFolders: store.state.folderContentsFolders,
@@ -126,7 +125,7 @@ public struct DocumentsContainer: View {
     DocumentsContainer(store: Store(
         state: DocumentsState(),
         effectHandler: DocumentsEffectHandler(
-            documentService: DocumentServiceImpl()
+            documentService: DocumentService()
         )
     ))
 }

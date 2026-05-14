@@ -1,10 +1,3 @@
-//
-//  ChatInputBar.swift
-//  InterPrep
-//
-//  Chat input bar component
-//
-
 import DesignSystem
 import SwiftUI
 
@@ -15,10 +8,10 @@ struct ChatInputBar: View {
     let onTextChanged: (String) -> Void
     let onSend: () -> Void
     let onFavoritesTapped: (() -> Void)?
-    
+
     @FocusState private var isFocused: Bool
     @Environment(\.colorScheme) var colorScheme
-    
+
     init(
         text: String,
         isSending: Bool,
@@ -34,10 +27,10 @@ struct ChatInputBar: View {
         self.onSend = onSend
         self.onFavoritesTapped = onFavoritesTapped
     }
-    
+
     var body: some View {
-        VStack(spacing: 0) {
-        HStack(spacing: 12) {
+        VStack(spacing: CGFloat.zero) {
+        HStack(spacing: Layout.rowSpacing) {
             if waitingForVacancyId, let onFavoritesTapped {
                 Button {
                     onFavoritesTapped()
@@ -45,7 +38,7 @@ struct ChatInputBar: View {
                     Image(systemName: "bookmark.fill")
                         .font(.title3)
                         .foregroundColor(.brandPrimary)
-                        .frame(width: 40, height: 40)
+                        .frame(width: Layout.actionButtonSide, height: Layout.actionButtonSide)
                         .background(
                             Circle()
                                 .fill(Color.brandPrimary.opacity(0.12))
@@ -53,22 +46,26 @@ struct ChatInputBar: View {
                 }
                 .disabled(isSending)
             }
-            
+
             TextField(
-                waitingForVacancyId ? "Выберите вакансию из избранного" : "Сообщение",
+                waitingForVacancyId ? "Выберите вакансию" : "Сообщение",
                 text: .init(
                     get: { text },
                     set: { onTextChanged($0) }
                 )
             )
             .textFieldStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Layout.fieldHorizontalPadding)
+            .padding(.vertical, Layout.fieldVerticalPadding)
             .background(Color.fieldBackground)
-            .cornerRadius(20)
+            .cornerRadius(Layout.fieldCornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: Layout.fieldCornerRadius)
+                    .stroke(Color.divider.opacity(colorScheme == .dark ? 0.4 : 0.55), lineWidth: Layout.fieldStrokeWidth)
+            )
             .focused($isFocused)
             .disabled(isSending)
-            
+
             Button(action: {
                 onSend()
                 isFocused = true
@@ -76,7 +73,7 @@ struct ChatInputBar: View {
                 Image(systemName: "paperplane.fill")
                     .font(.title3)
                     .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
+                    .frame(width: Layout.actionButtonSide, height: Layout.actionButtonSide)
                     .background(
                         Circle()
                             .fill(canSend ? Color.brandPrimary : Color.gray)
@@ -85,25 +82,34 @@ struct ChatInputBar: View {
             .disabled(!canSend || isSending)
         }
         .padding(.horizontal)
-        .padding(.vertical, 8)
+        .padding(.vertical, Layout.outerVerticalPadding)
         }
-        .background(Color.cardBackground)
-        .shadow(color: shadowColor, radius: 4, x: 0, y: -2)
+        .background(Color.backgroundPrimary)
     }
-    
-    private var shadowColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.05) : Color.black.opacity(0.05)
-    }
-    
+
     private var canSend: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
+extension ChatInputBar {
+    enum Layout {
+        static let rowSpacing: CGFloat = 12
+        static let actionButtonSide: CGFloat = 40
+        static let fieldHorizontalPadding: CGFloat = 16
+        static let fieldVerticalPadding: CGFloat = 10
+        static let fieldCornerRadius: CGFloat = 20
+        static let fieldStrokeWidth: CGFloat = 1
+        static let outerVerticalPadding: CGFloat = 8
+        static let barShadowRadius: CGFloat = 4
+        static let barShadowY: CGFloat = -2
     }
 }
 
 #Preview {
     VStack {
         Spacer()
-        
+
         ChatInputBar(
             text: "",
             isSending: false,
@@ -116,7 +122,7 @@ struct ChatInputBar: View {
 #Preview("With Text") {
     VStack {
         Spacer()
-        
+
         ChatInputBar(
             text: "Привет! Как дела?",
             isSending: false,
@@ -129,7 +135,7 @@ struct ChatInputBar: View {
 #Preview("Sending") {
     VStack {
         Spacer()
-        
+
         ChatInputBar(
             text: "",
             isSending: true,

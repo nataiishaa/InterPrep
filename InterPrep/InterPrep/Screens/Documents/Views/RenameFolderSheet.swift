@@ -1,8 +1,3 @@
-//
-//  RenameFolderSheet.swift
-//  InterPrep
-//
-
 import SwiftUI
 
 struct RenameFolderSheet: View {

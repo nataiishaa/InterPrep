@@ -1,10 +1,3 @@
-//
-//  RegistrationDetailsViewSnapshotTests.swift
-//  AuthFeatureTests
-//
-//  Snapshot tests for RegistrationDetailsView
-//
-
 @testable import AuthFeature
 import SnapshotTesting
 import SwiftUI
@@ -12,8 +5,6 @@ import XCTest
 
 final class RegistrationDetailsViewSnapshotTests: SnapshotTestCase {
 
-    // MARK: - Tests
-    
     func testRegistrationDetailsView_default() {
         let view = RegistrationDetailsView(model: .init(
             email: "",
@@ -27,14 +18,14 @@ final class RegistrationDetailsViewSnapshotTests: SnapshotTestCase {
             onSubmit: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),
             named: "default"
         )
     }
-    
+
     func testRegistrationDetailsView_filled() {
         let view = RegistrationDetailsView(model: .init(
             email: "user@example.com",
@@ -48,14 +39,14 @@ final class RegistrationDetailsViewSnapshotTests: SnapshotTestCase {
             onSubmit: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),
             named: "filled"
         )
     }
-    
+
     func testRegistrationDetailsView_loading() {
         let view = RegistrationDetailsView(model: .init(
             email: "user@example.com",
@@ -69,14 +60,14 @@ final class RegistrationDetailsViewSnapshotTests: SnapshotTestCase {
             onSubmit: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),
             named: "loading"
         )
     }
-    
+
     func testRegistrationDetailsView_withError() {
         let view = RegistrationDetailsView(model: .init(
             email: "user@example.com",
@@ -90,7 +81,7 @@ final class RegistrationDetailsViewSnapshotTests: SnapshotTestCase {
             onSubmit: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),

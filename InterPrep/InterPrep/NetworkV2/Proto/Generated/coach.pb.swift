@@ -441,6 +441,69 @@ public struct Coach_ClearChatHistoryResponse: Sendable {
   public init() {}
 }
 
+public enum Coach_ChatMessageOwner: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+  case unspecified
+  case user
+  case assistant
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .user
+    case 2: self = .assistant
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .user: return 1
+    case .assistant: return 2
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  public static var allCases: [Coach_ChatMessageOwner] = [
+    .unspecified,
+    .user,
+    .assistant,
+  ]
+}
+
+public struct Coach_AddChatMessageRequest: Sendable {
+  public var conversationID: String {
+    get {return _conversationID ?? String()}
+    set {_conversationID = newValue}
+  }
+  public var hasConversationID: Bool {return self._conversationID != nil}
+  public mutating func clearConversationID() {self._conversationID = nil}
+
+  public var content: String = String()
+
+  public var owner: Coach_ChatMessageOwner = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _conversationID: String? = nil
+}
+
+public struct Coach_AddChatMessageResponse: Sendable {
+  public var conversationID: String = String()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
 public enum Coach_CoachHistoryEntryKind: SwiftProtobuf.Enum, Swift.CaseIterable {
   public typealias RawValue = Int
   case unspecified
@@ -1462,6 +1525,84 @@ extension Coach_ClearChatHistoryResponse: SwiftProtobuf.Message, SwiftProtobuf._
   }
 }
 
+extension Coach_ChatMessageOwner: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "CHAT_MESSAGE_OWNER_UNSPECIFIED"),
+    1: .same(proto: "CHAT_MESSAGE_OWNER_USER"),
+    2: .same(proto: "CHAT_MESSAGE_OWNER_ASSISTANT"),
+  ]
+}
+
+extension Coach_AddChatMessageRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".AddChatMessageRequest"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "conversation_id"),
+    2: .same(proto: "content"),
+    3: .same(proto: "owner"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self._conversationID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.content) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.owner) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try { if let v = self._conversationID {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 1)
+    } }()
+    if !self.content.isEmpty {
+      try visitor.visitSingularStringField(value: self.content, fieldNumber: 2)
+    }
+    if self.owner != .unspecified {
+      try visitor.visitSingularEnumField(value: self.owner, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Coach_AddChatMessageRequest, rhs: Coach_AddChatMessageRequest) -> Bool {
+    if lhs._conversationID != rhs._conversationID {return false}
+    if lhs.content != rhs.content {return false}
+    if lhs.owner != rhs.owner {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Coach_AddChatMessageResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".AddChatMessageResponse"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "conversation_id"),
+  ]
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.conversationID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.conversationID.isEmpty {
+      try visitor.visitSingularStringField(value: self.conversationID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Coach_AddChatMessageResponse, rhs: Coach_AddChatMessageResponse) -> Bool {
+    if lhs.conversationID != rhs.conversationID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Coach_CoachHistoryEntry: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CoachHistoryEntry"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1659,18 +1800,18 @@ extension Coach_UploadAndParseResumeResponse: SwiftProtobuf.Message, SwiftProtob
   public static let protoMessageName: String = "coach.UploadAndParseResumeResponse"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "session_id"),
-    2: .same(proto: "status"),
-    3: .same(proto: "draft"),
-    4: .same(proto: "questions"),
+    2: .same(proto: "draft"),
+    3: .same(proto: "questions"),
+    4: .same(proto: "status"),
   ]
   
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.status) }()
-      case 3: try { try decoder.decodeSingularMessageField(value: &self._draft) }()
-      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.questions) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._draft) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.questions) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.status) }()
       default: break
       }
     }
@@ -1680,14 +1821,14 @@ extension Coach_UploadAndParseResumeResponse: SwiftProtobuf.Message, SwiftProtob
     if !self.sessionID.isEmpty {
       try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 1)
     }
-    if !self.status.isEmpty {
-      try visitor.visitSingularStringField(value: self.status, fieldNumber: 2)
-    }
     try { if let v = self._draft {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
     if !self.questions.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.questions, fieldNumber: 4)
+      try visitor.visitRepeatedMessageField(value: self.questions, fieldNumber: 3)
+    }
+    if !self.status.isEmpty {
+      try visitor.visitSingularStringField(value: self.status, fieldNumber: 4)
     }
     try unknownFields.traverse(visitor: &visitor)
   }

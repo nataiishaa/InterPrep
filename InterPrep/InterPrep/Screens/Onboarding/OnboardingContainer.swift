@@ -1,35 +1,35 @@
-//
-//  OnboardingContainer.swift
-//  InterPrep
-//
-//  Container for Onboarding screen
-//
-
 import ArchitectureCore
 import SwiftUI
 
 public struct OnboardingContainer: View {
-    @StateObject private var store: OnboardingStore
-    
+    @State private var store: OnboardingStore
+
     let onComplete: () -> Void
-    
+    let onRegister: () -> Void
+
     public init(
-        store: @autoclosure @escaping () -> OnboardingStore,
-        onComplete: @escaping () -> Void
+        store: OnboardingStore,
+        onComplete: @escaping () -> Void,
+        onRegister: @escaping () -> Void
     ) {
-        self._store = StateObject(wrappedValue: store())
+        self.store = store
         self.onComplete = onComplete
+        self.onRegister = onRegister
     }
-    
+
     public var body: some View {
         OnboardingView(model: makeModel())
             .onChange(of: store.state.isCompleted) { _, isCompleted in
                 if isCompleted {
-                    onComplete()
+                    if store.state.shouldOpenRegistration {
+                        onRegister()
+                    } else {
+                        onComplete()
+                    }
                 }
             }
     }
-    
+
     private func makeModel() -> OnboardingView.Model {
         .init(
             currentPage: store.state.currentPage,
@@ -51,11 +51,11 @@ public struct OnboardingContainer: View {
                 store.send(.getStartedTapped)
             },
             onRegister: {
-                store.send(.getStartedTapped)
+                store.send(.registerTapped)
             }
         )
     }
-    
+
     private func mapPage(_ page: OnboardingState.OnboardingPage) -> OnboardingView.Model.PageModel {
         .init(
             id: page.id,
@@ -71,8 +71,10 @@ public struct OnboardingContainer: View {
         store: Store(
             state: OnboardingState(),
             effectHandler: OnboardingEffectHandler(
-                storageService: OnboardingStorageServiceImpl()
+                storageService: OnboardingStorageService()
             )
-        )
-    ) {}
+        ),
+        onComplete: {},
+        onRegister: {}
+    )
 }

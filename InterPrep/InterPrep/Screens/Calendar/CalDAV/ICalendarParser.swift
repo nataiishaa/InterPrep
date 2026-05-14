@@ -1,27 +1,19 @@
-//
-//  ICalendarParser.swift
-//  InterPrep
-//
-//  iCalendar (.ics) format parser and generator
-//
-
 import Foundation
 
-/// iCalendar format parser (RFC 5545)
 struct ICalendarParser {
-    
+
     static func parse(_ icsData: String) throws -> CalDAVEvent {
         let lines = icsData.components(separatedBy: .newlines)
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
-        
+
         var uid: String?
         var summary: String?
         var description: String?
         var startDate: Date?
         var endDate: Date?
         var location: String?
-        
+
         for line in lines {
             if line.hasPrefix("UID:") {
                 uid = String(line.dropFirst(4))
@@ -37,13 +29,13 @@ struct ICalendarParser {
                 location = String(line.dropFirst(9))
             }
         }
-        
+
         guard let uid = uid,
               let summary = summary,
               let startDate = startDate else {
             throw CalDAVError.parseError
         }
-        
+
         return CalDAVEvent(
             uid: uid,
             summary: summary,
@@ -53,31 +45,29 @@ struct ICalendarParser {
             location: location
         )
     }
-    
+
     private static func parseDateProperty(_ line: String) -> Date? {
-        // Extract date value after colon
         guard let colonIndex = line.firstIndex(of: ":") else {
             return nil
         }
-        
+
         let dateString = String(line[line.index(after: colonIndex)...])
-        
-        // Try different date formats
+
         let formatters = [
-            createFormatter("yyyyMMdd'T'HHmmss'Z'"), // UTC
-            createFormatter("yyyyMMdd'T'HHmmss"),     // Local
-            createFormatter("yyyyMMdd")                // Date only
+            createFormatter("yyyyMMdd'T'HHmmss'Z'"),
+            createFormatter("yyyyMMdd'T'HHmmss"),
+            createFormatter("yyyyMMdd")
         ]
-        
+
         for formatter in formatters {
             if let date = formatter.date(from: dateString) {
                 return date
             }
         }
-        
+
         return nil
     }
-    
+
     private static func createFormatter(_ format: String) -> DateFormatter {
         let formatter = DateFormatter()
         formatter.dateFormat = format
@@ -87,14 +77,13 @@ struct ICalendarParser {
     }
 }
 
-/// iCalendar format generator
 struct ICalendarGenerator {
-    
+
     static func generate(_ event: CalDAVEvent) -> String {
         let dateFormatter = createUTCFormatter()
         let startString = dateFormatter.string(from: event.startDate)
         let endString = event.endDate.map { dateFormatter.string(from: $0) } ?? startString
-        
+
         var lines = [
             "BEGIN:VCALENDAR",
             "VERSION:2.0",
@@ -106,23 +95,23 @@ struct ICalendarGenerator {
             "DTEND:\(endString)",
             "SUMMARY:\(escapeText(event.summary))"
         ]
-        
+
         if let description = event.description {
             lines.append("DESCRIPTION:\(escapeText(description))")
         }
-        
+
         if let location = event.location {
             lines.append("LOCATION:\(escapeText(location))")
         }
-        
+
         lines.append(contentsOf: [
             "END:VEVENT",
             "END:VCALENDAR"
         ])
-        
+
         return lines.joined(separator: "\r\n")
     }
-    
+
     private static func createUTCFormatter() -> DateFormatter {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
@@ -130,7 +119,7 @@ struct ICalendarGenerator {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }
-    
+
     private static func escapeText(_ text: String) -> String {
         text
             .replacingOccurrences(of: "\\", with: "\\\\")
@@ -140,10 +129,7 @@ struct ICalendarGenerator {
     }
 }
 
-// MARK: - Conversion Extensions
-
 extension CalDAVEvent {
-    /// Create from local CalendarEvent (factory to avoid init-in-extension compile issues)
     static func from(calendarEvent event: CalendarState.CalendarEvent) -> CalDAVEvent {
         CalDAVEvent(
             uid: event.id,
@@ -155,8 +141,7 @@ extension CalDAVEvent {
             etag: nil
         )
     }
-    
-    /// Convert to local CalendarEvent
+
     func toCalendarEvent() -> CalendarState.CalendarEvent {
         CalendarState.CalendarEvent(
             id: uid,

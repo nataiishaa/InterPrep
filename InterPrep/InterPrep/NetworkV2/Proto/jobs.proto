@@ -85,11 +85,18 @@ message DeleteUserDataResponse {
   bool ok = 1;
 }
 
+message ListAreasRequest {}
+
+message ListAreasResponse {
+  repeated string area_names = 1;
+}
+
 service JobsService {
   rpc SearchJobs(SearchJobsRequest) returns (SearchJobsResponse);
   rpc GetVacancy(GetVacancyRequest) returns (GetVacancyResponse);
   rpc AddFavorite(AddFavoriteRequest) returns (AddFavoriteResponse);
   rpc RemoveFavorite(RemoveFavoriteRequest) returns (RemoveFavoriteResponse);
   rpc ListFavorites(ListFavoritesRequest) returns (ListFavoritesResponse);
+  rpc ListAreas(ListAreasRequest) returns (ListAreasResponse);
   rpc DeleteUserData(DeleteUserDataRequest) returns (DeleteUserDataResponse);
 }

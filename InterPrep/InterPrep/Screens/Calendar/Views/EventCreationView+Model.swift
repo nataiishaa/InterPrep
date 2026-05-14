@@ -1,10 +1,3 @@
-//
-//  EventCreationView+Model.swift
-//  InterPrep
-//
-//  Event creation view model
-//
-
 import Foundation
 
 extension EventCreationView {
@@ -27,5 +20,13 @@ extension EventCreationView {
         let onReminderMinutesChanged: (Int) -> Void
         let onSave: () -> Void
         let onCancel: () -> Void
+
+        var hasDateError: Bool {
+            errorMessage == "Время окончания должно быть позже времени начала"
+        }
+
+        var isSaveBlocked: Bool {
+            title.isEmpty || hasDateError
+        }
     }
 }

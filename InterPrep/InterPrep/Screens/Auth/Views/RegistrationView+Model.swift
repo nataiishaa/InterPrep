@@ -1,10 +1,3 @@
-//
-//  RegistrationView+Model.swift
-//  InterPrep
-//
-//  Registration view model
-//
-
 import Foundation
 
 extension RegistrationView {

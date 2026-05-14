@@ -1,10 +1,3 @@
-//
-//  OnboardingState.swift
-//  InterPrep
-//
-//  Onboarding screen state
-//
-
 import ArchitectureCore
 import Foundation
 
@@ -12,15 +5,16 @@ public struct OnboardingState {
     public var currentPage: Int = 0
     public var pages: [OnboardingPage] = OnboardingPage.defaultPages
     public var isCompleted: Bool = false
-    
+    public var shouldOpenRegistration: Bool = false
+
     public init() {}
-    
+
     public struct OnboardingPage: Identifiable, Equatable, Sendable {
         public let id: Int
         public let imageName: String
         public let title: String
         public let description: String
-        
+
         public init(id: Int, imageName: String, title: String, description: String) {
             self.id = id
             self.imageName = imageName
@@ -60,17 +54,20 @@ extension OnboardingState: FeatureState {
         case pageChanged(Int)
         case skipTapped
         case getStartedTapped
+        case registerTapped
     }
-    
+
     public enum Feedback: Sendable {
         case onboardingCompleted
+        case onboardingCompletedWithRegistration
     }
-    
+
     public enum Effect: Sendable {
         case completeOnboarding
+        case completeOnboardingWithRegistration
         case logPageView(Int)
     }
-    
+
     @MainActor
     public static func reduce(
         state: inout Self,
@@ -84,24 +81,31 @@ extension OnboardingState: FeatureState {
             } else {
                 return .completeOnboarding
             }
-            
+
         case .input(.previousPageTapped):
             if state.currentPage > 0 {
                 state.currentPage -= 1
                 return .logPageView(state.currentPage)
             }
-            
+
         case let .input(.pageChanged(page)):
             state.currentPage = page
             return .logPageView(page)
-            
+
         case .input(.skipTapped), .input(.getStartedTapped):
             return .completeOnboarding
-            
+
+        case .input(.registerTapped):
+            return .completeOnboardingWithRegistration
+
         case .feedback(.onboardingCompleted):
             state.isCompleted = true
+
+        case .feedback(.onboardingCompletedWithRegistration):
+            state.shouldOpenRegistration = true
+            state.isCompleted = true
         }
-        
+
         return nil
     }
 }

@@ -1,10 +1,3 @@
-//
-//  ProfileView+Model.swift
-//  InterPrep
-//
-//  Profile view model
-//
-
 import Foundation
 
 extension ProfileView {

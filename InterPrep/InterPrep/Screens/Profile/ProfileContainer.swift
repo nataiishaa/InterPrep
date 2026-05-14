@@ -1,38 +1,38 @@
-//
-//  ProfileContainer.swift
-//  InterPrep
-//
-//  Profile feature container
-//
-
 import ArchitectureCore
+import NetworkMonitorService
 import NotificationService
 import SwiftUI
 
 public struct ProfileContainer: View {
-    @StateObject private var store: ProfileStore
-    @StateObject private var notificationManager = NotificationManager.shared
+    @State private var store: ProfileStore
+    @ObservedObject private var notificationManager = NotificationManager.shared
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     @State private var showResumeDetailSheet = false
     private let onLogoutComplete: (() -> Void)?
     private let onNavigateToResumeUpload: (() -> Void)?
-    
+
     public init(
-        sessionService: (any ProfileSessionService)? = nil,
+        sessionService: (any ProfileSessionServicing)? = nil,
         onLogoutComplete: (() -> Void)? = nil,
         onNavigateToResumeUpload: (() -> Void)? = nil
     ) {
-        _store = StateObject(wrappedValue: Store(
+        self.store = Store(
             state: ProfileState(),
             effectHandler: ProfileEffectHandler(sessionService: sessionService)
-        ))
+        )
         self.onLogoutComplete = onLogoutComplete
         self.onNavigateToResumeUpload = onNavigateToResumeUpload
     }
-    
+
     public var body: some View {
         ProfileView(model: makeModel())
             .onAppear {
                 store.send(.onAppear)
+            }
+            .onChange(of: networkMonitor.isConnected) { _, isConnected in
+                if isConnected && store.state.isOfflineMode {
+                    store.send(.refresh)
+                }
             }
             .onChange(of: store.state.authRequired) { _, authRequired in
                 if authRequired {
@@ -54,7 +54,7 @@ public struct ProfileContainer: View {
                 )
             }
     }
-    
+
     private func makeModel() -> ProfileView.Model {
         .init(
             user: store.state.user,
@@ -101,12 +101,14 @@ public struct ProfileContainer: View {
             editModel: makeEditModel()
         )
     }
-    
+
     private func makeEditModel() -> ProfileEditView.Model {
         .init(
             firstName: store.state.user?.firstName ?? store.state.editedFirstName,
             lastName: store.state.user?.lastName ?? store.state.editedLastName,
             email: store.state.user?.email ?? "",
+            cachedProfilePhotoURL: store.state.cachedProfilePhotoURL,
+            avatarURL: store.state.user?.avatarURL,
             errorMessage: store.state.errorMessage,
             onPhotoSelected: { data in
                 store.send(.uploadProfilePhoto(data))
@@ -126,8 +128,6 @@ public struct ProfileContainer: View {
         )
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     ProfileContainer()

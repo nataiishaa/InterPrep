@@ -1,20 +1,18 @@
-//
-//  CalDAVSettings.swift
-//  InterPrep
-//
-//  CalDAV connection settings
-//
-
 import Foundation
+import Security
 
 public struct CalDAVSettings: Codable {
     public var isEnabled: Bool = false
     public var serverURL: String = ""
     public var username: String = ""
-    public var password: String = "" // Should be stored in Keychain in production
+    public var password: String = ""
     public var selectedCalendarURL: String?
     public var lastSyncDate: Date?
-    
+
+    private enum CodingKeys: String, CodingKey {
+        case isEnabled, serverURL, username, selectedCalendarURL, lastSyncDate
+    }
+
     public init(
         isEnabled: Bool = false,
         serverURL: String = "",
@@ -30,27 +28,22 @@ public struct CalDAVSettings: Codable {
         self.selectedCalendarURL = selectedCalendarURL
         self.lastSyncDate = lastSyncDate
     }
-    
+
     public static let presets: [CalDAVPreset] = [
-        .init(
-            name: "Google Calendar",
-            serverURL: "https://apidata.googleusercontent.com/caldav/v2/",
-            instructions: "Имя пользователя — ваш email в Google. Пароль: в аккаунте Google откройте Безопасность → Пароли приложений, создайте пароль и введите его здесь (не основной пароль от почты)."
-        ),
         .init(
             name: "iCloud",
             serverURL: "https://caldav.icloud.com/",
-            instructions: "Имя пользователя — ваш Apple ID (email). Пароль: Настройки → Apple ID → Вход и безопасность → Пароли приложений — создайте пароль для «Другое» и введите его здесь."
+            instructions: "Имя пользователя — ваш Apple ID (email).\n\nПароль: откройте appleid.apple.com → Вход и безопасность → Пароли для приложений → создайте пароль для «Другое» и введите его здесь (не основной пароль от Apple ID)."
+        ),
+        .init(
+            name: "Fastmail",
+            serverURL: "https://caldav.fastmail.com/dav/calendars/user/",
+            instructions: "Имя пользователя — ваш email в Fastmail.\n\nПароль: Настройки → Пароли и безопасность → Сторонние приложения → создайте пароль для приложения."
         ),
         .init(
             name: "Nextcloud",
-            serverURL: "https://your-server.com/remote.php/dav/",
-            instructions: "Укажите адрес вашего Nextcloud (например https://cloud.example.com/remote.php/dav/). Имя и пароль — от вашего аккаунта Nextcloud."
-        ),
-        .init(
-            name: "Другой календарь",
             serverURL: "",
-            instructions: "Если ваш календарь поддерживает CalDAV, уточните у провайдера URL сервера и введите его, а также логин и пароль."
+            instructions: "Укажите адрес вашего Nextcloud-сервера (например https://cloud.example.com/remote.php/dav/).\n\nИмя и пароль — от вашего аккаунта Nextcloud."
         )
     ]
 }
@@ -59,7 +52,7 @@ public struct CalDAVPreset {
     public let name: String
     public let serverURL: String
     public let instructions: String
-    
+
     public init(name: String, serverURL: String, instructions: String) {
         self.name = name
         self.serverURL = serverURL
@@ -69,26 +62,34 @@ public struct CalDAVPreset {
 
 public final class CalDAVSettingsManager {
     public static let shared = CalDAVSettingsManager()
-    
+
     private let userDefaults = UserDefaults.standard
     private let settingsKey = "caldav_settings"
-    
+    private let keychainService = "com.interprep.caldav"
+    private let keychainAccount = "caldav_password"
+
     private init() {}
-    
+
     public func loadSettings() -> CalDAVSettings {
         guard let data = userDefaults.data(forKey: settingsKey),
-              let settings = try? JSONDecoder().decode(CalDAVSettings.self, from: data) else {
+              var settings = try? JSONDecoder().decode(CalDAVSettings.self, from: data) else {
             return CalDAVSettings()
         }
+        settings.password = loadPasswordFromKeychain() ?? ""
         return settings
     }
-    
+
     public func saveSettings(_ settings: CalDAVSettings) {
         if let data = try? JSONEncoder().encode(settings) {
             userDefaults.set(data, forKey: settingsKey)
         }
+        if settings.password.isEmpty {
+            deletePasswordFromKeychain()
+        } else {
+            savePasswordToKeychain(settings.password)
+        }
     }
-    
+
     func createClient(from settings: CalDAVSettings) -> CalDAVClient? {
         guard settings.isEnabled,
               let url = URL(string: settings.serverURL),
@@ -96,11 +97,49 @@ public final class CalDAVSettingsManager {
               !settings.password.isEmpty else {
             return nil
         }
-        
+
         return CalDAVClient(
             serverURL: url,
             username: settings.username,
             password: settings.password
         )
+    }
+
+    private func savePasswordToKeychain(_ password: String) {
+        guard let data = password.data(using: .utf8) else { return }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+        ]
+        SecItemDelete(query as CFDictionary)
+        SecItemAdd(query as CFDictionary, nil)
+    }
+
+    private func loadPasswordFromKeychain() -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data else {
+            return nil
+        }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func deletePasswordFromKeychain() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount
+        ]
+        SecItemDelete(query as CFDictionary)
     }
 }

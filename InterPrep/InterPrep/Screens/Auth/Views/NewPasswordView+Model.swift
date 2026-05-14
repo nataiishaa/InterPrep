@@ -1,10 +1,3 @@
-//
-//  NewPasswordView+Model.swift
-//  InterPrep
-//
-//  New password view model
-//
-
 import Foundation
 
 extension NewPasswordView {

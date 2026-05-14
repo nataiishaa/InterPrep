@@ -1,10 +1,3 @@
-//
-//  PasswordResetViewSnapshotTests.swift
-//  AuthFeatureTests
-//
-//  Snapshot tests for PasswordResetView
-//
-
 @testable import AuthFeature
 import SnapshotTesting
 import SwiftUI
@@ -12,8 +5,6 @@ import XCTest
 
 final class PasswordResetViewSnapshotTests: SnapshotTestCase {
 
-    // MARK: - Tests
-    
     func testPasswordResetView_default() {
         let view = PasswordResetView(model: .init(
             email: "",
@@ -23,14 +14,14 @@ final class PasswordResetViewSnapshotTests: SnapshotTestCase {
             onSendCode: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),
             named: "default"
         )
     }
-    
+
     func testPasswordResetView_filled() {
         let view = PasswordResetView(model: .init(
             email: "user@example.com",
@@ -40,14 +31,14 @@ final class PasswordResetViewSnapshotTests: SnapshotTestCase {
             onSendCode: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),
             named: "filled"
         )
     }
-    
+
     func testPasswordResetView_loading() {
         let view = PasswordResetView(model: .init(
             email: "user@example.com",
@@ -57,14 +48,14 @@ final class PasswordResetViewSnapshotTests: SnapshotTestCase {
             onSendCode: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),
             named: "loading"
         )
     }
-    
+
     func testPasswordResetView_withError() {
         let view = PasswordResetView(model: .init(
             email: "invalid",
@@ -74,7 +65,7 @@ final class PasswordResetViewSnapshotTests: SnapshotTestCase {
             onSendCode: {}
         ))
         let hostingController = UIHostingController(rootView: view)
-        
+
         assertSnapshot(
             of: hostingController,
             as: .image(on: .iPhone13Pro),

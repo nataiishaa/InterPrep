@@ -1,10 +1,3 @@
-//
-//  PasswordResetView+Model.swift
-//  InterPrep
-//
-//  Password reset view model
-//
-
 import Foundation
 
 extension PasswordResetView {
