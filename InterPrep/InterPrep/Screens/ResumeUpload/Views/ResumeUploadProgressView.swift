@@ -8,6 +8,18 @@ public struct ResumeUploadProgressView: View {
         let subtitle: String
     }
 
+    private enum IconDecoration {
+        static let outerRingSize: CGFloat = 140
+        static let outerRingOpacity: Double = 0.08
+        static let middleRingSize: CGFloat = 110
+        static let middleRingOpacity: Double = 0.12
+        static let middleRingPulseMultiplier: CGFloat = 0.95
+        static let innerRingSize: CGFloat = 80
+        static let innerRingOpacity: Double = 0.18
+        static let symbolPointSize: CGFloat = 36
+        static let uploadResumeIconName = "arrow.up.doc.fill"
+    }
+
     @State private var currentMessageIndex: Int = 0
     @State private var animatedProgress: Double = 0
     @State private var pulseScale: CGFloat = 1.0
@@ -18,7 +30,7 @@ public struct ResumeUploadProgressView: View {
     private let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect()
 
     private let messages: [ProgressMessage] = [
-        ProgressMessage(icon: "arrow.up.doc.fill", title: "Загружаем резюме", subtitle: "Наши алгоритмы уже анализируют его"),
+        ProgressMessage(icon: IconDecoration.uploadResumeIconName, title: "Загружаем резюме", subtitle: "Наши алгоритмы уже анализируют его"),
         ProgressMessage(icon: "doc.text.magnifyingglass", title: "Изучаем опыт", subtitle: "Смотрим ваши достижения"),
         ProgressMessage(icon: "list.bullet.clipboard", title: "Определяем навыки", subtitle: "Выделяем ваши сильные стороны"),
         ProgressMessage(icon: "sparkles", title: "Оцениваем профиль", subtitle: "Сопоставляем с требованиями рынка"),
@@ -77,29 +89,29 @@ public struct ResumeUploadProgressView: View {
     private var iconView: some View {
         ZStack {
             Circle()
-                .fill(.white.opacity(0.08))
-                .frame(width: 140, height: 140)
+                .fill(.white.opacity(IconDecoration.outerRingOpacity))
+                .frame(width: IconDecoration.outerRingSize, height: IconDecoration.outerRingSize)
                 .scaleEffect(pulseScale)
 
             Circle()
-                .fill(.white.opacity(0.12))
-                .frame(width: 110, height: 110)
-                .scaleEffect(pulseScale * 0.95)
+                .fill(.white.opacity(IconDecoration.middleRingOpacity))
+                .frame(width: IconDecoration.middleRingSize, height: IconDecoration.middleRingSize)
+                .scaleEffect(pulseScale * IconDecoration.middleRingPulseMultiplier)
 
             Circle()
-                .fill(.white.opacity(0.18))
-                .frame(width: 80, height: 80)
+                .fill(.white.opacity(IconDecoration.innerRingOpacity))
+                .frame(width: IconDecoration.innerRingSize, height: IconDecoration.innerRingSize)
 
             if showCheckmark {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 36, weight: .bold))
+                    .font(.system(size: IconDecoration.symbolPointSize, weight: .bold))
                     .foregroundColor(.white)
                     .transition(.scale.combined(with: .opacity))
             } else {
                 Image(systemName: currentMessage.icon)
-                    .font(.system(size: 36, weight: .medium))
+                    .font(.system(size: IconDecoration.symbolPointSize, weight: .medium))
                     .foregroundColor(.white)
-                    .rotationEffect(.degrees(currentMessage.icon == "arrow.up.doc.fill" ? iconRotation : 0))
+                    .rotationEffect(.degrees(currentMessage.icon == IconDecoration.uploadResumeIconName ? iconRotation : 0))
                     .id(currentMessage.icon)
                     .transition(.asymmetric(
                         insertion: .scale(scale: 0.5).combined(with: .opacity),

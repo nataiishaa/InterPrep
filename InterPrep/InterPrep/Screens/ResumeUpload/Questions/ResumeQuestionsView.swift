@@ -9,7 +9,7 @@ public struct ResumeQuestionsView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: .zero) {
             header
 
             if !model.questions.isEmpty {

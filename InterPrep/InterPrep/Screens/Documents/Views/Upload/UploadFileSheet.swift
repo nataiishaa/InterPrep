@@ -3,6 +3,17 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct UploadFileSheet: View {
+    private enum IconDecoration {
+        static let outerRingSize: CGFloat = 140
+        static let outerRingOpacity: Double = 0.08
+        static let middleRingSize: CGFloat = 110
+        static let middleRingOpacity: Double = 0.12
+        static let innerRingSize: CGFloat = 80
+        static let innerRingOpacity: Double = 0.18
+        static let symbolName = "arrow.up.doc.fill"
+        static let symbolPointSize: CGFloat = 36
+    }
+
     @State private var showingDocumentPicker = false
     @State private var pulseScale: CGFloat = 1.0
     let onDismiss: () -> Void
@@ -90,20 +101,20 @@ struct UploadFileSheet: View {
     private var iconView: some View {
         ZStack {
             Circle()
-                .fill(.white.opacity(0.08))
-                .frame(width: 140, height: 140)
+                .fill(.white.opacity(IconDecoration.outerRingOpacity))
+                .frame(width: IconDecoration.outerRingSize, height: IconDecoration.outerRingSize)
                 .scaleEffect(pulseScale)
 
             Circle()
-                .fill(.white.opacity(0.12))
-                .frame(width: 110, height: 110)
+                .fill(.white.opacity(IconDecoration.middleRingOpacity))
+                .frame(width: IconDecoration.middleRingSize, height: IconDecoration.middleRingSize)
 
             Circle()
-                .fill(.white.opacity(0.18))
-                .frame(width: 80, height: 80)
+                .fill(.white.opacity(IconDecoration.innerRingOpacity))
+                .frame(width: IconDecoration.innerRingSize, height: IconDecoration.innerRingSize)
 
-            Image(systemName: "arrow.up.doc.fill")
-                .font(.system(size: 36, weight: .medium))
+            Image(systemName: IconDecoration.symbolName)
+                .font(.system(size: IconDecoration.symbolPointSize, weight: .medium))
                 .foregroundColor(.white)
         }
     }
