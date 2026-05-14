@@ -103,11 +103,21 @@ public actor ChatEffectHandler: EffectHandler {
     }
 
     private func userMessage(for error: Error) -> String {
-        if let localizable = error as? LocalizedError, let desc = localizable.errorDescription {
-            return desc
-        }
         if let ne = error as? NetworkError, ne.isConnectionError {
             return "Не удалось подключиться к серверу"
+        }
+        if let localizable = error as? LocalizedError,
+           let desc = localizable.errorDescription,
+           !desc.isEmpty {
+            return desc
+        }
+        let nsError = error as NSError
+        if let desc = nsError.userInfo[NSLocalizedDescriptionKey] as? String, !desc.isEmpty {
+            return desc
+        }
+        let bridged = nsError.localizedDescription
+        if !bridged.isEmpty {
+            return bridged
         }
         return "Произошла ошибка. Попробуйте позже"
     }
